@@ -1,0 +1,15 @@
+.toast-container {
+  height: 3rem;
+  width: 5rem;
+  text-align: center;
+  background-color: gray;
+  justify-content: center;
+  align-items: center;
+  display: flex;
+  opacity: 1;
+  transition: opacity 0.3s ease;
+}
+
+.toast-container--hidden {
+  opacity: 0;
+}
