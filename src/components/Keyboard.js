@@ -8,7 +8,7 @@ const keyboardLayout = [
 
 export default function Keyboard({ keyStatuses, onKeyClick }) {
   return (
-    <div className={styles.keyboard}>
+    <div className={styles["keyboard"]}>
       {keyboardLayout.map((row, rowIndex) => (
         <div key={rowIndex} className={styles["keyboard-row"]}>
           {row.map((key) => {
@@ -22,7 +22,7 @@ export default function Keyboard({ keyStatuses, onKeyClick }) {
                   isWide ? styles["key--wide"] : styles["key--narrow"]
                 } ${styles[`key--${status}`]}`}
               >
-                {key}
+                {key === "Backspace" ? "\u232B" : key}
               </button>
             );
           })}

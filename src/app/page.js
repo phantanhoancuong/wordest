@@ -275,44 +275,41 @@ export default function Home() {
   }
 
   return (
-    <>
-      <header>
+    <div className={styles["app"]}>
+      <header className={`${styles["app__banner"]} flex-center`}>
         <Banner />
       </header>
-      <main>
-        <div className={styles["game"]}>
-          {error ? (
-            <div className={styles["game__error"]}>
-              <p>{error}</p>
-            </div>
-          ) : (
-            <div className={styles["game__board"]}>
-              {gameOver ? (
-                <>
-                  <Grid
-                    grid={[
+
+      <main className={styles["app__game"]}>
+        {error ? (
+          <section className={styles["game__error"]}>
+            <p>{error}</p>
+          </section>
+        ) : (
+          <section className={`${styles["game__board"]} flex-center`}>
+            <Grid
+              grid={
+                gameOver
+                  ? [
                       targetWord.split("").map((char) => ({
                         char,
                         status: CellStatus.CORRECT,
                       })),
-                    ]}
-                  />
-                  <button onClick={restartGame}>Restart</button>
-                </>
-              ) : (
-                <>
-                  <Grid grid={grid} />
-                  <Keyboard
-                    keyStatuses={keyStatuses}
-                    onKeyClick={handleInput}
-                  />
-                </>
-              )}
-              <ToastBar toasts={toasts} removeToast={removeToast} />
-            </div>
-          )}
-        </div>
+                    ]
+                  : grid
+              }
+            />
+
+            {gameOver && <button onClick={restartGame}>Restart</button>}
+
+            <ToastBar toasts={toasts} removeToast={removeToast} />
+          </section>
+        )}
       </main>
-    </>
+
+      <footer className={`${styles["app__keyboard"]} flex-center`}>
+        <Keyboard keyStatuses={keyStatuses} onKeyClick={handleInput} />
+      </footer>
+    </div>
   );
 }

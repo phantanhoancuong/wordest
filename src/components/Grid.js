@@ -16,7 +16,9 @@ export default function Grid({ grid }) {
         row.map((cell, colIndex) => (
           <div
             key={`${rowIndex}-${colIndex}`}
-            className={`${styles.cell} ${styles[`cell--${cell.status}`]}`}
+            className={`${styles.cell} ${
+              styles[`cell--${cell.status}`]
+            } flex-center`}
           >
             {cell.char}
           </div>

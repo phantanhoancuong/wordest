@@ -1,22 +1,20 @@
 .grid {
   display: grid;
-  grid-template-rows: repeat(var(--rows), auto);
-  grid-template-columns: repeat(var(--cols), auto);
+  grid-template-rows: repeat(var(--rows), 1fr);
+  grid-template-columns: repeat(var(--cols), 1fr);
   justify-content: center;
   align-content: center;
-  gap: 0.7rem;
   user-select: none;
+  gap: 0.5rem;
 }
 
 .cell {
   display: grid;
   border: 2px solid #ccc;
-  height: 4rem;
-  width: 4rem;
-  justify-content: center;
-  align-items: center;
-  text-align: center;
-  font-size: 2.5rem;
+  aspect-ratio: 1 / 1;
+  width: min(calc(60vw / var(--cols)), calc(40vh / var(--rows)));
+  height: auto;
+  font-size: clamp(1rem, 3vw, 2.5rem);
   font-weight: bold;
   text-transform: uppercase;
 }
