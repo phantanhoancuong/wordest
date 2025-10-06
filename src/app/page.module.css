@@ -12,7 +12,7 @@
 }
 
 .app__banner {
-  flex: 0 0 15%;
+  flex: 0 0 10%;
   overflow: hidden;
 }
 
@@ -25,5 +25,5 @@
 }
 
 .app__keyboard {
-  flex: 0 0 30%;
+  flex: 0 0 35%;
 }

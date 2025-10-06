@@ -307,7 +307,7 @@ export default function Home() {
         )}
       </main>
 
-      <footer className={`${styles["app__keyboard"]} flex-center`}>
+      <footer className={`${styles["app__keyboard"]}`}>
         <Keyboard keyStatuses={keyStatuses} onKeyClick={handleInput} />
       </footer>
     </div>
