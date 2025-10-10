@@ -3,7 +3,7 @@
 }
 
 .banner-header__text {
-  font-size: clamp(2.5rem, 15vw, 3rem);
+  font-size: clamp(2rem, 8vw, 3rem);
   text-align: center;
   user-select: none;
 }
