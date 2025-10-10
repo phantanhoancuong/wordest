@@ -26,4 +26,29 @@
 
 .app__keyboard {
   flex: 0 0 35%;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+}
+
+.landscape-warning {
+  display: none;
+}
+
+@media (max-height: 500px) and (orientation: landscape) {
+  .app__banner,
+  .app__game,
+  .app__keyboard {
+    display: none;
+  }
+
+  .landscape-warning {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    height: 100vh;
+    font-size: 1rem;
+    font-weight: bold;
+  }
 }

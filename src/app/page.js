@@ -310,6 +310,12 @@ export default function Home() {
       <footer className={`${styles["app__keyboard"]}`}>
         <Keyboard keyStatuses={keyStatuses} onKeyClick={handleInput} />
       </footer>
+
+      <div className={styles["landscape-warning"]}>
+        The game doesn't fit on your screen in this orientation.
+        <br />
+        Please rotate your device.
+      </div>
     </div>
   );
 }
