@@ -6,30 +6,25 @@
 }
 
 .keyboard-row {
-  display: grid;
-  grid-auto-flow: column;
-  grid-auto-columns: min(8vw, 2.5rem);
+  display: flex;
   justify-content: center;
-  align-items: center;
   gap: clamp(0.25rem, 0.8vw, 0.5rem);
 }
 
 .key {
-  display: grid;
-  place-items: center;
-  font-weight: bold;
-  cursor: pointer;
-  user-select: none;
-  font-size: clamp(0.8rem, 2.5vw, 1rem);
+  display: flex;
+  justify-content: center;
+  align-items: center;
   aspect-ratio: 0.75;
+  width: min(8vw, 2.5rem);
 }
 
 .key--narrow {
   grid-column: span 1;
+  aspect-ratio: 0.75;
 }
-
 .key--wide {
-  grid-column: span 2;
+  width: calc(min(8vw, 2.5rem) * 2 + clamp(0.25rem, 0.8vw, 0.5rem));
   aspect-ratio: 1.5;
 }
 
