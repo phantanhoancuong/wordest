@@ -12,21 +12,21 @@ const ATTEMPTS = 6;
 const WORD_LENGTH = 5;
 const MAX_TOASTS = 3;
 
-function useLatest(value) {
+const useLatest = (value) => {
   const ref = useRef(value);
   useEffect(() => {
     ref.current = value;
   }, [value]);
   return ref;
-}
+};
 
-function countLetter(word) {
+const countLetter = (word) => {
   const count = {};
   for (const char of word) {
     count[char] = (count[char] || 0) + 1;
   }
   return count;
-}
+};
 
 const CellStatus = {
   DEFAULT: "default",
@@ -35,16 +35,16 @@ const CellStatus = {
   ABSENT: "absent",
 };
 
-function initEmptyGrid() {
+const initEmptyGrid = () => {
   return Array.from({ length: ATTEMPTS }, () =>
     Array.from({ length: WORD_LENGTH }, () => ({
       char: "",
       status: CellStatus.DEFAULT,
     }))
   );
-}
+};
 
-async function fetchWordFromApi() {
+const fetchWordFromApi = async () => {
   const res = await fetch("/api/word");
   if (!res.ok) {
     throw new Error(`HTTP Error! Status: ${res.status}`);
@@ -54,7 +54,7 @@ async function fetchWordFromApi() {
     throw new Error(data.error || "Invalid server response");
   }
   return data.target.toUpperCase();
-}
+};
 
 export default function Home() {
   const [grid, setGrid] = useState(() => initEmptyGrid());
@@ -70,6 +70,24 @@ export default function Home() {
   const [targetWord, setTargetWord] = useState("");
   const targetLetterCount = useRef({});
   const [gameOver, setGameOver] = useState(false);
+
+  const keySounds = useRef([]);
+
+  useEffect(() => {
+    keySounds.current = [
+      new Audio("/sounds/key_01.mp3"),
+      new Audio("/sounds/key_02.mp3"),
+    ];
+  }, []);
+
+  const playKeySound = () => {
+    const sounds = keySounds.current;
+    if (!sounds.length) return;
+
+    const randomIndex = Math.floor(Math.random() * sounds.length);
+    const sound = sounds[randomIndex].cloneNode();
+    sound.play();
+  };
 
   useEffect(() => {
     const loadWord = async () => {
@@ -87,7 +105,7 @@ export default function Home() {
     loadWord();
   }, []);
 
-  function updateCell(row, col, charValue, statusValue) {
+  const updateCell = (row, col, charValue, statusValue) => {
     setGrid((prevGrid) => {
       const newRow = [...prevGrid[row]];
       newRow[col] = { char: charValue, status: statusValue };
@@ -95,15 +113,15 @@ export default function Home() {
       newGrid[row] = newRow;
       return newGrid;
     });
-  }
+  };
 
-  function updateRow(row, rowValue) {
+  const updateRow = (row, rowValue) => {
     setGrid((prevGrid) =>
       prevGrid.map((r, rIndex) => (rIndex === row ? rowValue : r))
     );
-  }
+  };
 
-  function updateKeyStatuses(guess, statuses) {
+  const updateKeyStatuses = (guess, statuses) => {
     setKeyStatuses((prev) => {
       const newStatuses = { ...prev };
       for (let i = 0; i < guess.length; i++) {
@@ -122,9 +140,9 @@ export default function Home() {
       }
       return newStatuses;
     });
-  }
+  };
 
-  async function submitGuess(row) {
+  const submitGuess = async (row) => {
     const guess = gridRef.current[row].map((cell) => cell.char).join("");
 
     if (guess.length !== WORD_LENGTH) return;
@@ -193,11 +211,11 @@ export default function Home() {
       console.error("Error validating guess: ", err);
       addToast("Network error, please try again later.");
     }
-  }
+  };
 
-  function handleInput(key) {
+  const handleInput = (key) => {
     if (gameOver || !targetWord) return;
-
+    playKeySound();
     const row = rowRef.current;
     const col = colRef.current;
 
@@ -227,7 +245,7 @@ export default function Home() {
         return newCol;
       });
     }
-  }
+  };
 
   useEffect(() => {
     const handleKeyDown = (event) => {
@@ -242,7 +260,7 @@ export default function Home() {
   }, [gameOver, targetWord]);
 
   const [toasts, setToasts] = useState([]);
-  function addToast(message) {
+  const addToast = (message) => {
     setToasts((prev) => {
       const without = prev.filter((t) => t.message !== message);
       const newToast = { id: Date.now(), message };
@@ -250,12 +268,12 @@ export default function Home() {
       const updated = [...without, newToast];
       return updated.slice(-MAX_TOASTS);
     });
-  }
-  function removeToast(id) {
+  };
+  const removeToast = (id) => {
     setToasts((prev) => prev.filter((t) => t.id !== id));
-  }
+  };
 
-  async function restartGame() {
+  const restartGame = async () => {
     try {
       const word = await fetchWordFromApi();
       setTargetWord(word);
@@ -272,7 +290,7 @@ export default function Home() {
       setError("Could not restart the game. Please try again later.");
       setGameOver(true);
     }
-  }
+  };
 
   return (
     <div className={styles["app"]}>

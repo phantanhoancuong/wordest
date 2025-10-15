@@ -17,6 +17,7 @@
   align-items: center;
   font-weight: bold;
   aspect-ratio: 0.75;
+  user-select: none;
   width: min(8vw, 2.5rem);
 }
 
