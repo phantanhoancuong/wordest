@@ -22,26 +22,70 @@
   text-transform: uppercase;
 }
 
+.cell--correct,
+.cell--present,
+.cell--absent {
+  animation: bounce 0.3s ease forwards;
+  animation-delay: var(--delay);
+}
+
+@keyframes bounce {
+  0% {
+    transform: translateY(0);
+    background-color: var(--cell-background-color-absent);
+    color: black;
+    border-color: #ccc;
+  }
+  50% {
+    transform: translateY(min(-10px, -0.5rem));
+  }
+  100% {
+    transform: translateY(0);
+  }
+
+  50%,
+  100% {
+    background-color: var(--target-background-color);
+    color: var(--target-text-color);
+    border-color: var(--target-border-color);
+  }
+}
+
+@keyframes shake {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  20%,
+  60% {
+    transform: translateX(-10%);
+  }
+  40%,
+  80% {
+    transform: translateX(10%);
+  }
+}
+
 .cell--default {
-  background-color: var(--cell-background-color-default);
-  color: black;
-  border-color: #ccc;
+  --target-background-color: var(--cell-background-color-default);
+  --target-text-color: black;
+  --target-border-color: var(--cell-border-color-default);
 }
 
 .cell--correct {
-  background-color: var(--cell-background-color-correct);
-  color: white;
-  border-color: #6aaa64;
+  --target-background-color: var(--cell-background-color-correct);
+  --target-text-color: white;
+  --target-border-color: var(--cell-border-color-correct);
 }
 
 .cell--present {
-  background-color: var(--cell-background-color-present);
-  color: white;
-  border-color: #c9b458;
+  --target-background-color: var(--cell-background-color-present);
+  --target-text-color: white;
+  --target-border-color: var(--cell-border-color-present);
 }
 
 .cell--absent {
-  background-color: var(--cell-background-color-absent);
-  color: white;
-  border-color: #787c7e;
+  --target-background-color: var(--cell-background-color-absent);
+  --target-text-color: white;
+  --target-border-color: var(--cell-border-color-absent);
 }

@@ -4,6 +4,11 @@
   --cell-background-color-absent: gray;
   --cell-background-color-present: yellow;
   --cell-background-color-correct: green;
+
+  --cell-border-color-default: white;
+  --cell-border-color-absent: gray;
+  --cell-border-color-present: yellow;
+  --cell-border-color-correct: green;
 }
 
 body {

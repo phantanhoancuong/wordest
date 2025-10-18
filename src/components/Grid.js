@@ -19,6 +19,7 @@ export default function Grid({ grid }) {
             className={`${styles.cell} ${
               styles[`cell--${cell.status}`]
             } flex-center`}
+            style={{ "--delay": `${colIndex * 0.25}s` }}
           >
             {cell.char}
           </div>
