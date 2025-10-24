@@ -1,6 +1,15 @@
 import styles from "../styles/Grid.module.css";
 
-export default function Grid({ grid }) {
+/**
+ * Grid component.
+ *
+ * Renders the game board as a grid of cells.
+ * @component
+ * @param {Object} props - Component props.
+ * @property {Array<Array<Object>>} props.grid - 2D array of cell ojects.
+ * @returns {JSX.Element} The grid element.
+ */
+const Grid = ({ grid }) => {
   const rows = grid.length;
   const cols = grid[0].length;
 
@@ -27,4 +36,6 @@ export default function Grid({ grid }) {
       )}
     </div>
   );
-}
+};
+
+export default Grid;

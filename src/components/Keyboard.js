@@ -1,12 +1,23 @@
 import styles from "../styles/Keyboard.module.css";
 
-const keyboardLayout = [
-  ["Q", "W", "E", "R", "T", "Y", "U", "I", "O", "P"],
-  ["A", "S", "D", "F", "G", "H", "J", "K", "L"],
-  ["Enter", "Z", "X", "C", "V", "B", "N", "M", "Backspace"],
-];
+/**
+ * Keyboard component.
+ *
+ * Renders an on-screen keyboard with status colors for each key.
+ *
+ * @component
+ * @param {Object} props - Component props.
+ * @property {Object<string, string>} props.keyStatuses - Mapping of each key to its status.
+ * @property {Function} props.onKeyClick - Callback invoked when a key is clicked. Receives the key string.
+ * @returns {JSX.Element} The keyboard element.
+ */
+const Keyboard = ({ keyStatuses, onKeyClick }) => {
+  const keyboardLayout = [
+    ["Q", "W", "E", "R", "T", "Y", "U", "I", "O", "P"],
+    ["A", "S", "D", "F", "G", "H", "J", "K", "L"],
+    ["Enter", "Z", "X", "C", "V", "B", "N", "M", "Backspace"],
+  ];
 
-export default function Keyboard({ keyStatuses, onKeyClick }) {
   return (
     <div className={styles["keyboard"]}>
       {keyboardLayout.map((row, rowIndex) => (
@@ -30,4 +41,6 @@ export default function Keyboard({ keyStatuses, onKeyClick }) {
       ))}
     </div>
   );
-}
+};
+
+export default Keyboard;
