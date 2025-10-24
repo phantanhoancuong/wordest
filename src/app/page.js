@@ -38,10 +38,13 @@ export default function Home() {
                       game.targetWord.split("").map((char) => ({
                         char,
                         status: CellStatus.CORRECT,
+                        animation: CellAnimation.NONE,
+                        animationDelay: 0,
                       })),
                     ]
                   : grid.data
               }
+              onAnimationEnd={grid.handleAnimationEnd}
             />
 
             {game.gameOver && (

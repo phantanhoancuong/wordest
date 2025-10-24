@@ -6,9 +6,9 @@ import {
   WORD_LENGTH,
   CellStatus,
   CellAnimation,
-  BOUNCE_ANIMATION_DURATION,
+  BOUNCE_ANIMATION_DELAY,
 } from "../lib/constants";
-import { evaluateGuess } from "../lib/utils";
+import { evaluateGuess, mapGuessToRow } from "../lib/utils";
 
 import { useGridState } from "./useGridState";
 import { useKeyboardInput } from "./useKeyboardInput";
@@ -97,12 +97,15 @@ export const useGame = () => {
       setValidationError("Not in word list.");
       addToast("Not in word list.");
 
-      const newRow = guess.split("").map((char) => ({
-        char,
-        status: CellStatus.DEFAULT,
-        animation: CellAnimation.SHAKE,
-        animationDelay: 0,
-      }));
+      const newRow = mapGuessToRow(
+        guess,
+        Array(WORD_LENGTH).fill(CellStatus.DEFAULT),
+        {
+          animation: CellAnimation.SHAKE,
+          animationDelay: 0,
+          isConsecutive: false,
+        }
+      );
 
       updateRow(row, newRow);
       return;
@@ -123,12 +126,11 @@ export const useGame = () => {
       targetLetterCount.current
     );
 
-    const newRow = guess.split("").map((char, i) => ({
-      char,
-      status: statuses[i],
+    const newRow = mapGuessToRow(guess, statuses, {
       animation: CellAnimation.BOUNCE,
-      animationDelay: i * BOUNCE_ANIMATION_DURATION,
-    }));
+      animationDelay: BOUNCE_ANIMATION_DELAY,
+      isConsecutive: true,
+    });
 
     updateRow(row, newRow);
     updateKeyStatuses(guess, statuses);

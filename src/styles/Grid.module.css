@@ -89,3 +89,23 @@
   --target-text-color: white;
   --target-border-color: var(--cell-border-color-absent);
 }
+
+.cell--shake {
+  animation: shake 0.5s ease forwards;
+  animation-delay: var(--delay);
+}
+
+@keyframes shake {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  20%,
+  60% {
+    transform: translateX(-10%);
+  }
+  40%,
+  80% {
+    transform: translateX(10%);
+  }
+}

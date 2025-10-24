@@ -20,11 +20,11 @@ export const WORD_LENGTH = 5;
 export const MAX_TOASTS = 3;
 
 /**
- * Duration of the bounce anmation for cells, in milliseconds.
+ * Duration of the delay for animation in cells, in milliseconds.
  *
  * @type {number}
  */
-export const BOUNCE_ANIMATION_DURATION = 100;
+export const BOUNCE_ANIMATION_DELAY = 100;
 
 /**
  * Enum for cell statuses in the grid.

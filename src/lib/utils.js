@@ -73,3 +73,31 @@ export const evaluateGuess = (guess, targetWord, targetLetterCount) => {
 
   return statuses;
 };
+
+/**
+ * Converts a guess string and evaluation statuses into a row of cell objects with animation properties.
+ *
+ * @param {string} guess - The guessed word.
+ * @param {Array<string>} statuses - Array of CellStatus values for each character.
+ * @param {Object} [options] - Optional animation settings.
+ * @property {string} [options.animation=CellAnimation.NONE] - The animation to apply to each cell.
+ * @property {number} [options.animationDelay=0] - Base delay in milliseconds for animations.
+ * @property {boolean} [options.isConsecutive=true] - If true, delay increases per cell.
+ * @returns
+ */
+export const mapGuessToRow = (
+  guess,
+  statuses,
+  {
+    animation = CellAnimation.NONE,
+    animationDelay = 0,
+    isConsecutive = false,
+  } = {}
+) => {
+  return guess.split("").map((char, i) => ({
+    char,
+    status: statuses[i],
+    animation,
+    animationDelay: isConsecutive ? i * animationDelay : animationDelay,
+  }));
+};
