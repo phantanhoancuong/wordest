@@ -35,7 +35,7 @@ import { useToasts } from "./useToasts";
  * @property {boolean} game.gameOver - Whether the game has ended.
  * @property {string} game.validationError - Latest validation error message.
  * @property {string} game.wordFetchError - Error fetching the target word.
- * @property {Function} game.restart - Resets the game state.
+ * @property {Function} game.restartGame - Resets the game state.
  * @property {Object} toasts - Toast notifications
  * @property {Array<Object>} toasts.list - List of active toasts.
  * @property {Function} toasts.removeToast - Removes a toast by ID
@@ -84,7 +84,7 @@ export const useGame = () => {
    * Submits the guess (current row) for evaluation and updates game states.
    *
    * @param {number} row - the row index to submit.
-   * @returns {Promsise<void>}
+   * @returns {Promise<void>}
    */
 
   const submitGuess = async (row) => {
@@ -183,7 +183,7 @@ export const useGame = () => {
       playKeySound();
       setColState((c) => {
         if (c >= WORD_LENGTH) return c;
-        updateCell(row, c, letter, CellStatus.DEFAULT);
+        updateCell(row, c, { char: letter });
         return c + 1;
       });
     }
@@ -208,7 +208,7 @@ export const useGame = () => {
       validationError,
       wordFetchError,
       targetWord,
-      restart: restartGame,
+      restartGame,
     },
 
     toasts: {
