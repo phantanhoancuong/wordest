@@ -1,36 +1,60 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Wordest
 
-## Getting Started
+**Wordest** is a re-creation of the word puzzle that I think you know, built with **React** and **Next.js**.
 
-First, run the development server:
+In case you don't know, the goal is to guess a hidden word within a limited number of attempts.
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+- Each guess must be a valid word of the correct length.
+- After each guess, each letter will be highlighted to show feedback:
+  - Correct letter in the correct position
+  - Correct letter in the wrong position
+  - Incorrect letter
+- Use the feedback to refine your next guesses.
+- The game ends when you guess the word correctly or run out of attempts.
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+You can play it live at:  
+[https://wordest.vercel.app](https://wordest.vercel.app)
 
-You can start editing the page by modifying `app/page.js`. The page auto-updates as you edit the file.
+---
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Planned Features
 
-## Learn More
+**Wordest** started as a simple game, but I plan to extend it with more features over time.  
+Some ideas (they may not all be implemented; these are just concepts I think would be nice) include:
 
-To learn more about Next.js, take a look at the following resources:
+### Gameplay
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+- Custom word lengths and attempts
+- Difficulty levels (different word lists)
+- Timer mode
+- Hint system
+- Custom word dictionary API
+- Hard mode (enforce reusing known correct letters in later guesses)
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+### UI / UX
 
-## Deploy on Vercel
+_(I try to adhere to good UX / UI design principles)_
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+- Content fitting one screen
+- Dark and Light themes
+- Animated feedback
+- Sound effect feedback
+- Dynamic layout between mobile and desktop
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+### Stats and Progression
+
+_(Might be implemented last)_
+
+- Player statistics (games played, win rate, streaks, accuracy)
+- Achievements and badges
+- History log
+- Practice mode (no stat tracking)
+
+---
+
+## Feedback
+
+I plan to keep improving **Wordest** and continue building other small web-based projects such as websites, interactive tools, and mini-games to explore design, animation, and front-end architecture.
+
+If you have any feedback, suggestions, or ideas, feel free to open an issue or reach out to me at:  
+phantanhoancuong@gmail.com
