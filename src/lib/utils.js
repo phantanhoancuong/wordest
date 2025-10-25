@@ -81,7 +81,7 @@ export const evaluateGuess = (guess, targetWord, targetLetterCount) => {
  * @param {Array<string>} statuses - Array of CellStatus values for each character.
  * @param {Object} [options] - Optional animation settings.
  * @property {string} [options.animation=CellAnimation.NONE] - The animation to apply to each cell.
- * @property {number} [options.animationDelay=0] - Base delay in milliseconds for animations.
+ * @property {number} [options.animationDelay=0] - Base delay in seconds for animations.
  * @property {boolean} [options.isConsecutive=true] - If true, delay increases per cell.
  * @returns
  */

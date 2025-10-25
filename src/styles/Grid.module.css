@@ -25,7 +25,7 @@
 .cell--correct,
 .cell--present,
 .cell--absent {
-  animation: bounce 0.3s ease forwards;
+  animation: bounce var(--bounce-duration) ease forwards;
   animation-delay: var(--delay);
 }
 
@@ -48,21 +48,6 @@
     background-color: var(--target-background-color);
     color: var(--target-text-color);
     border-color: var(--target-border-color);
-  }
-}
-
-@keyframes shake {
-  0%,
-  100% {
-    transform: translateX(0);
-  }
-  20%,
-  60% {
-    transform: translateX(-10%);
-  }
-  40%,
-  80% {
-    transform: translateX(10%);
   }
 }
 
@@ -91,7 +76,7 @@
 }
 
 .cell--shake {
-  animation: shake 0.5s ease forwards;
+  animation: shake var(--shake-duration) ease forwards;
   animation-delay: var(--delay);
 }
 

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 
 import { validateWord } from "../lib/api";
 import {
@@ -7,6 +7,7 @@ import {
   CellStatus,
   CellAnimation,
   BOUNCE_ANIMATION_DELAY,
+  SHAKE_ANIMATION_DELAY,
 } from "../lib/constants";
 import { evaluateGuess, mapGuessToRow } from "../lib/utils";
 
@@ -51,30 +52,74 @@ export const useGame = () => {
   const [colState, setColState] = useState(0);
   const [validationError, setValidationError] = useState("");
 
+  const animatingCellNum = useRef(0);
+  const pendingRowIncrement = useRef(false);
+  const finishedCellMap = useRef(new Map());
+  const inputLocked = useRef(false);
+
   const rowRef = useLatest(rowState);
   const colRef = useLatest(colState);
 
   const { toasts, addToast, removeToast } = useToasts();
   const { keyStatuses, updateKeyStatuses, resetKeyStatuses } = useKeyStatuses();
 
-  const {
-    grid,
-    gridRef,
-    updateCell,
-    updateRow,
-    handleAnimationEnd,
-    resetGrid,
-  } = useGridState();
+  const { grid, gridRef, updateCell, updateRow, flushAnimation, resetGrid } =
+    useGridState();
 
+  /**
+   * Handles the cell's data at the end of its animation.
+   *
+   * Decrements the active animation counter, clears finished animations when all have ended,
+   * and advances to the next row if needed.
+   *
+   * @param {number} rowIndex - The row index of the animated cell.
+   * @param {number} colIndex - The column index of the animated cell.
+   * @returns {void}
+   */
+  const handleAnimationEnd = (rowIndex, colIndex) => {
+    if (!finishedCellMap.current.has(rowIndex)) {
+      finishedCellMap.current.set(rowIndex, []);
+    }
+
+    finishedCellMap.current.get(rowIndex).push(colIndex);
+
+    animatingCellNum.current = Math.max(0, animatingCellNum.current - 1);
+    console.log(animatingCellNum.current);
+
+    if (animatingCellNum.current === 0) {
+      if (pendingRowIncrement.current === true) {
+        setColState(0);
+        setRowState((r) => r + 1);
+        pendingRowIncrement.current = false;
+      }
+
+      flushAnimation(finishedCellMap.current);
+      finishedCellMap.current.clear();
+    }
+  };
+
+  /**
+   * Resets all game states, grid, keyboard, and target word to start a new game.
+   *
+   * @returns {void}
+   */
   const restartGame = () => {
     setRowState(0);
     setColState(0);
     resetGrid();
     setGameOver(false);
+    animatingCellNum.current = 0;
+    pendingRowIncrement.current = false;
+    finishedCellMap.current.clear();
     resetKeyStatuses();
     reloadTargetWord();
   };
 
+  /**
+   * Plays a random key press sound from the preloaded set.
+   *
+   * @type {Function}
+   */
   const playKeySound = useSoundPlayer([
     "/sounds/key_01.mp3",
     "/sounds/key_02.mp3",
@@ -86,69 +131,81 @@ export const useGame = () => {
    * @param {number} row - the row index to submit.
    * @returns {Promise<void>}
    */
-
   const submitGuess = async (row) => {
-    const guess = gridRef.current[row].map((cell) => cell.char).join("");
-    if (guess.length !== WORD_LENGTH) return;
+    if (inputLocked.current) return;
+    inputLocked.current = true;
 
-    const { status, ok } = await validateWord(guess);
+    try {
+      const guess = gridRef.current[row].map((cell) => cell.char).join("");
+      if (guess.length !== WORD_LENGTH) return;
 
-    if (status === 422) {
-      setValidationError("Not in word list.");
-      addToast("Not in word list.");
+      const { status, ok } = await validateWord(guess);
 
-      const newRow = mapGuessToRow(
+      if (status === 422) {
+        setValidationError("Not in word list.");
+        addToast("Not in word list.");
+
+        const newRow = mapGuessToRow(
+          guess,
+          Array(WORD_LENGTH).fill(CellStatus.DEFAULT),
+          {
+            animation: CellAnimation.SHAKE,
+            animationDelay: SHAKE_ANIMATION_DELAY,
+            isConsecutive: false,
+          }
+        );
+
+        animatingCellNum.current += WORD_LENGTH;
+        updateRow(row, newRow);
+        return;
+      }
+
+      if (status === 500 || !ok) {
+        const message = "Error validating word. Please try again.";
+        setValidationError(message);
+        addToast(message);
+        return;
+      }
+
+      setValidationError("");
+
+      const statuses = evaluateGuess(
         guess,
-        Array(WORD_LENGTH).fill(CellStatus.DEFAULT),
-        {
-          animation: CellAnimation.SHAKE,
-          animationDelay: 0,
-          isConsecutive: false,
-        }
+        targetWord,
+        targetLetterCount.current
       );
 
+      const newRow = mapGuessToRow(guess, statuses, {
+        animation: CellAnimation.BOUNCE,
+        animationDelay: BOUNCE_ANIMATION_DELAY,
+        isConsecutive: true,
+      });
+
       updateRow(row, newRow);
-      return;
+      animatingCellNum.current += WORD_LENGTH;
+      updateKeyStatuses(guess, statuses);
+
+      if (guess === targetWord) {
+        addToast("You win!");
+        setGameOver(true);
+        return;
+      }
+
+      if (row + 1 >= ATTEMPTS) {
+        addToast(`The word was: ${targetWord}`);
+        setGameOver(true);
+        return;
+      }
+
+      pendingRowIncrement.current = true;
+    } finally {
+      const unlockInterval = setInterval(() => {
+        if (animatingCellNum.current === 0) {
+          inputLocked.current = false;
+          clearInterval(unlockInterval);
+        }
+      }, 50);
     }
-
-    if (status === 500 || !ok) {
-      const message = "Error validating word. Please try again.";
-      setValidationError(message);
-      addToast(message);
-      return;
-    }
-
-    setValidationError("");
-
-    const statuses = evaluateGuess(
-      guess,
-      targetWord,
-      targetLetterCount.current
-    );
-
-    const newRow = mapGuessToRow(guess, statuses, {
-      animation: CellAnimation.BOUNCE,
-      animationDelay: BOUNCE_ANIMATION_DELAY,
-      isConsecutive: true,
-    });
-
-    updateRow(row, newRow);
-    updateKeyStatuses(guess, statuses);
-
-    if (guess === targetWord) {
-      addToast("You win!");
-      setGameOver(true);
-      return;
-    }
-
-    if (row + 1 >= ATTEMPTS) {
-      addToast(`The word was: ${targetWord}`);
-      setGameOver(true);
-      return;
-    }
-
-    setRowState((r) => r + 1);
-    setColState(0);
   };
 
   /**
@@ -158,7 +215,14 @@ export const useGame = () => {
    * @returns {void}
    */
   const handleInput = (key) => {
-    if (gameOver || !targetWord) return;
+    if (
+      gameOver ||
+      !targetWord ||
+      animatingCellNum.current > 0 ||
+      inputLocked.current
+    )
+      return;
+
     const row = rowRef.current;
     const col = colRef.current;
 

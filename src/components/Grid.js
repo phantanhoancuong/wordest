@@ -1,4 +1,8 @@
 import styles from "../styles/Grid.module.css";
+import {
+  BOUNCE_ANIMATION_DURATION,
+  SHAKE_ANIMATION_DURATION,
+} from "../lib/constants";
 
 /**
  * Grid component.
@@ -31,6 +35,8 @@ const Grid = ({ grid, onAnimationEnd }) => {
             } flex-center`}
             style={{
               "--delay": `${cell.animationDelay || 0}s`,
+              "--bounce-duration": `${BOUNCE_ANIMATION_DURATION}s`,
+              "--shake-duration": `${SHAKE_ANIMATION_DURATION}s`,
             }}
             onAnimationEnd={() => onAnimationEnd?.(rowIndex, colIndex)}
           >

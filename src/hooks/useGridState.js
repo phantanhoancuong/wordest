@@ -88,25 +88,28 @@ export const useGridState = () => {
   };
 
   /**
-   * Reset animation data after a cell's animation ends.
-   *
-   * @param {number} rowIndex - Row index of the cell.
-   * @param {number} colIndex - Column index of the cell.
-   * @returns {void}
+   * Reset animation data after cell's animation ends.
+   * @param {Map<number, number[]>} finishedCellMap - rowIndex -> array of finished colIndices.
    */
-  const handleAnimationEnd = (rowIndex, colIndex) => {
+  const flushAnimation = (finishedCellMap) => {
+    console.log("flushing");
     setGrid((prevGrid) => {
       const newGrid = [...prevGrid];
-      const newRow = [...newGrid[rowIndex]];
-      const cell = newRow[colIndex];
 
-      newRow[colIndex] = {
-        ...cell,
-        animation: CellAnimation.NONE,
-        animationDelay: 0,
-      };
+      for (const [rowIndex, finishedCols] of finishedCellMap.entries()) {
+        const newRow = [...newGrid[rowIndex]];
 
-      newGrid[rowIndex] = newRow;
+        finishedCols.forEach((colIndex) => {
+          const cell = newRow[colIndex];
+          newRow[colIndex] = {
+            ...cell,
+            animation: CellAnimation.NONE,
+            animationDelay: 0,
+          };
+        });
+
+        newGrid[rowIndex] = newRow;
+      }
       return newGrid;
     });
   };
@@ -116,7 +119,7 @@ export const useGridState = () => {
     gridRef,
     updateCell,
     updateRow,
-    handleAnimationEnd,
+    flushAnimation,
     resetGrid,
   };
 };
