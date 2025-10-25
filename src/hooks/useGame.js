@@ -84,7 +84,6 @@ export const useGame = () => {
     finishedCellMap.current.get(rowIndex).push(colIndex);
 
     animatingCellNum.current = Math.max(0, animatingCellNum.current - 1);
-    console.log(animatingCellNum.current);
 
     if (animatingCellNum.current === 0) {
       if (pendingRowIncrement.current === true) {

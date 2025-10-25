@@ -92,7 +92,6 @@ export const useGridState = () => {
    * @param {Map<number, number[]>} finishedCellMap - rowIndex -> array of finished colIndices.
    */
   const flushAnimation = (finishedCellMap) => {
-    console.log("flushing");
     setGrid((prevGrid) => {
       const newGrid = [...prevGrid];
 
