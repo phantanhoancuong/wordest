@@ -3,7 +3,7 @@
 import { Grid, Keyboard, ToastBar, Banner } from "../components";
 import styles from "./page.module.css";
 
-import { CellStatus } from "../lib/constants";
+import { CellStatus, CellAnimation } from "../lib/constants";
 import { useGame } from "../hooks/useGame";
 
 /**
