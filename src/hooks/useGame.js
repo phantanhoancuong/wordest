@@ -94,6 +94,8 @@ export const useGame = () => {
 
       flushAnimation(finishedCellMap.current);
       finishedCellMap.current.clear();
+
+      inputLocked.current = false;
     }
   };
 
@@ -110,6 +112,7 @@ export const useGame = () => {
     animatingCellNum.current = 0;
     pendingRowIncrement.current = false;
     finishedCellMap.current.clear();
+    inputLocked.current = false;
     resetKeyStatuses();
     reloadTargetWord();
   };
@@ -117,7 +120,7 @@ export const useGame = () => {
   /**
    * Plays a random key press sound from the preloaded set.
    *
-   * @type {Function}
+   * @type {() => void}
    */
   const playKeySound = useSoundPlayer([
     "/sounds/key_01.mp3",
@@ -197,13 +200,9 @@ export const useGame = () => {
       }
 
       pendingRowIncrement.current = true;
-    } finally {
-      const unlockInterval = setInterval(() => {
-        if (animatingCellNum.current === 0) {
-          inputLocked.current = false;
-          clearInterval(unlockInterval);
-        }
-      }, 50);
+    } catch (error) {
+      console.error("submitGuess error:", error);
+      addToast("Unexpected error occurred.");
     }
   };
 
