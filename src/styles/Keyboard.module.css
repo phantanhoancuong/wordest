@@ -19,6 +19,7 @@
   aspect-ratio: 0.75;
   user-select: none;
   width: min(8vw, 2.5rem);
+  cursor: pointer;
 }
 
 .keyboard__key--narrow {
