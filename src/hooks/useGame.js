@@ -88,14 +88,16 @@ export const useGame = () => {
     animatingCellNum.current = Math.max(0, animatingCellNum.current - 1);
 
     if (animatingCellNum.current === 0) {
+      flushAnimation(new Map(finishedCellMap.current));
+      finishedCellMap.current.clear();
+      inputLocked.current = false;
+
       if (pendingRowIncrement.current === true) {
         setColState(0);
         setRowState((r) => r + 1);
         pendingRowIncrement.current = false;
       }
-      flushAnimation(finishedCellMap.current);
-      finishedCellMap.current.clear();
-      inputLocked.current = false;
+
       if (pendingGameOver.current === true) {
         setGameOver(true);
         pendingGameOver.current = false;
