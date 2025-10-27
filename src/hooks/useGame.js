@@ -57,6 +57,8 @@ export const useGame = () => {
   const finishedCellMap = useRef(new Map());
   const inputLocked = useRef(false);
 
+  const pendingGameOver = useRef(false);
+
   const rowRef = useLatest(rowState);
   const colRef = useLatest(colState);
 
@@ -91,11 +93,13 @@ export const useGame = () => {
         setRowState((r) => r + 1);
         pendingRowIncrement.current = false;
       }
-
       flushAnimation(finishedCellMap.current);
       finishedCellMap.current.clear();
-
       inputLocked.current = false;
+      if (pendingGameOver.current === true) {
+        setGameOver(true);
+        pendingGameOver.current = false;
+      }
     }
   };
 
@@ -108,6 +112,7 @@ export const useGame = () => {
     setRowState(0);
     setColState(0);
     resetGrid();
+    pendingGameOver.current = false;
     setGameOver(false);
     animatingCellNum.current = 0;
     pendingRowIncrement.current = false;
@@ -189,13 +194,13 @@ export const useGame = () => {
 
       if (guess === targetWord) {
         addToast("You win!");
-        setGameOver(true);
+        pendingGameOver.current = true;
         return;
       }
 
       if (row + 1 >= ATTEMPTS) {
         addToast(`The word was: ${targetWord}`);
-        setGameOver(true);
+        pendingGameOver.current = true;
         return;
       }
 
