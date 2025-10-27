@@ -1,9 +1,3 @@
-.game__error {
-  color: red;
-  text-align: center;
-  font-size: 3rem;
-}
-
 .app {
   height: 100dvh;
   min-width: 100%;
@@ -14,10 +8,6 @@
 .app__banner {
   flex: 0 0 10%;
   overflow: hidden;
-}
-
-.game__board {
-  height: 100%;
 }
 
 .app__game {
@@ -31,8 +21,13 @@
   justify-content: flex-end;
 }
 
+.app__toast-bar {
+  margin-top: 1rem;
+}
+
 .landscape-warning {
   display: none;
+  text-align: center;
 }
 
 @media (max-height: 500px) and (orientation: landscape) {
@@ -46,9 +41,39 @@
     display: flex;
     justify-content: center;
     align-items: center;
-    text-align: center;
     height: 100dvh;
     font-size: 1rem;
     font-weight: bold;
   }
+}
+
+.game__error {
+  color: red;
+  text-align: center;
+  font-size: 3rem;
+}
+
+.game-board {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.game-board__grid {
+  display: grid;
+  gap: 0.5rem;
+}
+
+.game-board__buttons {
+  margin-top: 1rem;
+  display: flex;
+  gap: 0.5rem;
+}
+
+.game-board__button {
+  padding: 0.5rem 1rem;
+  font-size: 1rem;
+  cursor: pointer;
 }

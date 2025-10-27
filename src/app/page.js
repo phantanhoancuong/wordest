@@ -30,28 +30,35 @@ export default function Home() {
             <p>{game.wordFetchError}</p>
           </section>
         ) : (
-          <section className={`${styles["game__board"]} flex-center`}>
-            <Grid
-              grid={
-                game.gameOver
-                  ? [
-                      game.targetWord.split("").map((char) => ({
-                        char,
-                        status: CellStatus.CORRECT,
-                        animation: CellAnimation.NONE,
-                        animationDelay: 0,
-                      })),
-                    ]
-                  : grid.data
-              }
-              onAnimationEnd={grid.handleAnimationEnd}
+          <section className={`${styles["game-board"]} flex-center`}>
+            <div className={styles["game-board__grid"]}>
+              <Grid
+                grid={
+                  game.gameOver
+                    ? [
+                        game.targetWord.split("").map((char) => ({
+                          char,
+                          status: CellStatus.CORRECT,
+                          animation: CellAnimation.NONE,
+                          animationDelay: 0,
+                        })),
+                      ]
+                    : grid.data
+                }
+                onAnimationEnd={grid.handleAnimationEnd}
+              />
+            </div>
+
+            <div className={styles["game-board__buttons"]}>
+              {game.gameOver && (
+                <button onClick={game.restartGame}>Restart</button>
+              )}
+            </div>
+            <ToastBar
+              className={styles["app__toast-bar"]}
+              toasts={toasts.list}
+              removeToast={toasts.removeToast}
             />
-
-            {game.gameOver && (
-              <button onClick={game.restartGame}>Restart</button>
-            )}
-
-            <ToastBar toasts={toasts.list} removeToast={toasts.removeToast} />
           </section>
         )}
       </main>

@@ -29,9 +29,7 @@ const Toast = ({ message, duration = 2000, onClose }) => {
 
   return (
     <div
-      className={`${styles["toast-container"]} ${
-        visible ? "" : styles["toast-container--hidden"]
-      }`}
+      className={`${styles["toast"]} ${visible ? "" : styles["toast--hidden"]}`}
     >
       {message}
     </div>

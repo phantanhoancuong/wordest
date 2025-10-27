@@ -1,8 +1,8 @@
-.banner-header {
+.banner {
   height: 100%;
 }
 
-.banner-header__text {
+.banner__text {
   font-size: clamp(2rem, 8vw, 3rem);
   text-align: center;
   user-select: none;

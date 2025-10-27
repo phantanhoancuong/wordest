@@ -21,7 +21,7 @@ const Keyboard = ({ keyStatuses, onKeyClick }) => {
   return (
     <div className={styles["keyboard"]}>
       {keyboardLayout.map((row, rowIndex) => (
-        <div key={rowIndex} className={styles["keyboard-row"]}>
+        <div key={rowIndex} className={styles["keyboard__row"]}>
           {row.map((key) => {
             const isWide = key === "Enter" || key === "Backspace";
             const status = keyStatuses[key] || "default";
@@ -29,9 +29,11 @@ const Keyboard = ({ keyStatuses, onKeyClick }) => {
               <button
                 key={key}
                 onClick={() => onKeyClick(key)}
-                className={`${styles.key} ${
-                  isWide ? styles["key--wide"] : styles["key--narrow"]
-                } ${styles[`key--${status}`]}`}
+                className={`${styles["keyboard__key"]} ${
+                  isWide
+                    ? styles["keyboard__key--wide"]
+                    : styles["keyboard__key--narrow"]
+                } ${styles[`keyboard__key--${status}`]}`}
               >
                 {key === "Backspace" ? "\u232B" : key}
               </button>

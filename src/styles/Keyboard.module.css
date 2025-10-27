@@ -5,13 +5,13 @@
   margin: auto;
 }
 
-.keyboard-row {
+.keyboard__row {
   display: flex;
   justify-content: center;
   gap: clamp(0.25rem, 0.8vw, 0.5rem);
 }
 
-.key {
+.keyboard__key {
   display: flex;
   justify-content: center;
   align-items: center;
@@ -21,34 +21,34 @@
   width: min(8vw, 2.5rem);
 }
 
-.key--narrow {
+.keyboard__key--narrow {
   grid-column: span 1;
   aspect-ratio: 0.75;
 }
-.key--wide {
+.keyboard__key--wide {
   width: calc(min(8vw, 2.5rem) * 2 + clamp(0.25rem, 0.8vw, 0.5rem));
   aspect-ratio: 1.5;
 }
 
-.key--default {
+.keyboard__key--default {
   background-color: var(--cell-background-color-default);
   color: black;
   border-color: #ccc;
 }
 
-.key--correct {
+.keyboard__key--correct {
   background-color: var(--cell-background-color-correct);
   color: white;
   border-color: #6aaa64;
 }
 
-.key--present {
+.keyboard__key--present {
   background-color: var(--cell-background-color-present);
   color: white;
   border-color: #c9b458;
 }
 
-.key--absent {
+.keyboard__key--absent {
   background-color: var(--cell-background-color-absent);
   color: white;
   border-color: #787c7e;
