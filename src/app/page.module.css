@@ -11,14 +11,14 @@
 }
 
 .app__game {
-  flex: 0 0 55%;
+  flex: 0 0 65%;
 }
 
 .app__keyboard {
-  flex: 0 0 35%;
+  flex: 0 0 25%;
   display: flex;
   flex-direction: column;
-  justify-content: flex-end;
+  justify-content: flex-start;
 }
 
 .app__toast-bar {
@@ -66,9 +66,10 @@
   gap: 0.5rem;
 }
 
-.game-board__buttons {
+.game-board__controls {
   margin-top: 1rem;
   display: flex;
+  flex-direction: column;
   gap: 0.5rem;
 }
 

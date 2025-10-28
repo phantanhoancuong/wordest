@@ -117,8 +117,8 @@ export const useGridState = (row, col) => {
   return {
     grid,
     gridRef,
-    rowNum,
-    colNum,
+    rowNum: rowNum.current,
+    colNum: colNum.current,
     updateCell,
     updateRow,
     flushAnimation,

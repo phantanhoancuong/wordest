@@ -24,12 +24,18 @@ import { useToasts } from "./useToasts";
  *
  * Tracks the grid of guesses, keyboard statuses, game state, toasts, input handling, and sound playback.
  *
- * @returns {Object} Game utilities
- * @property {Object} grid - Grid data and animation handler
- * @property {Array<Array<Object>>} grid.data - 2D array of cell objects
- * @property {Function} grid.handleAnimationEnd - Resets animation for a cell
- * @property {Object} keyboard - Keyboard status utilities
- * @property {Object} keyboard.statuses - Mapping of letters to their CellStatus
+ * @returns {Object} Game utilities.
+ * @property {Object} gameGrid - Grid data and animation handler for the player's guesses.
+ * @property {Array<Array<Object>>} gameGrid.data - 2D array of cell objects.
+ * @property {number} gameGrid.rowNum - Total number of rows.
+ * @property {number} gameGrid.colNum - Total number of columns.
+ * @property {Object} answerGrid - Grid data and animation handler for the answer grid.
+ * @property {Array<Array<Object>>} answerGrid.data - 2D array of cell objects.
+ * @property {number} answerGrid.rowNum - Total number of rows.
+ * @property {number} answerGrid.colNum - Total number of columns.
+ * @property {Function} grid.handleAnimationEnd - Resets animation for a cell.
+ * @property {Object} keyboard - Keyboard status utilities.
+ * @property {Object} keyboard.statuses - Mapping of letters to their CellStatus.
  * @property {Function} keyboard.update - Updates statuses based on guesses.
  * @property {Function} keyboard.reset - Resets all keyboard statuses.
  * @property {Object} game - Game state.
@@ -66,6 +72,7 @@ export const useGame = () => {
   const { keyStatuses, updateKeyStatuses, resetKeyStatuses } = useKeyStatuses();
 
   const gameGrid = useGridState(ATTEMPTS, WORD_LENGTH);
+  const answerGrid = useGridState(1, WORD_LENGTH);
 
   /**
    * Handles the cell's data at the end of its animation.
@@ -147,7 +154,7 @@ export const useGame = () => {
       const guess = gameGrid.gridRef.current[row]
         .map((cell) => cell.char)
         .join("");
-      if (guess.length !== gameGrid.colNum.current) return;
+      if (guess.length !== gameGrid.colNum) return;
 
       const { status, ok } = await validateWord(guess);
 
@@ -157,7 +164,7 @@ export const useGame = () => {
 
         const newRow = mapGuessToRow(
           guess,
-          Array(gameGrid.colNum.current).fill(CellStatus.DEFAULT),
+          Array(gameGrid.colNum).fill(CellStatus.DEFAULT),
           {
             animation: CellAnimation.SHAKE,
             animationDelay: SHAKE_ANIMATION_DELAY,
@@ -165,7 +172,7 @@ export const useGame = () => {
           }
         );
 
-        animatingCellNum.current += gameGrid.colNum.current;
+        animatingCellNum.current += gameGrid.colNum;
         gameGrid.updateRow(row, newRow);
         return;
       }
@@ -192,7 +199,7 @@ export const useGame = () => {
       });
 
       gameGrid.updateRow(row, newRow);
-      animatingCellNum.current += gameGrid.colNum.current;
+      animatingCellNum.current += gameGrid.colNum;
       updateKeyStatuses(guess, statuses);
 
       if (guess === targetWord) {
@@ -201,7 +208,7 @@ export const useGame = () => {
         return;
       }
 
-      if (row + 1 >= gameGrid.rowNum.current) {
+      if (row + 1 >= gameGrid.rowNum) {
         addToast(`The word was: ${targetWord}`);
         pendingGameOver.current = true;
         return;
@@ -245,7 +252,7 @@ export const useGame = () => {
 
     if (key === "Enter") {
       playKeySound();
-      if (col !== gameGrid.colNum.current) return;
+      if (col !== gameGrid.colNum) return;
       submitGuess(row);
       return;
     }
@@ -254,7 +261,7 @@ export const useGame = () => {
     if (/^[A-Z]$/.test(letter)) {
       playKeySound();
       setColState((c) => {
-        if (c >= gameGrid.colNum.current) return c;
+        if (c >= gameGrid.colNum) return c;
         gameGrid.updateCell(row, c, { char: letter });
         return c + 1;
       });
@@ -264,8 +271,17 @@ export const useGame = () => {
   useKeyboardInput(handleInput);
 
   return {
-    grid: {
+    gameGrid: {
       data: gameGrid.grid,
+      rowNum: gameGrid.rowNum,
+      colNum: gameGrid.colNum,
+      handleAnimationEnd,
+    },
+
+    answerGrid: {
+      data: answerGrid.grid,
+      rowNum: answerGrid.rowNum,
+      colNum: answerGrid.colNum,
       handleAnimationEnd,
     },
 

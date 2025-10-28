@@ -16,7 +16,7 @@ import { useGame } from "../hooks/useGame";
  * @returns {JSX.Element} The rendered game page.
  */
 export default function Home() {
-  const { grid, keyboard, game, toasts, input } = useGame();
+  const { gameGrid, answerGrid, keyboard, game, toasts, input } = useGame();
 
   return (
     <div className={styles["app"]}>
@@ -33,26 +33,44 @@ export default function Home() {
           <section className={`${styles["game-board"]} flex-center`}>
             <div className={styles["game-board__grid"]}>
               <Grid
-                grid={
-                  game.gameOver
-                    ? [
-                        game.targetWord.split("").map((char) => ({
-                          char,
-                          status: CellStatus.CORRECT,
-                          animation: CellAnimation.NONE,
-                          animationDelay: 0,
-                        })),
-                      ]
-                    : grid.data
-                }
-                onAnimationEnd={grid.handleAnimationEnd}
+                grid={gameGrid.data}
+                onAnimationEnd={gameGrid.handleAnimationEnd}
+                dataRows={gameGrid.rowNum}
+                dataCols={gameGrid.colNum}
+                layoutRows={gameGrid.rowNum}
+                layoutCols={gameGrid.colNum}
               />
             </div>
 
-            <div className={styles["game-board__buttons"]}>
-              {game.gameOver && (
-                <button onClick={game.restartGame}>Restart</button>
+            <div className={styles["game-board__controls"]}>
+              {!game.gameOver ? (
+                <Grid
+                  grid={[
+                    game.targetWord.split("").map(() => ({
+                      char: "",
+                      status: CellStatus.DEFAULT,
+                      animation: CellAnimation.NONE,
+                      animationDelay: 0,
+                    })),
+                  ]}
+                  layoutRows={6}
+                  layoutCols={gameGrid.colNum}
+                />
+              ) : (
+                <Grid
+                  grid={[
+                    game.targetWord.split("").map((ch) => ({
+                      char: ch,
+                      status: CellStatus.CORRECT,
+                      animation: CellAnimation.NONE,
+                      animationDelay: 0,
+                    })),
+                  ]}
+                  layoutRows={6}
+                  layoutCols={gameGrid.colNum}
+                />
               )}
+              <button onClick={game.restartGame}>Restart</button>
             </div>
             <ToastBar
               className={styles["app__toast-bar"]}
