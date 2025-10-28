@@ -1,11 +1,6 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 
-import {
-  ATTEMPTS,
-  WORD_LENGTH,
-  CellStatus,
-  CellAnimation,
-} from "../lib/constants";
+import { CellStatus, CellAnimation } from "../lib/constants";
 import { initEmptyGrid } from "../lib/utils";
 
 import { useLatest } from "./useLatest";
@@ -14,7 +9,8 @@ import { useLatest } from "./useLatest";
  * Hook to manage 2D grid of cells representing player's guesses.
  *
  * Provides functions to update cells, replace rows, reset the grid, and clear animations once they finish.
- *
+ * @param {number} row - Total number of rows in the grid.
+ * @param {number} col - Total number of columns in the grid.
  * @returns {Object} Grid state utilities.
  * @property {Array<Array<Object>>} return.grid - 2D array of cell data (character, status, animation).
  * @property {Object} return.gridRef - Ref object always pointing to the latest grid.
@@ -23,8 +19,13 @@ import { useLatest } from "./useLatest";
  * @property {Function} return.handleAnimationEnd - Resets animation for a cell.
  * @property {Function} return.resetGrid - Clears and resets the grid.
  */
-export const useGridState = () => {
-  const [grid, setGrid] = useState(initEmptyGrid(ATTEMPTS, WORD_LENGTH));
+export const useGridState = (row, col) => {
+  const rowNum = useRef(row);
+  const colNum = useRef(col);
+
+  const [grid, setGrid] = useState(
+    initEmptyGrid(rowNum.current, colNum.current)
+  );
   const gridRef = useLatest(grid);
 
   /**
@@ -33,7 +34,7 @@ export const useGridState = () => {
    * @returns {void}
    */
   const resetGrid = () => {
-    setGrid(initEmptyGrid(ATTEMPTS, WORD_LENGTH));
+    setGrid(initEmptyGrid(rowNum.current, colNum.current));
   };
 
   /**
@@ -116,6 +117,8 @@ export const useGridState = () => {
   return {
     grid,
     gridRef,
+    rowNum,
+    colNum,
     updateCell,
     updateRow,
     flushAnimation,

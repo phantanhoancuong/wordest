@@ -65,8 +65,7 @@ export const useGame = () => {
   const { toasts, addToast, removeToast } = useToasts();
   const { keyStatuses, updateKeyStatuses, resetKeyStatuses } = useKeyStatuses();
 
-  const { grid, gridRef, updateCell, updateRow, flushAnimation, resetGrid } =
-    useGridState();
+  const gameGrid = useGridState(ATTEMPTS, WORD_LENGTH);
 
   /**
    * Handles the cell's data at the end of its animation.
@@ -88,7 +87,7 @@ export const useGame = () => {
     animatingCellNum.current = Math.max(0, animatingCellNum.current - 1);
 
     if (animatingCellNum.current === 0) {
-      flushAnimation(new Map(finishedCellMap.current));
+      gameGrid.flushAnimation(new Map(finishedCellMap.current));
       finishedCellMap.current.clear();
       inputLocked.current = false;
 
@@ -113,7 +112,7 @@ export const useGame = () => {
   const restartGame = () => {
     setRowState(0);
     setColState(0);
-    resetGrid();
+    gameGrid.resetGrid();
     pendingGameOver.current = false;
     setGameOver(false);
     animatingCellNum.current = 0;
@@ -145,8 +144,10 @@ export const useGame = () => {
     inputLocked.current = true;
 
     try {
-      const guess = gridRef.current[row].map((cell) => cell.char).join("");
-      if (guess.length !== WORD_LENGTH) return;
+      const guess = gameGrid.gridRef.current[row]
+        .map((cell) => cell.char)
+        .join("");
+      if (guess.length !== gameGrid.colNum.current) return;
 
       const { status, ok } = await validateWord(guess);
 
@@ -156,7 +157,7 @@ export const useGame = () => {
 
         const newRow = mapGuessToRow(
           guess,
-          Array(WORD_LENGTH).fill(CellStatus.DEFAULT),
+          Array(gameGrid.colNum.current).fill(CellStatus.DEFAULT),
           {
             animation: CellAnimation.SHAKE,
             animationDelay: SHAKE_ANIMATION_DELAY,
@@ -164,8 +165,8 @@ export const useGame = () => {
           }
         );
 
-        animatingCellNum.current += WORD_LENGTH;
-        updateRow(row, newRow);
+        animatingCellNum.current += gameGrid.colNum.current;
+        gameGrid.updateRow(row, newRow);
         return;
       }
 
@@ -190,8 +191,8 @@ export const useGame = () => {
         isConsecutive: true,
       });
 
-      updateRow(row, newRow);
-      animatingCellNum.current += WORD_LENGTH;
+      gameGrid.updateRow(row, newRow);
+      animatingCellNum.current += gameGrid.colNum.current;
       updateKeyStatuses(guess, statuses);
 
       if (guess === targetWord) {
@@ -200,7 +201,7 @@ export const useGame = () => {
         return;
       }
 
-      if (row + 1 >= ATTEMPTS) {
+      if (row + 1 >= gameGrid.rowNum.current) {
         addToast(`The word was: ${targetWord}`);
         pendingGameOver.current = true;
         return;
@@ -236,7 +237,7 @@ export const useGame = () => {
       setColState((prev) => {
         if (prev === 0) return prev;
         const newCol = prev - 1;
-        updateCell(row, newCol);
+        gameGrid.updateCell(row, newCol);
         return newCol;
       });
       return;
@@ -244,7 +245,7 @@ export const useGame = () => {
 
     if (key === "Enter") {
       playKeySound();
-      if (col !== WORD_LENGTH) return;
+      if (col !== gameGrid.colNum.current) return;
       submitGuess(row);
       return;
     }
@@ -253,8 +254,8 @@ export const useGame = () => {
     if (/^[A-Z]$/.test(letter)) {
       playKeySound();
       setColState((c) => {
-        if (c >= WORD_LENGTH) return c;
-        updateCell(row, c, { char: letter });
+        if (c >= gameGrid.colNum.current) return c;
+        gameGrid.updateCell(row, c, { char: letter });
         return c + 1;
       });
     }
@@ -264,7 +265,7 @@ export const useGame = () => {
 
   return {
     grid: {
-      data: grid,
+      data: gameGrid.grid,
       handleAnimationEnd,
     },
 
