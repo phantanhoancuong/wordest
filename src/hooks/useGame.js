@@ -257,7 +257,7 @@ export const useGame = () => {
     try {
       const { status, ok, data } = await validateWord(guess);
 
-      if (!ok || !data) {
+      if (status >= 500 || !data) {
         handleValidationError();
         return;
       }
