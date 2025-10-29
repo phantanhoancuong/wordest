@@ -52,7 +52,6 @@ import { useToasts } from "./useToasts";
 export const useGame = () => {
   const { targetWord, targetLetterCount, wordFetchError, reloadTargetWord } =
     useTargetWord();
-
   const [gameOver, setGameOver] = useState(false);
 
   const [rowState, setRowState] = useState(0);
@@ -227,7 +226,6 @@ export const useGame = () => {
    *
    * @returns {void}
    */
-
   const handleValidationError = () => {
     const message = "Error validating word. Please try again.";
     setValidationError(message);
