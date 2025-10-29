@@ -54,25 +54,33 @@ export const useGame = () => {
     useTargetWord();
 
   const [gameOver, setGameOver] = useState(false);
+
   const [rowState, setRowState] = useState(0);
   const [colState, setColState] = useState(0);
-  const [validationError, setValidationError] = useState("");
+  const rowRef = useLatest(rowState);
+  const colRef = useLatest(colState);
 
   const animatingCellNum = useRef(0);
   const pendingRowIncrement = useRef(false);
+  const pendingGameOver = useRef(false);
   const finishedCellMap = useRef(new Map());
   const inputLocked = useRef(false);
 
-  const pendingGameOver = useRef(false);
-
-  const rowRef = useLatest(rowState);
-  const colRef = useLatest(colState);
+  const [validationError, setValidationError] = useState("");
 
   const { toasts, addToast, removeToast } = useToasts();
   const { keyStatuses, updateKeyStatuses, resetKeyStatuses } = useKeyStatuses();
 
   const gameGrid = useGridState(ATTEMPTS, WORD_LENGTH);
   const answerGrid = useGridState(1, WORD_LENGTH);
+
+  const updateGridSync = (rowIndex) => {
+    gameGrid.gridRef.current[rowIndex] = gameRow;
+    answerGrid.gridRef.current[0] = answerRow;
+
+    gameGrid.updateRow(rowIndex, gameRow);
+    answerGrid.updateRow(0, answerRow);
+  };
 
   /**
    * Handles the cell's data at the end of its animation.
@@ -117,17 +125,21 @@ export const useGame = () => {
    * @returns {void}
    */
   const restartGame = () => {
+    setGameOver(false);
+
     setRowState(0);
     setColState(0);
-    gameGrid.resetGrid();
-    pendingGameOver.current = false;
-    setGameOver(false);
-    animatingCellNum.current = 0;
-    pendingRowIncrement.current = false;
-    finishedCellMap.current.clear();
-    inputLocked.current = false;
+
     resetKeyStatuses();
     reloadTargetWord();
+
+    gameGrid.resetGrid();
+    answerGrid.resetGrid();
+    animatingCellNum.current = 0;
+    finishedCellMap.current.clear();
+    pendingGameOver.current = false;
+    pendingRowIncrement.current = false;
+    inputLocked.current = false;
   };
 
   /**
@@ -141,83 +153,130 @@ export const useGame = () => {
   ]);
 
   /**
+   * Handles when the guessed word is not in the valid word list.
+   *
+   * Provides user feedback, applies a shake animation to the current row,
+   * and prevents further input until the animation finishes.
+   *
+   * @param {string} guess - The invalid guessed word.
+   * @param {number} row - The index of the current row being updated.
+   * @returns {void}
+   */
+  const handleInvalidGuess = (guess, row) => {
+    const message = "Not in word list.";
+    setValidationError(message);
+    addToast(message);
+
+    const shakeRow = mapGuessToRow(
+      guess,
+      Array(gameGrid.colNum).fill(CellStatus.DEFAULT),
+      {
+        animation: CellAnimation.SHAKE,
+        animationDelay: SHAKE_ANIMATION_DELAY,
+        isConsecutive: false,
+      }
+    );
+
+    animatingCellNum.current += gameGrid.colNum;
+    gameGrid.updateRow(row, shakeRow);
+  };
+
+  /**
+   * Handles a valid guess by evaluating letter correctness.
+   *
+   * Applies bounce animations, updates keyboard states, and manage game-over conditions.
+   *
+   * @param {string} guess - The validated word.
+   * @param {number} row - The index of the current row being updated.
+   * @returns {void}
+   */
+  const handleValidGuess = (guess, row) => {
+    const statuses = evaluateGuess(
+      guess,
+      targetWord,
+      targetLetterCount.current
+    );
+
+    const newRow = mapGuessToRow(guess, statuses, {
+      animation: CellAnimation.BOUNCE,
+      animationDelay: BOUNCE_ANIMATION_DELAY,
+      isConsecutive: true,
+    });
+
+    gameGrid.updateRow(row, newRow);
+    animatingCellNum.current += gameGrid.colNum;
+    updateKeyStatuses(guess, statuses);
+
+    if (guess === targetWord) {
+      addToast("You win!");
+      pendingGameOver.current = true;
+      return;
+    }
+
+    if (row + 1 >= gameGrid.rowNum) {
+      addToast(`The word was: ${targetWord}`);
+      pendingGameOver.current = true;
+      return;
+    }
+
+    pendingRowIncrement.current = true;
+  };
+
+  /**
+   * Handles a general validation error.
+   *
+   * @returns {void}
+   */
+
+  const handleValidationError = () => {
+    const message = "Error validating word. Please try again.";
+    setValidationError(message);
+    addToast(message);
+  };
+
+  /**
    * Submits the guess (current row) for evaluation and updates game states.
    *
-   * @param {number} row - the row index to submit.
-   * @returns {Promise<void>}
+   * 1. Reads the current row's guess
+   * 2. Validates it through the API.
+   * 3. Handles invalid, valid, and error cases.
+   *
+   * Input is locked during submission to prevent race conditions.
+   * @async
+   * @function submitGuess
+   * @returns {Promise<void>} Resolves once the guess submission and updates are complete.
    */
-  const submitGuess = async (row) => {
+  const submitGuess = async () => {
+    const row = rowRef.current;
     if (inputLocked.current) return;
     inputLocked.current = true;
 
+    const guess = gameGrid.gridRef.current[row]
+      .map((cell) => cell.char)
+      .join("");
+    if (guess.length !== gameGrid.colNum) return;
+
     try {
-      const guess = gameGrid.gridRef.current[row]
-        .map((cell) => cell.char)
-        .join("");
-      if (guess.length !== gameGrid.colNum) return;
+      const { status, ok, data } = await validateWord(guess);
 
-      const { status, ok } = await validateWord(guess);
-
-      if (status === 422) {
-        setValidationError("Not in word list.");
-        addToast("Not in word list.");
-
-        const newRow = mapGuessToRow(
-          guess,
-          Array(gameGrid.colNum).fill(CellStatus.DEFAULT),
-          {
-            animation: CellAnimation.SHAKE,
-            animationDelay: SHAKE_ANIMATION_DELAY,
-            isConsecutive: false,
-          }
-        );
-
-        animatingCellNum.current += gameGrid.colNum;
-        gameGrid.updateRow(row, newRow);
+      if (!ok || !data) {
+        handleValidationError();
         return;
       }
 
-      if (status === 500 || !ok) {
-        const message = "Error validating word. Please try again.";
-        setValidationError(message);
-        addToast(message);
+      if (!data.valid) {
+        handleInvalidGuess(guess, row);
         return;
       }
 
       setValidationError("");
 
-      const statuses = evaluateGuess(
-        guess,
-        targetWord,
-        targetLetterCount.current
-      );
-
-      const newRow = mapGuessToRow(guess, statuses, {
-        animation: CellAnimation.BOUNCE,
-        animationDelay: BOUNCE_ANIMATION_DELAY,
-        isConsecutive: true,
-      });
-
-      gameGrid.updateRow(row, newRow);
-      animatingCellNum.current += gameGrid.colNum;
-      updateKeyStatuses(guess, statuses);
-
-      if (guess === targetWord) {
-        addToast("You win!");
-        pendingGameOver.current = true;
-        return;
-      }
-
-      if (row + 1 >= gameGrid.rowNum) {
-        addToast(`The word was: ${targetWord}`);
-        pendingGameOver.current = true;
-        return;
-      }
-
-      pendingRowIncrement.current = true;
+      handleValidGuess(guess, row);
     } catch (error) {
       console.error("submitGuess error:", error);
       addToast("Unexpected error occurred.");
+    } finally {
+      inputLocked.current = false;
     }
   };
 
@@ -236,15 +295,17 @@ export const useGame = () => {
     )
       return;
 
-    const row = rowRef.current;
-    const col = colRef.current;
-
     if (key === "Backspace") {
       playKeySound();
-      setColState((prev) => {
-        if (prev === 0) return prev;
-        const newCol = prev - 1;
-        gameGrid.updateCell(row, newCol);
+      setColState((prevCol) => {
+        if (prevCol === 0) return prevCol;
+        const newCol = prevCol - 1;
+        gameGrid.updateCell(rowRef.current, newCol, {
+          char: "",
+          status: CellStatus.DEFAULT,
+          animation: CellAnimation.NONE,
+          animationDelay: 0,
+        });
         return newCol;
       });
       return;
@@ -252,18 +313,23 @@ export const useGame = () => {
 
     if (key === "Enter") {
       playKeySound();
-      if (col !== gameGrid.colNum) return;
-      submitGuess(row);
+      if (colRef.current !== gameGrid.colNum) return;
+      submitGuess();
       return;
     }
 
     const letter = key.toUpperCase();
     if (/^[A-Z]$/.test(letter)) {
       playKeySound();
-      setColState((c) => {
-        if (c >= gameGrid.colNum) return c;
-        gameGrid.updateCell(row, c, { char: letter });
-        return c + 1;
+      setColState((prevCol) => {
+        if (prevCol >= gameGrid.colNum) return prevCol;
+        gameGrid.updateCell(rowRef.current, prevCol, {
+          char: letter,
+          status: CellStatus.DEFAULT,
+          animation: CellAnimation.NONE,
+          animationDelay: 0,
+        });
+        return prevCol + 1;
       });
     }
   };
