@@ -1,13 +1,12 @@
 import { useEffect, useRef } from "react";
 
 /**
- * Hook to play audio clips from a list of sound paths.
+ * Hook to preload and play audio clips.
  *
- * Preloads audio elements and provides a function to play a random sound from the list.
- * Each play clones the audio element to allow overlapping playback.
+ * Creates and caches audio elements from given file paths, allowing multiple sounds to overlap when played.
  *
  * @param {string[]} [soundPaths=[]] - Array of sound file URLs to preload.
- * @returns {Function} play - Function to play a random sound from the preloaded list.
+ * @returns {() => void} Function that plays a random sound from the preloaded list.
  */
 export const useSoundPlayer = (soundPaths = []) => {
   const sounds = useRef([]);
@@ -20,13 +19,7 @@ export const useSoundPlayer = (soundPaths = []) => {
     });
   }, [soundPaths]);
 
-  /**
-   * Plays a random sound from the preloaded list.
-   *
-   * Clones the audio element to allow multiple sounds to play simultaneously.
-   *
-   * @returns {void}
-   */
+  /** Plays a random sound from the preloaded list. */
   const play = () => {
     if (!sounds.current.length) return;
     const random = Math.floor(Math.random() * sounds.current.length);

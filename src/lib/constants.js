@@ -20,32 +20,30 @@ export const WORD_LENGTH = 5;
 export const MAX_TOASTS = 3;
 
 /**
- * Duration of the delay for the bounce animation in cells, in seconds.
+ * Configuration object defining timing values (in seconds) for cell animations.
  *
- * @type {number}
+ * @typedef {Object} animationTiming
+ * @property {number} bounceDelay - Delay before the bounce animation starts.
+ * @property {number} bounceDuration - Duration of the bounce animation.
+ * @property {number} shakeDelay - Delay before the shake animation starts.
+ * @property {number} shakeDuration - Duration of the shake animation.
+ * @property {number} bounceRevealDelay - Delay before the bounce-reveal animation starts.
+ * @property {number} bounceRevealDuration - Duration of the bounce-reveal animation.
  */
-export const BOUNCE_ANIMATION_DELAY = 0.3;
 
 /**
- * Duration of the bounce animation in cells, in seconds.
+ * Timing values for cell animations, in seconds.
  *
- * @type {number}
+ * @type {animationTiming}
  */
-export const BOUNCE_ANIMATION_DURATION = 0.3;
-
-/**
- * Duration of the delay for the shake animation in cells, in seconds.
- *
- * @type {number}
- */
-export const SHAKE_ANIMATION_DELAY = 0;
-
-/**
- * Duration of the shake animation in cells, in seconds.
- *
- * @type {number}
- */
-export const SHAKE_ANIMATION_DURATION = 0.3;
+export const animationTiming = {
+  bounceDelay: 0.3,
+  bounceDuration: 0.3,
+  shakeDelay: 0,
+  shakeDuration: 0.3,
+  bounceRevealDelay: 0.3,
+  bounceRevealDuration: 0.3,
+};
 
 /**
  * Enum for cell statuses in the grid.
@@ -55,25 +53,31 @@ export const SHAKE_ANIMATION_DURATION = 0.3;
  * @enum {string}
  */
 export const CellStatus = {
-  /** Default, unguessed cell */
+  /** Default, unguessed cell. */
   DEFAULT: "default",
-  /** Correct letter in correct position */
+  /** Correct letter in the correct position. */
   CORRECT: "correct",
-  /** Correct letter in wrong position */
+  /** Correct letter but in the wrong position. */
   PRESENT: "present",
-  /** Letter is absent from the word */
+  /** Letter is not in the target word. */
   ABSENT: "absent",
+  /** Hidden or transparent cell (e.g., during transitions). */
+  HIDDEN: "hidden",
 };
-
 /**
  * Enum for cell animations.
  *
- * Controls how a cell animates when updated.
+ * Defines available animation states for grid cells.
  *
  * @enum {string}
  */
 export const CellAnimation = {
+  /** No animation. */
   NONE: "none",
+  /** Cell bounces up and down. */
   BOUNCE: "bounce",
+  /** Cell shakes horizontally to indicate an invalid guess. */
   SHAKE: "shake",
+  /** Cell bounces and reveals a hidden character. */
+  BOUNCE_REVEAL: "bounce-reveal",
 };

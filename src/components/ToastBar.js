@@ -2,15 +2,13 @@ import styles from "../styles/ToastBar.module.css";
 import Toast from "../components/Toast.js";
 
 /**
- * ToastBar component.
- *
- * Renders a container for multiple toast notifications.
+ * ToastBar component — renders a container that displays multiple toast notifications.
  *
  * @component
- * @param {Object} props - Component.props.
- * @property {Array<{id: number, message: string}>} props.toasts - Array of toast objects to display.
- * @property {Function} props.removeToast - Callback to remove a toast by ID.
- * @returns {JSX.Element} The toast bar element.
+ * @param {Object} props - Component props.
+ * @param {{ id: number, message: string }[]} props.toasts - Array of toast objects to display.
+ * @param {(id: number) => void} props.removeToast - Callback to remove a toast by its ID.
+ * @returns {JSX.Element} The rendered toast bar element.
  */
 const ToastBar = ({ toasts, removeToast }) => {
   return (
@@ -21,7 +19,7 @@ const ToastBar = ({ toasts, removeToast }) => {
           message={toast.message}
           duration={1000}
           onClose={() => removeToast(toast.id)}
-        ></Toast>
+        />
       ))}
     </div>
   );

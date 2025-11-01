@@ -19,12 +19,27 @@ import { useLatest } from "./useLatest";
  * @property {Function} return.handleAnimationEnd - Resets animation for a cell.
  * @property {Function} return.resetGrid - Clears and resets the grid.
  */
-export const useGridState = (row, col) => {
+export const useGridState = (
+  row,
+  col,
+  status = CellStatus.DEFAULT,
+  animation = CellAnimation.NONE,
+  animationDelay = 0
+) => {
   const rowNum = useRef(row);
   const colNum = useRef(col);
+  const defaultStatus = useRef(status);
+  const defaultAnimation = useRef(animation);
+  const defaultAnimationDelay = useRef(animationDelay);
 
   const [grid, setGrid] = useState(
-    initEmptyGrid(rowNum.current, colNum.current)
+    initEmptyGrid(
+      rowNum.current,
+      colNum.current,
+      defaultStatus,
+      defaultAnimation,
+      defaultAnimationDelay
+    )
   );
   const gridRef = useLatest(grid);
 
@@ -34,7 +49,15 @@ export const useGridState = (row, col) => {
    * @returns {void}
    */
   const resetGrid = () => {
-    setGrid(initEmptyGrid(rowNum.current, colNum.current));
+    setGrid(
+      initEmptyGrid(
+        rowNum.current,
+        colNum.current,
+        defaultStatus,
+        defaultAnimation,
+        defaultAnimationDelay
+      )
+    );
   };
 
   /**

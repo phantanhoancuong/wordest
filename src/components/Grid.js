@@ -1,21 +1,24 @@
 import styles from "../styles/Grid.module.css";
-
 import Cell from "./Cell";
 
 /**
- * Grid component.
+ * @typedef {Object} GridProps
+ * @property {Array<Array<import('./Cell').CellData>>} grid - 2D array of cell data.
+ * @property {(row: number, col: number) => void} [onAnimationEnd] - Called when a cell animation ends.
+ * @property {number} [dataRows] - Logical row count of the data grid.
+ * @property {number} [dataCols] - Logical column count of the data grid.
+ * @property {number} [layoutRows] - Visual row count (for layout or animation).
+ * @property {number} [layoutCols] - Visual column count (for layout or animation).
+ */
+
+/**
+ * Renders the game board as a grid of {@link Cell} components.
  *
- * Renders the game board as a grid of cells.
+ * CSS grid layout is controlled by CSS variables derived from the given row and column counts.
  *
  * @component
- * @param {Object} props - Component props.
- * @property {Array<Array<Object>>} props.grid - 2D array of cell objects.
- * @property {Function} [props.onAnimationEnd] - Callback fired when a cell animation ends.
- * @property {number} [props.dataRows] - Number of logical rows in the data grid.
- * @property {number} [props.dataCols] - Number of logical columns in the data grid.
- * @property {number} [props.layoutRows] - Number of visual layout rows (can differ from `dataRows` for animation/layout flexibility).
- * @property {number} [props.layoutCols] - Number of visual layout columns (can differ from `dataRows` for animation/layout flexibility).
- * @returns {JSX.Element} The grid element.
+ * @param {GridProps} props
+ * @returns {JSX.Element}
  */
 const Grid = ({
   grid,
@@ -24,30 +27,28 @@ const Grid = ({
   dataCols,
   layoutRows,
   layoutCols,
-}) => {
-  return (
-    <div
-      className={styles["grid"]}
-      style={{
-        "--data-rows": dataRows ?? grid.length,
-        "--data-cols": dataCols ?? grid[0].length,
-        "--layout-rows": layoutRows ?? grid.length,
-        "--layout-cols": layoutCols ?? grid[0].length,
-      }}
-    >
-      {grid.map((row, rowIndex) =>
-        row.map((cell, colIndex) => (
-          <Cell
-            key={`${rowIndex}-${colIndex}`}
-            cell={cell}
-            row={rowIndex}
-            col={colIndex}
-            onAnimationEnd={onAnimationEnd}
-          />
-        ))
-      )}
-    </div>
-  );
-};
+}) => (
+  <div
+    className={styles.grid}
+    style={{
+      "--data-rows": dataRows ?? grid.length,
+      "--data-cols": dataCols ?? grid[0].length,
+      "--layout-rows": layoutRows ?? grid.length,
+      "--layout-cols": layoutCols ?? grid[0].length,
+    }}
+  >
+    {grid.map((row, rowIndex) =>
+      row.map((cell, colIndex) => (
+        <Cell
+          key={`${rowIndex}-${colIndex}`}
+          cell={cell}
+          row={rowIndex}
+          col={colIndex}
+          onAnimationEnd={onAnimationEnd}
+        />
+      ))
+    )}
+  </div>
+);
 
 export default Grid;

@@ -2,57 +2,44 @@ import { useState } from "react";
 import { CellStatus } from "../lib/constants";
 
 /**
- * Hook to manage statuses of keys on the keyboard (feedback for guesses)
+ * Hook to manage the visual status of keyboard keys.
  *
- * Tracks whether each letter has been guessed correctly, is present in the word, or absent
+ * Tracks each letter's feedback state (`correct`, `present`, or `absent`)
+ * and provides utilities to update or reset these states.
  *
- * Provides functions to update statuses based on guesses and reset them
- *
- * @returns {Object} Keyboard statuses state utilities
- * @property {Object} keyStatuses - Mapping from letters to their CellStatus
- * @property {Function} updateKeyStatuses - Updates statuses based on a new guess
- * @property {Function} resetKeyStatuses - Resets all key statuses to empty
+ * @returns {{
+ *   keyStatuses: Record<string, string>,
+ *   updateKeyStatuses: (guess: string, statuses: string[]) => void,
+ *   resetKeyStatuses: () => void
+ * }}
  */
 export const useKeyStatuses = () => {
   const [keyStatuses, setKeyStatuses] = useState({});
 
   /**
-   * Updates the status of each key based on the latest guess
-   *
-   * Only upgrades the status if the new status is "better"
-   *
-   * @param {string} guess - The guessed word (all caps)
-   * @param {Array<string>} statuses - Array of statuses for each letter in all previous guesses
-   * @returns {void}
+   * Updates key statuses based on the latest guess.
+   * Keeps the "strongest" status (e.g., `correct` overrides `present`).
    */
   const updateKeyStatuses = (guess, statuses) => {
     setKeyStatuses((prev) => {
-      const newStatuses = { ...prev };
+      const next = { ...prev };
       for (let i = 0; i < guess.length; i++) {
         const letter = guess[i];
         const newStatus = statuses[i];
-        const currentStatus = newStatuses[letter];
+        const current = next[letter];
 
-        if (currentStatus === CellStatus.CORRECT) continue;
-        if (
-          currentStatus === CellStatus.PRESENT &&
-          newStatus === CellStatus.ABSENT
-        )
+        if (current === CellStatus.CORRECT) continue;
+        if (current === CellStatus.PRESENT && newStatus === CellStatus.ABSENT)
           continue;
-        newStatuses[letter] = newStatus;
+
+        next[letter] = newStatus;
       }
-      return newStatuses;
+      return next;
     });
   };
 
-  /**
-   * Resets all key statuses to their initial empty state
-   *
-   * @returns {void}
-   */
-  const resetKeyStatuses = () => {
-    setKeyStatuses({});
-  };
+  /** Resets all key statuses to their initial empty state. */
+  const resetKeyStatuses = () => setKeyStatuses({});
 
   return { keyStatuses, updateKeyStatuses, resetKeyStatuses };
 };

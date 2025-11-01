@@ -16,28 +16,6 @@
   animation-delay: var(--delay);
 }
 
-@keyframes bounce {
-  0% {
-    transform: translateY(0);
-    background-color: var(--cell-background-color-absent);
-    color: black;
-    border-color: #ccc;
-  }
-  50% {
-    transform: translateY(min(-10px, -0.5rem));
-  }
-  100% {
-    transform: translateY(0);
-  }
-
-  50%,
-  100% {
-    background-color: var(--target-background-color);
-    color: var(--target-text-color);
-    border-color: var(--target-border-color);
-  }
-}
-
 .cell--default {
   --target-background-color: var(--cell-background-color-default);
   --target-text-color: black;
@@ -67,6 +45,36 @@
   animation-delay: var(--delay);
 }
 
+.cell--hidden {
+  color: rgba(0, 0, 0, 0);
+}
+
+.cell--bounce-reveal {
+  --target-background-color: var(--cell-background-color-correct);
+  --target-border-color: var(--cell-border-color-correct);
+  --target-text-color: white;
+  animation: bounce-reveal var(--bounce-reveal-duration) ease forwards;
+  animation-delay: var(--delay);
+}
+
+@keyframes bounce-reveal {
+  0% {
+    transform: translateY(0);
+    background-color: var(--cell-background-color-absent);
+    color: rgba(0, 0, 0, 0);
+    border-color: #ccc;
+  }
+  50% {
+    transform: translateY(min(-10px, -0.5rem));
+  }
+  100% {
+    transform: translateY(0);
+    background-color: var(--target-background-color);
+    color: var(--target-text-color);
+    border-color: var(--target-border-color);
+  }
+}
+
 @keyframes shake {
   0%,
   100% {
@@ -79,5 +87,27 @@
   40%,
   80% {
     transform: translateX(10%);
+  }
+}
+
+@keyframes bounce {
+  0% {
+    transform: translateY(0);
+    background-color: var(--cell-background-color-absent);
+    color: black;
+    border-color: #ccc;
+  }
+  50% {
+    transform: translateY(min(-10px, -0.5rem));
+  }
+  100% {
+    transform: translateY(0);
+  }
+
+  50%,
+  100% {
+    background-color: var(--target-background-color);
+    color: var(--target-text-color);
+    border-color: var(--target-border-color);
   }
 }

@@ -5,25 +5,22 @@ import { countLetter } from "../lib/utils";
 /**
  * Hook to manage the game's target word.
  *
- * Handles fetching a new target word from the API, evaluating guesses, and storing error messages during the fetch.
-
- * @returns {Object} Target word state utilities
- * @property {string} targetWord - The current word to be guessed
- * @property {Object} targetLetterCount - Ref object mapping letters to their counts in the target word
- * @property {string} wordFetchError - Error message if fetching the word failed
- * @property {Function} reloadTargetWord - Fetches a new target word and updates state
+ * Handles fetching the target word from the API, storing it, counting its letters,
+ * and exposing any fetch errors.
+ *
+ * @returns {{
+ *   targetWord: string,
+ *   targetLetterCount: import('react').MutableRefObject<Record<string, number>>,
+ *   wordFetchError: string,
+ *   reloadTargetWord: () => Promise<string|null>
+ * }}
  */
 export const useTargetWord = () => {
   const [targetWord, setTargetWord] = useState("");
   const [error, setError] = useState("");
   const targetLetterCount = useRef({});
 
-  /**
-   * Fetches a new a target word from the API and update state.
-   *
-   * @async
-   * @returns {Promise<string|null>} The fetched word, or null if fetch failed
-   */
+  /** Fetches a new target word from the API and updates state. */
   const loadWord = async () => {
     try {
       setError("");
@@ -31,23 +28,21 @@ export const useTargetWord = () => {
       setTargetWord(word);
       targetLetterCount.current = countLetter(word);
       return word;
-    } catch (error) {
-      console.error("Failed to fetch word: ", error);
+    } catch (err) {
+      console.error("Failed to fetch word:", err);
       setError("Could not load the game. Please try again later.");
       return null;
     }
   };
 
-  /**
-   * Loads a target word when the hook is first mounted
-   */
+  // Load initial word on mount
   useEffect(() => {
     loadWord();
   }, []);
 
   return {
-    targetWord: targetWord,
-    targetLetterCount: targetLetterCount,
+    targetWord,
+    targetLetterCount,
     wordFetchError: error,
     reloadTargetWord: loadWord,
   };

@@ -1,13 +1,12 @@
-import { useRef, useState } from "react";
+import { useMemo, useRef, useState, useEffect } from "react";
 
 import { validateWord } from "../lib/api";
 import {
   ATTEMPTS,
   WORD_LENGTH,
+  animationTiming,
   CellStatus,
   CellAnimation,
-  BOUNCE_ANIMATION_DELAY,
-  SHAKE_ANIMATION_DELAY,
 } from "../lib/constants";
 import { evaluateGuess, mapGuessToRow } from "../lib/utils";
 
@@ -25,27 +24,32 @@ import { useToasts } from "./useToasts";
  * Tracks the grid of guesses, keyboard statuses, game state, toasts, input handling, and sound playback.
  *
  * @returns {Object} Game utilities.
+ *
  * @property {Object} gameGrid - Grid data and animation handler for the player's guesses.
  * @property {Array<Array<Object>>} gameGrid.data - 2D array of cell objects.
  * @property {number} gameGrid.rowNum - Total number of rows.
  * @property {number} gameGrid.colNum - Total number of columns.
+ * @property {Function} gameGrid.handleAnimationEnd - Called when a cell's animation ends to update game state.
+ *
  * @property {Object} answerGrid - Grid data and animation handler for the answer grid.
- * @property {Array<Array<Object>>} answerGrid.data - 2D array of cell objects.
  * @property {number} answerGrid.rowNum - Total number of rows.
  * @property {number} answerGrid.colNum - Total number of columns.
- * @property {Function} grid.handleAnimationEnd - Resets animation for a cell.
+ *
  * @property {Object} keyboard - Keyboard status utilities.
  * @property {Object} keyboard.statuses - Mapping of letters to their CellStatus.
  * @property {Function} keyboard.update - Updates statuses based on guesses.
  * @property {Function} keyboard.reset - Resets all keyboard statuses.
+ *
  * @property {Object} game - Game state.
  * @property {boolean} game.gameOver - Whether the game has ended.
  * @property {string} game.validationError - Latest validation error message.
  * @property {string} game.wordFetchError - Error fetching the target word.
  * @property {Function} game.restartGame - Resets the game state.
+ *
  * @property {Object} toasts - Toast notifications
  * @property {Array<Object>} toasts.list - List of active toasts.
  * @property {Function} toasts.removeToast - Removes a toast by ID
+ *
  * @property {Object} input - Input handling utilities.
  * @property {Function} input.handle - Handles keyboard input.
  */
@@ -67,19 +71,37 @@ export const useGame = () => {
 
   const [validationError, setValidationError] = useState("");
 
-  const { toasts, addToast, removeToast } = useToasts();
+  const { toastList, addToast, removeToast } = useToasts();
   const { keyStatuses, updateKeyStatuses, resetKeyStatuses } = useKeyStatuses();
 
-  const gameGrid = useGridState(ATTEMPTS, WORD_LENGTH);
-  const answerGrid = useGridState(1, WORD_LENGTH);
+  const gameGrid = useGridState(
+    ATTEMPTS,
+    WORD_LENGTH,
+    CellStatus.DEFAULT,
+    CellAnimation.NONE,
+    0
+  );
 
-  const updateGridSync = (rowIndex) => {
-    gameGrid.gridRef.current[rowIndex] = gameRow;
-    answerGrid.gridRef.current[0] = answerRow;
+  const answerGrid = useGridState(
+    1,
+    WORD_LENGTH,
+    CellStatus.HIDDEN,
+    CellAnimation.NONE,
+    0
+  );
 
-    gameGrid.updateRow(rowIndex, gameRow);
-    answerGrid.updateRow(0, answerRow);
-  };
+  const updateAnswerGrid = useMemo(() => {
+    if (!targetWord) return () => answerGrid.resetGrid();
+    const newRow = targetWord.split("").map((ch) => ({
+      char: ch,
+      status: CellStatus.HIDDEN,
+      animation: CellAnimation.NONE,
+      animationDelay: 0,
+    }));
+    return () => answerGrid.updateRow(0, newRow);
+  }, [targetWord]);
+
+  useEffect(() => updateAnswerGrid(), [updateAnswerGrid]);
 
   /**
    * Handles the cell's data at the end of its animation.
@@ -139,6 +161,7 @@ export const useGame = () => {
     pendingGameOver.current = false;
     pendingRowIncrement.current = false;
     inputLocked.current = false;
+    toasts.forEach((t) => removeToast(t.id));
   };
 
   /**
@@ -171,7 +194,7 @@ export const useGame = () => {
       Array(gameGrid.colNum).fill(CellStatus.DEFAULT),
       {
         animation: CellAnimation.SHAKE,
-        animationDelay: SHAKE_ANIMATION_DELAY,
+        animationDelay: animationTiming.shakeDelay,
         isConsecutive: false,
       }
     );
@@ -198,11 +221,27 @@ export const useGame = () => {
 
     const newRow = mapGuessToRow(guess, statuses, {
       animation: CellAnimation.BOUNCE,
-      animationDelay: BOUNCE_ANIMATION_DELAY,
+      animationDelay: animationTiming.bounceDelay,
       isConsecutive: true,
     });
 
+    const answerRow = answerGrid.gridRef.current[0].map((cell, i) => {
+      if (cell.status === CellStatus.CORRECT) return cell;
+
+      if (statuses[i] === CellStatus.CORRECT) {
+        return {
+          ...cell,
+          status: CellStatus.HIDDEN,
+          animation: CellAnimation.BOUNCE_REVEAL,
+          animationDelay: i * animationTiming.bounceRevealDelay,
+        };
+      }
+
+      return cell;
+    });
+
     gameGrid.updateRow(row, newRow);
+    answerGrid.updateRow(0, answerRow);
     animatingCellNum.current += gameGrid.colNum;
     updateKeyStatuses(guess, statuses);
 
@@ -252,7 +291,10 @@ export const useGame = () => {
     const guess = gameGrid.gridRef.current[row]
       .map((cell) => cell.char)
       .join("");
-    if (guess.length !== gameGrid.colNum) return;
+    if (guess.length !== gameGrid.colNum) {
+      inputLocked.current = false;
+      return;
+    }
 
     try {
       const { status, ok, data } = await validateWord(guess);
@@ -262,7 +304,7 @@ export const useGame = () => {
         return;
       }
 
-      if (!data.valid) {
+      if (!data?.valid) {
         handleInvalidGuess(guess, row);
         return;
       }
@@ -293,42 +335,40 @@ export const useGame = () => {
     )
       return;
 
-    if (key === "Backspace") {
-      playKeySound();
-      setColState((prevCol) => {
-        if (prevCol === 0) return prevCol;
-        const newCol = prevCol - 1;
-        gameGrid.updateCell(rowRef.current, newCol, {
-          char: "",
-          status: CellStatus.DEFAULT,
-          animation: CellAnimation.NONE,
-          animationDelay: 0,
-        });
-        return newCol;
-      });
-      return;
-    }
+    playKeySound();
 
-    if (key === "Enter") {
-      playKeySound();
-      if (colRef.current !== gameGrid.colNum) return;
-      submitGuess();
-      return;
-    }
-
-    const letter = key.toUpperCase();
-    if (/^[A-Z]$/.test(letter)) {
-      playKeySound();
-      setColState((prevCol) => {
-        if (prevCol >= gameGrid.colNum) return prevCol;
-        gameGrid.updateCell(rowRef.current, prevCol, {
-          char: letter,
-          status: CellStatus.DEFAULT,
-          animation: CellAnimation.NONE,
-          animationDelay: 0,
+    switch (key) {
+      case "Backspace":
+        return setColState((prev) => {
+          if (prev === 0) return prev;
+          const newCol = prev - 1;
+          gameGrid.updateCell(rowRef.current, newCol, {
+            char: "",
+            status: CellStatus.DEFAULT,
+            animation: CellAnimation.NONE,
+            animationDelay: 0,
+          });
+          return newCol;
         });
-        return prevCol + 1;
-      });
+
+      case "Enter":
+        if (colRef.current === gameGrid.colNum) submitGuess();
+        return;
+
+      default:
+        const letter = key.toUpperCase();
+        if (/^[A-Z]$/.test(letter)) {
+          setColState((prev) => {
+            if (prev >= gameGrid.colNum) return prev;
+            gameGrid.updateCell(rowRef.current, prev, {
+              char: letter,
+              status: CellStatus.DEFAULT,
+              animation: CellAnimation.NONE,
+              animationDelay: 0,
+            });
+            return prev + 1;
+          });
+        }
     }
   };
 
@@ -364,7 +404,7 @@ export const useGame = () => {
     },
 
     toasts: {
-      list: toasts,
+      list: toastList,
       removeToast,
     },
 

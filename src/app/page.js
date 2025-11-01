@@ -3,14 +3,19 @@
 import { Grid, Keyboard, ToastBar, Banner } from "../components";
 import styles from "./page.module.css";
 
-import { CellStatus, CellAnimation } from "../lib/constants";
 import { useGame } from "../hooks/useGame";
 
 /**
  * Main game page component.
  *
- * Renders the game board, keyboard, toasts, and banners.
- * Handles game state updates and user input via the `useGame` hook.
+ * This component renders:
+ * - The **game grid** where players make guesses.
+ * - The **answer grid** displaying the hidden target word.
+ * - The **keyboard** for letter input.
+ * - A **toast bar** for game feedback and messages.
+ * - A **banner** (header) and a **landscape warning** for small screens.
+ *
+ * Uses the {@link useGame} hook to manage game state, user input, and UI updates.
  *
  * @component
  * @returns {JSX.Element} The rendered game page.
@@ -43,33 +48,11 @@ export default function Home() {
             </div>
 
             <div className={styles["game-board__controls"]}>
-              {!game.gameOver ? (
-                <Grid
-                  grid={[
-                    game.targetWord.split("").map(() => ({
-                      char: "",
-                      status: CellStatus.DEFAULT,
-                      animation: CellAnimation.NONE,
-                      animationDelay: 0,
-                    })),
-                  ]}
-                  layoutRows={6}
-                  layoutCols={gameGrid.colNum}
-                />
-              ) : (
-                <Grid
-                  grid={[
-                    game.targetWord.split("").map((ch) => ({
-                      char: ch,
-                      status: CellStatus.CORRECT,
-                      animation: CellAnimation.NONE,
-                      animationDelay: 0,
-                    })),
-                  ]}
-                  layoutRows={6}
-                  layoutCols={gameGrid.colNum}
-                />
-              )}
+              <Grid
+                grid={answerGrid.data}
+                layoutRows={6}
+                layoutCols={gameGrid.colNum}
+              />
               <button onClick={game.restartGame}>Restart</button>
             </div>
             <ToastBar

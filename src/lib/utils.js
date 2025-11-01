@@ -1,10 +1,10 @@
 import { WORD_LENGTH, CellAnimation, CellStatus } from "../lib/constants";
 
 /**
- * Counts the occurences of each letter in a given word.
+ * Counts the occurrences of each letter in a word.
  *
- * @param {string} word - The word to count letters in.
- * @returns {Object<string, number>} Object mapping each letter to its count.
+ * @param {string} word - The word to count letters from.
+ * @returns {Record<string, number>} An object mapping each letter to its frequency.
  */
 export const countLetter = (word) => {
   const count = {};
@@ -17,14 +17,14 @@ export const countLetter = (word) => {
 /**
  * Creates an empty 2D grid of cell objects.
  *
- * Each cell has default character, status, animation, and animation delay.
+ * Each cell includes default `char`, `status`, `animation`, and `animationDelay` values.
  *
  * @param {number} rowNum - Number of rows in the grid.
  * @param {number} colNum - Number of columns in the grid.
- * @param {string} [defaultStatus=CellStatus.DEFAULT] - Default status for each cell.
- * @param {string} [defaulAnimation=CellAnimation.NONE] - Default animation for each cell.
- * @param {number} [animationDelay=0] - Default animation delay for each cell (ms).
- * @returns {Array<Array<Object>>} 2D array representing the grid.
+ * @param {string} [defaultStatus=CellStatus.DEFAULT] - Default cell status.
+ * @param {string} [defaultAnimation=CellAnimation.NONE] - Default animation type.
+ * @param {number} [animationDelay=0] - Default animation delay (in seconds).
+ * @returns {Array<Array<Object>>} A 2D array representing the initialized grid.
  */
 export const initEmptyGrid = (
   rowNum,
@@ -38,19 +38,20 @@ export const initEmptyGrid = (
       char: "",
       status: defaultStatus,
       animation: defaultAnimation,
-      animationDelay: animationDelay,
+      animationDelay,
     }))
   );
 };
 
 /**
- * Evaluates a guess against the target word.
+ * Evaluates a guessed word against the target word.
  *
- * Determines each letter's status.
+ * Returns an array of `CellStatus` values representing the accuracy of each letter.
+ *
  * @param {string} guess - The guessed word.
  * @param {string} targetWord - The target word to compare against.
- * @param {Object<string, number>} targetLetterCount - Letter counts of the target word.
- * @returns {Array<string>} Array of CellStatus values for each letter in the guess.
+ * @param {Record<string, number>} targetLetterCount - Letter frequency map of the target word.
+ * @returns {string[]} Array of `CellStatus` values for each letter.
  */
 export const evaluateGuess = (guess, targetWord, targetLetterCount) => {
   const tempLetterCount = { ...targetLetterCount };
@@ -75,15 +76,17 @@ export const evaluateGuess = (guess, targetWord, targetLetterCount) => {
 };
 
 /**
- * Converts a guess string and evaluation statuses into a row of cell objects with animation properties.
+ * Maps a guessed word and its evaluation statuses into an array of cell objects.
+ *
+ * Useful for rendering animated rows in the game grid.
  *
  * @param {string} guess - The guessed word.
- * @param {Array<string>} statuses - Array of CellStatus values for each character.
- * @param {Object} [options] - Optional animation settings.
- * @property {string} [options.animation=CellAnimation.NONE] - The animation to apply to each cell.
- * @property {number} [options.animationDelay=0] - Base delay in seconds for animations.
- * @property {boolean} [options.isConsecutive=true] - If true, delay increases per cell.
- * @returns
+ * @param {string[]} statuses - Array of `CellStatus` values for each character.
+ * @param {Object} [options={}] - Optional animation configuration.
+ * @param {string} [options.animation=CellAnimation.NONE] - Animation applied to each cell.
+ * @param {number} [options.animationDelay=0] - Base animation delay (in seconds).
+ * @param {boolean} [options.isConsecutive=false] - If true, delay increases per cell index.
+ * @returns {Array<Object>} Array of cell objects representing the row.
  */
 export const mapGuessToRow = (
   guess,
