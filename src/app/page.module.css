@@ -21,10 +21,6 @@
   justify-content: flex-start;
 }
 
-.app__toast-bar {
-  margin-top: 1rem;
-}
-
 .landscape-warning {
   display: none;
   text-align: center;

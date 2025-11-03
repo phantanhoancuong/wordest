@@ -6,12 +6,11 @@ import { useEffect } from "react";
  * Listens for `keydown` events and normalizes single-character keys to uppercase
  * before invoking the provided callback.
  *
- * @param {(key: string) => void} onKeyPress - Callback fired with the pressed key.
+ * @param onKeyPress - Callback fired with the pressed key.
  */
-export const useKeyboardInput = (onKeyPress) => {
+export const useKeyboardInput = (onKeyPress: (key: string) => void): void => {
   useEffect(() => {
-    /** @param {KeyboardEvent} e */
-    const handleKeyDown = (e) => {
+    const handleKeyDown = (e: KeyboardEvent) => {
       const key = e.key.length === 1 ? e.key.toUpperCase() : e.key;
       onKeyPress(key);
     };

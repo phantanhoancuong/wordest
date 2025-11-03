@@ -1,17 +1,17 @@
 import styles from "../styles/Keyboard.module.css";
+import { UseGameReturn } from "@/types/useGame.types";
+
+interface KeyboardProps {
+  keyStatuses: UseGameReturn["keyboard"]["statuses"];
+  onKeyClick: UseGameReturn["input"]["handle"];
+}
 
 /**
  * On-screen keyboard component.
  *
  * Displays a clickable keyboard layout with visual feedback for each key's status.
- *
- * @param {{
- *   keyStatuses: Record<string, string>,
- *   onKeyClick: (key: string) => void
- * }} props - Component props.
- * @returns {JSX.Element} Rendered keyboard element.
  */
-const Keyboard = ({ keyStatuses, onKeyClick }) => {
+const Keyboard = ({ keyStatuses, onKeyClick }: KeyboardProps) => {
   const layout = [
     ["Q", "W", "E", "R", "T", "Y", "U", "I", "O", "P"],
     ["A", "S", "D", "F", "G", "H", "J", "K", "L"],

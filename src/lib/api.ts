@@ -1,16 +1,33 @@
+interface FetchWordReponse {
+  target: string;
+  error?: string;
+}
+
+interface ValidateWordResponse {
+  valid: boolean;
+  error?: string;
+  [key: string]: any;
+}
+
+interface ValidationResult {
+  status: number;
+  ok: boolean;
+  data: ValidateWordResponse | null;
+}
+
 /**
  * Fetches a random target word from the API.
  *
  * Converts the returned word to uppercase before returning.
  *
  * @async
- * @returns {Promise<string>} The target word in uppercase.
+ * @returns The target word in uppercase.
  * @throws {Error} If the HTTP request fails or the response is invalid.
  */
-export const fetchWordFromApi = async () => {
+export const fetchWordFromApi = async (): Promise<string> => {
   const res = await fetch("/api/word");
   if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
-  const data = await res.json();
+  const data: FetchWordReponse = await res.json();
   if (data.error) throw new Error(data.error || "Invalid server response");
   return data.target.toUpperCase();
 };
@@ -24,7 +41,7 @@ export const fetchWordFromApi = async () => {
  * @param {string} word - The guessed word to validate.
  * @returns {Promise<{status: number, ok: boolean, data: any}>} The validation result object.
  */
-export const validateWord = async (word) => {
+export const validateWord = async (word: string): Promise<ValidationResult> => {
   try {
     const result = await fetch("/api/validate", {
       method: "POST",
@@ -34,7 +51,7 @@ export const validateWord = async (word) => {
 
     const data = await result.json();
     return { status: result.status, ok: result.ok, data };
-  } catch (error) {
+  } catch (error: unknown) {
     console.error("Error validating word:", error);
     return { status: 500, ok: false, data: null };
   }

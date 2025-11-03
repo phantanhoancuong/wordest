@@ -1,12 +1,13 @@
-import { WORD_LENGTH, CellAnimation, CellStatus } from "../lib/constants";
+import { CellStatusType, CellAnimationType, Cell } from "@/types/cell";
+import { WORD_LENGTH, CellAnimation, CellStatus } from "./constants";
 
 /**
  * Counts the occurrences of each letter in a word.
  *
- * @param {string} word - The word to count letters from.
- * @returns {Record<string, number>} An object mapping each letter to its frequency.
+ * @param word - The word to count letters from.
+ * @returns An object mapping each letter to its frequency.
  */
-export const countLetter = (word) => {
+export const countLetter = (word: string): Record<string, number> => {
   const count = {};
   for (const char of word) {
     count[char] = (count[char] || 0) + 1;
@@ -19,20 +20,20 @@ export const countLetter = (word) => {
  *
  * Each cell includes default `char`, `status`, `animation`, and `animationDelay` values.
  *
- * @param {number} rowNum - Number of rows in the grid.
- * @param {number} colNum - Number of columns in the grid.
- * @param {string} [defaultStatus=CellStatus.DEFAULT] - Default cell status.
- * @param {string} [defaultAnimation=CellAnimation.NONE] - Default animation type.
- * @param {number} [animationDelay=0] - Default animation delay (in seconds).
- * @returns {Array<Array<Object>>} A 2D array representing the initialized grid.
+ * @param rowNum - Number of rows in the grid.
+ * @param colNum - Number of columns in the grid.
+ * @param defaultStatus- Default cell status.
+ * @param defaultAnimation - Default animation type.
+ * @param animationDelay - Default animation delay (in seconds).
+ * @returns A 2D array representing the initialized grid.
  */
 export const initEmptyGrid = (
-  rowNum,
-  colNum,
-  defaultStatus = CellStatus.DEFAULT,
-  defaultAnimation = CellAnimation.NONE,
+  rowNum: number,
+  colNum: number,
+  defaultStatus: CellStatusType = CellStatus.DEFAULT,
+  defaultAnimation: CellAnimationType = CellAnimation.NONE,
   animationDelay = 0
-) => {
+): Array<Array<Cell>> => {
   return Array.from({ length: rowNum }, () =>
     Array.from({ length: colNum }, () => ({
       char: "",
@@ -48,12 +49,16 @@ export const initEmptyGrid = (
  *
  * Returns an array of `CellStatus` values representing the accuracy of each letter.
  *
- * @param {string} guess - The guessed word.
- * @param {string} targetWord - The target word to compare against.
- * @param {Record<string, number>} targetLetterCount - Letter frequency map of the target word.
- * @returns {string[]} Array of `CellStatus` values for each letter.
+ * @param guess - The guessed word.
+ * @param targetWord - The target word to compare against.
+ * @param targetLetterCount - Letter frequency map of the target word.
+ * @returns Array of `CellStatus` values for each letter.
  */
-export const evaluateGuess = (guess, targetWord, targetLetterCount) => {
+export const evaluateGuess = (
+  guess: string,
+  targetWord: string,
+  targetLetterCount: Record<string, number>
+): Array<CellStatusType> => {
   const tempLetterCount = { ...targetLetterCount };
   const statuses = Array(WORD_LENGTH).fill(CellStatus.ABSENT);
 
@@ -75,28 +80,32 @@ export const evaluateGuess = (guess, targetWord, targetLetterCount) => {
   return statuses;
 };
 
+interface MapGuessToRowOptions {
+  animation?: CellAnimationType;
+  animationDelay?: number;
+  isConsecutive?: boolean;
+}
+
 /**
  * Maps a guessed word and its evaluation statuses into an array of cell objects.
  *
  * Useful for rendering animated rows in the game grid.
  *
- * @param {string} guess - The guessed word.
- * @param {string[]} statuses - Array of `CellStatus` values for each character.
- * @param {Object} [options={}] - Optional animation configuration.
- * @param {string} [options.animation=CellAnimation.NONE] - Animation applied to each cell.
- * @param {number} [options.animationDelay=0] - Base animation delay (in seconds).
- * @param {boolean} [options.isConsecutive=false] - If true, delay increases per cell index.
- * @returns {Array<Object>} Array of cell objects representing the row.
+ * @param guess - The guessed word.
+ * @param statuses - Array of `CellStatus` values for each character.
+ * @param options - Optional animation configuration.
+ * @returns Array of cell objects representing the row.
  */
 export const mapGuessToRow = (
-  guess,
-  statuses,
-  {
+  guess: string,
+  statuses: Array<CellStatusType>,
+  options: MapGuessToRowOptions = {}
+): Array<Cell> => {
+  const {
     animation = CellAnimation.NONE,
     animationDelay = 0,
     isConsecutive = false,
-  } = {}
-) => {
+  } = options;
   return guess.split("").map((char, i) => ({
     char,
     status: statuses[i],

@@ -55,11 +55,7 @@ export default function Home() {
               />
               <button onClick={game.restartGame}>Restart</button>
             </div>
-            <ToastBar
-              className={styles["app__toast-bar"]}
-              toasts={toasts.list}
-              removeToast={toasts.removeToast}
-            />
+            <ToastBar toasts={toasts.list} removeToast={toasts.removeToast} />
           </section>
         )}
       </main>

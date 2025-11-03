@@ -11,7 +11,7 @@ export async function POST(req) {
       return Response.json({ valid: false }, { status: 422 });
     }
     return Response.json({ valid: true }, { status: 200 });
-  } catch (err) {
+  } catch (err: unknown) {
     console.error("Validation error: ", err);
     return Response.json({ error: "Internal Server Error" }, { status: 500 });
   }

@@ -17,43 +17,17 @@ import { useLatest } from "./useLatest";
 import { useSoundPlayer } from "./useSoundPlayer";
 import { useTargetWord } from "./useTargetWord";
 import { useToasts } from "./useToasts";
+import { UseGameReturn } from "@/types/useGame.types";
+import { CellStatusType } from "@/types/cell";
 
 /**
  * Hook to manage the state and logic of the game.
  *
  * Tracks the grid of guesses, keyboard statuses, game state, toasts, input handling, and sound playback.
  *
- * @returns {Object} Game utilities.
- *
- * @property {Object} gameGrid - Grid data and animation handler for the player's guesses.
- * @property {Array<Array<Object>>} gameGrid.data - 2D array of cell objects.
- * @property {number} gameGrid.rowNum - Total number of rows.
- * @property {number} gameGrid.colNum - Total number of columns.
- * @property {Function} gameGrid.handleAnimationEnd - Called when a cell's animation ends to update game state.
- *
- * @property {Object} answerGrid - Grid data and animation handler for the answer grid.
- * @property {number} answerGrid.rowNum - Total number of rows.
- * @property {number} answerGrid.colNum - Total number of columns.
- *
- * @property {Object} keyboard - Keyboard status utilities.
- * @property {Object} keyboard.statuses - Mapping of letters to their CellStatus.
- * @property {Function} keyboard.update - Updates statuses based on guesses.
- * @property {Function} keyboard.reset - Resets all keyboard statuses.
- *
- * @property {Object} game - Game state.
- * @property {boolean} game.gameOver - Whether the game has ended.
- * @property {string} game.validationError - Latest validation error message.
- * @property {string} game.wordFetchError - Error fetching the target word.
- * @property {Function} game.restartGame - Resets the game state.
- *
- * @property {Object} toasts - Toast notifications
- * @property {Array<Object>} toasts.list - List of active toasts.
- * @property {Function} toasts.removeToast - Removes a toast by ID
- *
- * @property {Object} input - Input handling utilities.
- * @property {Function} input.handle - Handles keyboard input.
+ * @returns Game controller and associated utilities.
  */
-export const useGame = () => {
+export const useGame = (): UseGameReturn => {
   const { targetWord, targetLetterCount, wordFetchError, reloadTargetWord } =
     useTargetWord();
   const [gameOver, setGameOver] = useState(false);
@@ -90,6 +64,11 @@ export const useGame = () => {
     0
   );
 
+  const playKeySound = useSoundPlayer([
+    "/sounds/key_01.mp3",
+    "/sounds/key_02.mp3",
+  ]);
+
   const updateAnswerGrid = useMemo(() => {
     if (!targetWord) return () => answerGrid.resetGrid();
     const newRow = targetWord.split("").map((ch) => ({
@@ -109,11 +88,10 @@ export const useGame = () => {
    * Decrements the active animation counter, clears finished animations when all have ended,
    * and advances to the next row if needed.
    *
-   * @param {number} rowIndex - The row index of the animated cell.
-   * @param {number} colIndex - The column index of the animated cell.
-   * @returns {void}
+   * @param rowIndex - The row index of the animated cell.
+   * @param colIndex - The column index of the animated cell.
    */
-  const handleAnimationEnd = (rowIndex, colIndex) => {
+  const handleAnimationEnd = (rowIndex: number, colIndex: number): void => {
     if (!finishedCellMap.current.has(rowIndex)) {
       finishedCellMap.current.set(rowIndex, []);
     }
@@ -142,10 +120,8 @@ export const useGame = () => {
 
   /**
    * Resets all game states, grid, keyboard, and target word to start a new game.
-   *
-   * @returns {void}
    */
-  const restartGame = () => {
+  const restartGame = (): void => {
     setGameOver(false);
 
     setRowState(0);
@@ -161,18 +137,8 @@ export const useGame = () => {
     pendingGameOver.current = false;
     pendingRowIncrement.current = false;
     inputLocked.current = false;
-    toasts.forEach((t) => removeToast(t.id));
+    toastList.forEach((t) => removeToast(t.id));
   };
-
-  /**
-   * Plays a random key press sound from the preloaded set.
-   *
-   * @type {() => void}
-   */
-  const playKeySound = useSoundPlayer([
-    "/sounds/key_01.mp3",
-    "/sounds/key_02.mp3",
-  ]);
 
   /**
    * Handles when the guessed word is not in the valid word list.
@@ -180,11 +146,10 @@ export const useGame = () => {
    * Provides user feedback, applies a shake animation to the current row,
    * and prevents further input until the animation finishes.
    *
-   * @param {string} guess - The invalid guessed word.
-   * @param {number} row - The index of the current row being updated.
-   * @returns {void}
+   * @param guess - The invalid guessed word.
+   * @param row - The index of the current row being updated.
    */
-  const handleInvalidGuess = (guess, row) => {
+  const handleInvalidGuess = (guess: string, row: number): void => {
     const message = "Not in word list.";
     setValidationError(message);
     addToast(message);
@@ -208,11 +173,10 @@ export const useGame = () => {
    *
    * Applies bounce animations, updates keyboard states, and manage game-over conditions.
    *
-   * @param {string} guess - The validated word.
-   * @param {number} row - The index of the current row being updated.
-   * @returns {void}
+   * @param guess - The validated word.
+   * @param row - The index of the current row being updated.
    */
-  const handleValidGuess = (guess, row) => {
+  const handleValidGuess = (guess: string, row: number) => {
     const statuses = evaluateGuess(
       guess,
       targetWord,
@@ -262,10 +226,8 @@ export const useGame = () => {
 
   /**
    * Handles a general validation error.
-   *
-   * @returns {void}
    */
-  const handleValidationError = () => {
+  const handleValidationError = (): void => {
     const message = "Error validating word. Please try again.";
     setValidationError(message);
     addToast(message);
@@ -279,11 +241,8 @@ export const useGame = () => {
    * 3. Handles invalid, valid, and error cases.
    *
    * Input is locked during submission to prevent race conditions.
-   * @async
-   * @function submitGuess
-   * @returns {Promise<void>} Resolves once the guess submission and updates are complete.
    */
-  const submitGuess = async () => {
+  const submitGuess = async (): Promise<void> => {
     const row = rowRef.current;
     if (inputLocked.current) return;
     inputLocked.current = true;
@@ -312,7 +271,7 @@ export const useGame = () => {
       setValidationError("");
 
       handleValidGuess(guess, row);
-    } catch (error) {
+    } catch (error: unknown) {
       console.error("submitGuess error:", error);
       addToast("Unexpected error occurred.");
     } finally {
@@ -323,10 +282,9 @@ export const useGame = () => {
   /**
    * Handles keyboard input for the game.
    *
-   * @param {string} key - The key pressed by the user.
-   * @returns {void}
+   * @param key - The key pressed by the user.
    */
-  const handleInput = (key) => {
+  const handleInput = (key: string): void => {
     if (
       gameOver ||
       !targetWord ||

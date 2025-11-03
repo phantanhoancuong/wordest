@@ -1,17 +1,18 @@
 import { useEffect, useState } from "react";
 import styles from "../styles/Toast.module.css";
+import { Toast as ToastType } from "../types/toast";
+import { UseGameReturn } from "@/types/useGame.types";
+
+interface ToastProps {
+  message: ToastType["message"];
+  duration: number;
+  onClose: () => void;
+}
 
 /**
  * Toast component — displays a temporary notification message that fades out automatically.
- *
- * @component
- * @param {Object} props - Component props.
- * @param {string} props.message - The text to display in the toast.
- * @param {number} [props.duration=2000] - Time in milliseconds before the toast starts hiding.
- * @param {() => void} [props.onClose] - Callback invoked after the toast is fully removed.
- * @returns {JSX.Element} The rendered toast element.
  */
-const Toast = ({ message, duration = 2000, onClose }) => {
+const Toast = ({ message, duration = 2000, onClose }: ToastProps) => {
   const [visible, setVisible] = useState(true);
 
   useEffect(() => {
