@@ -53,7 +53,12 @@ export default function Home() {
                 layoutRows={6}
                 layoutCols={gameGrid.colNum}
               />
-              <button onClick={game.restartGame}>Restart</button>
+              <button
+                className={styles["game-board__button"]}
+                onClick={game.restartGame}
+              >
+                Restart
+              </button>
             </div>
             <ToastBar toasts={toasts.list} removeToast={toasts.removeToast} />
           </section>
