@@ -1,11 +1,12 @@
 import styles from "../styles/Banner.module.css";
+import Image from "next/image";
 
 /**
  * Banner component — displays the game title.
  */
 const Banner = () => (
-  <div className={`${styles["banner"]} flex-center`}>
-    <h1 className={styles["banner__text"]}>WORDEST</h1>
+  <div className={styles["banner"]}>
+    <Image src="logo.svg" alt="Logo" fill />
   </div>
 );
 
