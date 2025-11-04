@@ -6,7 +6,7 @@ import Image from "next/image";
  */
 const Banner = () => (
   <div className={styles["banner"]}>
-    <Image src="logo.svg" alt="Logo" fill />
+    <Image src="/images/logo.svg" alt="Logo" fill />
   </div>
 );
 

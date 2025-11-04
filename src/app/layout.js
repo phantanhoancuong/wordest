@@ -4,7 +4,7 @@ export const metadata = {
   title: "WORDest",
   description: "A Wordle-style word guessing game",
   icons: {
-    icon: "/logo-small.svg",
+    icon: "images/logo-small.svg",
   },
 };
 
