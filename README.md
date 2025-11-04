@@ -1,6 +1,6 @@
-# Wordest
+# WORDest
 
-**Wordest** is a re-creation of the word puzzle that I think you know, built with **React** and **Next.js**.
+**WORDest** is a re-creation of the word puzzle that I think you know, built with **React** and **Next.js**.
 
 In case you don't know, the goal is to guess a hidden word within a limited number of attempts.
 
@@ -19,7 +19,7 @@ You can play it live at:
 
 ## Planned Features
 
-**Wordest** started as a simple game, but I plan to extend it with more features over time.  
+**WORDest** started as a simple game, but I plan to extend it with more features over time.  
 Some ideas (they may not all be implemented; these are just concepts I think would be nice) include:
 
 ### Gameplay
@@ -54,7 +54,7 @@ _(Might be implemented last)_
 
 ## Feedback
 
-I plan to keep improving **Wordest** and continue building other small web-based projects such as websites, interactive tools, and mini-games to explore design, animation, and front-end architecture.
+I plan to keep improving **WORDest** and continue building other small web-based projects such as websites, interactive tools, and mini-games to explore design, animation, and front-end architecture.
 
 If you have any feedback, suggestions, or ideas, feel free to open an issue or reach out to me at:  
 phantanhoancuong@gmail.com
