@@ -1,78 +1,61 @@
 .cell {
   display: grid;
+  place-items: center;
   border: 2px solid #ccc;
   aspect-ratio: 1;
   width: var(--grid-cell-size);
-  height: auto;
   font-size: var(--grid-font-size);
   font-weight: bold;
   text-transform: uppercase;
+
+  transition: background-color var(--color-duration) ease var(--delay),
+    color var(--color-duration) ease var(--delay),
+    border-color var(--color-duration) ease var(--delay);
 }
 
-.cell--correct,
-.cell--present,
-.cell--absent {
-  animation: bounce var(--bounce-duration) ease forwards;
-  animation-delay: var(--delay);
-}
-
+/* ===== State Colors ===== */
 .cell--default {
   --target-background-color: var(--cell-background-color-default);
   --target-text-color: black;
-  --target-border-color: var(--cell-border-color-default);
+  border-color: var(--cell-border-color-default);
 }
 
 .cell--correct {
-  --target-background-color: var(--cell-background-color-correct);
-  --target-text-color: white;
-  --target-border-color: var(--cell-border-color-correct);
+  background-color: var(--cell-background-color-correct);
+  color: white;
+  border-color: var(--cell-border-color-correct);
 }
 
 .cell--present {
-  --target-background-color: var(--cell-background-color-present);
-  --target-text-color: white;
-  --target-border-color: var(--cell-border-color-present);
+  background-color: var(--cell-background-color-present);
+  color: white;
+  border-color: var(--cell-border-color-present);
 }
 
 .cell--absent {
-  --target-background-color: var(--cell-background-color-absent);
-  --target-text-color: white;
-  --target-border-color: var(--cell-border-color-absent);
-}
-
-.cell--shake {
-  animation: shake var(--shake-duration) ease forwards;
-  animation-delay: var(--delay);
+  background-color: var(--cell-background-color-absent);
+  color: white;
+  border-color: var(--cell-border-color-absent);
 }
 
 .cell--hidden {
   color: rgba(0, 0, 0, 0);
 }
 
-.cell--bounce-reveal {
-  --target-background-color: var(--cell-background-color-correct);
-  --target-border-color: var(--cell-border-color-correct);
-  --target-text-color: white;
-  animation: bounce-reveal var(--bounce-reveal-duration) ease forwards;
+.cell--wrong {
+  color: white;
+  background-color: red;
+}
+
+/* ===== Animations ===== */
+.cell--bounce {
+  animation: bounce var(--motion-duration) ease forwards;
   animation-delay: var(--delay);
 }
 
-@keyframes bounce-reveal {
-  0% {
-    transform: translateY(0);
-    background-color: var(--cell-background-color-absent);
-    color: rgba(0, 0, 0, 0);
-    border-color: #ccc;
-  }
-  50% {
-    transform: translateY(min(-10px, -0.5rem));
-  }
-  100% {
-    transform: translateY(0);
-    background-color: var(--target-background-color);
-    color: var(--target-text-color);
-    border-color: var(--target-border-color);
-  }
+.cell--shake {
+  animation: shake var(--motion-duration) ease forwards;
+  animation-delay: var(--delay);
 }
 
 @keyframes shake {
@@ -93,21 +76,11 @@
 @keyframes bounce {
   0% {
     transform: translateY(0);
-    background-color: var(--cell-background-color-absent);
-    color: black;
-    border-color: #ccc;
   }
   50% {
     transform: translateY(min(-10px, -0.5rem));
   }
   100% {
     transform: translateY(0);
-  }
-
-  50%,
-  100% {
-    background-color: var(--target-background-color);
-    color: var(--target-text-color);
-    border-color: var(--target-border-color);
   }
 }

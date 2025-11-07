@@ -18,8 +18,8 @@ import { useSoundPlayer } from "./useSoundPlayer";
 import { useTargetWord } from "./useTargetWord";
 import { useToasts } from "./useToasts";
 import { UseGameReturn } from "@/types/useGame.types";
-import { CellStatusType } from "@/types/cell";
-
+import { GameState } from "../lib/constants";
+import { useAnimationTracker } from "./useAnimationTracker";
 /**
  * Hook to manage the state and logic of the game.
  *
@@ -30,17 +30,16 @@ import { CellStatusType } from "@/types/cell";
 export const useGame = (): UseGameReturn => {
   const { targetWord, targetLetterCount, wordFetchError, reloadTargetWord } =
     useTargetWord();
-  const [gameOver, setGameOver] = useState(false);
+
+  const [gameState, setGameState] = useState<GameState>(GameState.PLAYING);
+  const pendingGameState = useRef<GameState | null>(null);
 
   const [rowState, setRowState] = useState(0);
   const [colState, setColState] = useState(0);
   const rowRef = useLatest(rowState);
   const colRef = useLatest(colState);
 
-  const animatingCellNum = useRef(0);
   const pendingRowIncrement = useRef(false);
-  const pendingGameOver = useRef(false);
-  const finishedCellMap = useRef(new Map());
   const inputLocked = useRef(false);
 
   const [validationError, setValidationError] = useState("");
@@ -77,10 +76,27 @@ export const useGame = (): UseGameReturn => {
       animation: CellAnimation.NONE,
       animationDelay: 0,
     }));
+    console.log(targetWord);
     return () => answerGrid.updateRow(0, newRow);
   }, [targetWord]);
 
   useEffect(() => updateAnswerGrid(), [updateAnswerGrid]);
+
+  const gameGridAnimationTracker = useAnimationTracker(
+    (finishedMap) => {
+      gameGrid.flushAnimation(finishedMap);
+    },
+    () => {
+      inputLocked.current = false;
+      if (pendingGameState.current != null) {
+        updateGameState();
+      }
+    }
+  );
+
+  const answerGridAnimationTracker = useAnimationTracker((finishedMap) => {
+    answerGrid.flushAnimation(finishedMap);
+  });
 
   /**
    * Handles the cell's data at the end of its animation.
@@ -91,39 +107,71 @@ export const useGame = (): UseGameReturn => {
    * @param rowIndex - The row index of the animated cell.
    * @param colIndex - The column index of the animated cell.
    */
-  const handleAnimationEnd = (rowIndex: number, colIndex: number): void => {
-    if (!finishedCellMap.current.has(rowIndex)) {
-      finishedCellMap.current.set(rowIndex, []);
+  const handleGameGridAnimationEnd = (
+    rowIndex: number,
+    colIndex: number
+  ): void => {
+    gameGridAnimationTracker.markEnd(rowIndex, colIndex);
+
+    if (pendingRowIncrement.current === true) {
+      setColState(0);
+      setRowState((prevRow) => prevRow + 1);
+      pendingRowIncrement.current = false;
     }
+  };
 
-    finishedCellMap.current.get(rowIndex).push(colIndex);
+  /**
+   * Handles the cell's data at the end of its animation.
+   *
+   * Decrements the active animation counter and
+   * clears finished animations when all have ended,
+   *
+   * @param rowIndex - Always 0 (ignored).
+   * @param colIndex - The column index of the animated cell.
+   */
+  const handleAnswerGridAnimationEnd = (rowIndex: number, colIndex: number) => {
+    rowIndex = 0;
+    answerGridAnimationTracker.markEnd(rowIndex, colIndex);
+  };
 
-    animatingCellNum.current = Math.max(0, animatingCellNum.current - 1);
+  /**
+   * Applies the pending game state (if any).
+   *
+   * - Called when cell animations finish.
+   * - Updates the main `gameState` and clears the pending ref.
+   */
+  const updateGameState = (): void => {
+    const nextGameState = pendingGameState.current;
+    if (!nextGameState || nextGameState === gameState) return;
+    setGameState(nextGameState);
 
-    if (animatingCellNum.current === 0) {
-      gameGrid.flushAnimation(new Map(finishedCellMap.current));
-      finishedCellMap.current.clear();
-      inputLocked.current = false;
-
-      if (pendingRowIncrement.current === true) {
-        setColState(0);
-        setRowState((r) => r + 1);
-        pendingRowIncrement.current = false;
-      }
-
-      if (pendingGameOver.current === true) {
-        setGameOver(true);
-        pendingGameOver.current = false;
-      }
+    if (nextGameState !== GameState.PLAYING) {
+      revealAnswerGrid(nextGameState);
     }
+    pendingGameState.current = null;
+  };
+
+  const revealAnswerGrid = (state: GameState) => {
+    requestAnimationFrame(() => {
+      answerGridAnimationTracker.add(answerGrid.colNum);
+
+      const revealedRow = answerGrid.gridRef.current[0].map((cell, i) => ({
+        ...cell,
+        status: state === GameState.WON ? CellStatus.CORRECT : CellStatus.WRONG,
+        animation: CellAnimation.BOUNCE,
+        animationDelay: 0,
+        animationKey: (cell.animationKey ?? 0) + 1,
+      }));
+
+      answerGrid.updateRow(0, revealedRow);
+    });
   };
 
   /**
    * Resets all game states, grid, keyboard, and target word to start a new game.
    */
   const restartGame = (): void => {
-    setGameOver(false);
-
+    setGameState(GameState.PLAYING);
     setRowState(0);
     setColState(0);
 
@@ -132,11 +180,13 @@ export const useGame = (): UseGameReturn => {
 
     gameGrid.resetGrid();
     answerGrid.resetGrid();
-    animatingCellNum.current = 0;
-    finishedCellMap.current.clear();
-    pendingGameOver.current = false;
+    gameGridAnimationTracker.reset();
+    pendingGameState.current = null;
     pendingRowIncrement.current = false;
     inputLocked.current = false;
+
+    answerGridAnimationTracker.reset();
+
     toastList.forEach((t) => removeToast(t.id));
   };
 
@@ -159,12 +209,11 @@ export const useGame = (): UseGameReturn => {
       Array(gameGrid.colNum).fill(CellStatus.DEFAULT),
       {
         animation: CellAnimation.SHAKE,
-        animationDelay: animationTiming.shakeDelay,
+        animationDelay: animationTiming.shake.delay,
         isConsecutive: false,
       }
     );
-
-    animatingCellNum.current += gameGrid.colNum;
+    gameGridAnimationTracker.add(gameGrid.colNum);
     gameGrid.updateRow(row, shakeRow);
   };
 
@@ -185,39 +234,51 @@ export const useGame = (): UseGameReturn => {
 
     const newRow = mapGuessToRow(guess, statuses, {
       animation: CellAnimation.BOUNCE,
-      animationDelay: animationTiming.bounceDelay,
+      animationDelay: animationTiming.bounce.delay,
       isConsecutive: true,
     });
 
-    const answerRow = answerGrid.gridRef.current[0].map((cell, i) => {
-      if (cell.status === CellStatus.CORRECT) return cell;
+    const prevAnswerRow = answerGrid.gridRef.current[0];
+    const answerRow = [...prevAnswerRow];
+    let changedCount = 0;
 
+    for (let i = 0; i < answerRow.length; i++) {
+      const prevCell = prevAnswerRow[i];
+
+      // If it's already correct, skip it — no animation or change.
+      if (prevCell.status === CellStatus.CORRECT) continue;
+
+      // If this guess reveals a correct letter for the first time
       if (statuses[i] === CellStatus.CORRECT) {
-        return {
-          ...cell,
-          status: CellStatus.HIDDEN,
-          animation: CellAnimation.BOUNCE_REVEAL,
-          animationDelay: i * animationTiming.bounceRevealDelay,
+        answerRow[i] = {
+          ...prevCell,
+          status: CellStatus.CORRECT,
+          animation: CellAnimation.BOUNCE,
+          animationDelay: i * animationTiming.bounce.delay,
         };
+        changedCount++;
       }
+    }
 
-      return cell;
-    });
+    if (changedCount > 0) {
+      answerGridAnimationTracker.add(changedCount);
+      answerGrid.updateRow(0, answerRow);
+    }
 
+    gameGridAnimationTracker.add(gameGrid.colNum);
     gameGrid.updateRow(row, newRow);
-    answerGrid.updateRow(0, answerRow);
-    animatingCellNum.current += gameGrid.colNum;
     updateKeyStatuses(guess, statuses);
 
     if (guess === targetWord) {
       addToast("You win!");
-      pendingGameOver.current = true;
+      pendingGameState.current = GameState.WON;
       return;
     }
 
     if (row + 1 >= gameGrid.rowNum) {
       addToast(`The word was: ${targetWord}`);
-      pendingGameOver.current = true;
+      pendingGameState.current = GameState.LOST;
+
       return;
     }
 
@@ -286,9 +347,9 @@ export const useGame = (): UseGameReturn => {
    */
   const handleInput = (key: string): void => {
     if (
-      gameOver ||
+      gameState !== GameState.PLAYING ||
       !targetWord ||
-      animatingCellNum.current > 0 ||
+      gameGridAnimationTracker.getCount() > 0 ||
       inputLocked.current
     )
       return;
@@ -337,14 +398,14 @@ export const useGame = (): UseGameReturn => {
       data: gameGrid.grid,
       rowNum: gameGrid.rowNum,
       colNum: gameGrid.colNum,
-      handleAnimationEnd,
+      handleAnimationEnd: handleGameGridAnimationEnd,
     },
 
     answerGrid: {
       data: answerGrid.grid,
       rowNum: answerGrid.rowNum,
       colNum: answerGrid.colNum,
-      handleAnimationEnd,
+      handleAnimationEnd: handleAnswerGridAnimationEnd,
     },
 
     keyboard: {
@@ -354,7 +415,7 @@ export const useGame = (): UseGameReturn => {
     },
 
     game: {
-      gameOver,
+      gameState,
       validationError,
       wordFetchError,
       targetWord,

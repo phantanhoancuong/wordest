@@ -5,6 +5,7 @@ export interface Cell {
   status: CellStatusType;
   animation: CellAnimationType;
   animationDelay: number;
+  animationKey?: number;
 }
 
 export type PartialCell = Partial<Cell>;

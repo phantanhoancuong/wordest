@@ -47,7 +47,7 @@ const Grid = ({
       {grid.map((row: Array<CellType>, rowIndex: number) =>
         row.map((cell: CellType, colIndex: number) => (
           <Cell
-            key={`${rowIndex}-${colIndex}`}
+            key={`${rowIndex}-${colIndex}-${cell.animationKey}`}
             cell={cell}
             row={rowIndex}
             col={colIndex}

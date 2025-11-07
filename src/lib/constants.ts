@@ -19,6 +19,8 @@ export enum CellStatus {
   ABSENT = "absent",
   /** Hidden or transparent cell (e.g., during transitions) */
   HIDDEN = "hidden",
+  /** Cell styling for when the user loses the game. */
+  WRONG = "wrong",
 }
 
 /** Enum for cell animations */
@@ -33,22 +35,37 @@ export enum CellAnimation {
   BOUNCE_REVEAL = "bounce-reveal",
 }
 
+/**
+ * Used to determine the state and result of the game.
+ */
+export enum GameState {
+  PLAYING = "playing",
+  WON = "won",
+  LOST = "lost",
+}
+
 /** Animation timing configuration */
+interface AnimationTypeTiming {
+  delay: number;
+  motion: number;
+  color: number;
+}
+
 export interface AnimationTiming {
-  bounceDelay: number;
-  bounceDuration: number;
-  shakeDelay: number;
-  shakeDuration: number;
-  bounceRevealDelay: number;
-  bounceRevealDuration: number;
+  bounce: AnimationTypeTiming;
+  shake: AnimationTypeTiming;
 }
 
 /** Default timing values for animations (in seconds) */
 export const animationTiming: AnimationTiming = {
-  bounceDelay: 0.3,
-  bounceDuration: 0.3,
-  shakeDelay: 0,
-  shakeDuration: 0.3,
-  bounceRevealDelay: 0.3,
-  bounceRevealDuration: 0.3,
+  bounce: {
+    delay: 0.25,
+    motion: 0.25,
+    color: 0.25,
+  },
+  shake: {
+    delay: 0.3,
+    motion: 0.3,
+    color: 0.3,
+  },
 };

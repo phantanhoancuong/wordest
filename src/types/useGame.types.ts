@@ -2,6 +2,7 @@ import { UseGridStateReturn } from "./useGridState.types";
 import { UseKeyStatusesReturn } from "./useKeyStatuses.types";
 import { UseTargetWordReturn } from "./useTargetWord.types";
 import { UseToastsReturn } from "./useToasts";
+import { GameState } from "@/lib/constants";
 
 type GameGridSection = {
   data: UseGridStateReturn["grid"];
@@ -22,7 +23,7 @@ export interface UseGameReturn {
   };
 
   game: {
-    gameOver: boolean;
+    gameState: GameState;
     validationError: string;
     wordFetchError: string;
     targetWord: UseTargetWordReturn["targetWord"];

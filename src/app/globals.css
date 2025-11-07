@@ -5,7 +5,7 @@
   --cell-background-color-present: yellow;
   --cell-background-color-correct: green;
 
-  --cell-border-color-default: white;
+  --cell-border-color-default: #ccc;
   --cell-border-color-absent: gray;
   --cell-border-color-present: yellow;
   --cell-border-color-correct: green;

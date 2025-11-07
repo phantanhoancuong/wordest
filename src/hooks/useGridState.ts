@@ -133,9 +133,9 @@ export const useGridState = (
             animationDelay: 0,
           };
         });
-
         newGrid[rowIndex] = newRow;
       }
+
       return newGrid;
     });
   };

@@ -17,21 +17,37 @@ interface CellProps {
 
 interface CellStyleVars extends React.CSSProperties {
   "--delay"?: string;
-  "--bounce-duration"?: string;
-  "--shake-duration"?: string;
-  "--bounce-reveal-duration"?: string;
+  "--motion-duration"?: string;
+  "--color-duration"?: string;
 }
+
+/**
+ * Finds the corresponding timing config
+ * by normalizing enum names to match animationTiming keys.
+ */
+const resolveAnimationTiming = (animation: CellAnimation) => {
+  const defaultTiming = { delay: 0, motion: 0, color: 0 };
+
+  if (animation === CellAnimation.NONE) return defaultTiming;
+
+  const key = animation.replace(/-([a-z])/g, (_, letter) =>
+    letter.toUpperCase()
+  ) as keyof typeof animationTiming;
+
+  return animationTiming[key] ?? defaultTiming;
+};
 
 /**
  * Renders a single cell in the game grid with its character and animation.
  * Animation timings are applied via CSS variables from `animationTiming`.
  */
 const Cell = memo(({ cell, row, col, onAnimationEnd }: CellProps) => {
+  const timing = resolveAnimationTiming(cell.animation);
+
   const style: CellStyleVars = {
     "--delay": `${cell.animationDelay}s`,
-    "--bounce-duration": `${animationTiming.bounceDuration}s`,
-    "--shake-duration": `${animationTiming.shakeDuration}s`,
-    "--bounce-reveal-duration": `${animationTiming.bounceRevealDuration}s`,
+    "--motion-duration": `${timing.motion}s`,
+    "--color-duration": `${timing.color}s`,
   };
 
   const statusClass = styles[`cell--${cell.status}`];

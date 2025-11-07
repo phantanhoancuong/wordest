@@ -16,9 +16,6 @@ import { useGame } from "../hooks/useGame";
  * - A **banner** (header) and a **landscape warning** for small screens.
  *
  * Uses the {@link useGame} hook to manage game state, user input, and UI updates.
- *
- * @component
- * @returns {JSX.Element} The rendered game page.
  */
 export default function Home() {
   const { gameGrid, answerGrid, keyboard, game, toasts, input } = useGame();
@@ -52,6 +49,7 @@ export default function Home() {
                 grid={answerGrid.data}
                 layoutRows={6}
                 layoutCols={gameGrid.colNum}
+                onAnimationEnd={answerGrid.handleAnimationEnd}
               />
               <button
                 className={styles["game-board__button"]}
