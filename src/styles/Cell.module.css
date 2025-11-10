@@ -13,41 +13,40 @@
     border-color var(--color-duration) ease var(--delay);
 }
 
-/* ===== State Colors ===== */
 .cell--default {
   --target-background-color: var(--cell-background-color-default);
-  --target-text-color: black;
+  --target-text-color: var(--cell-text-color-default);
   border-color: var(--cell-border-color-default);
 }
 
 .cell--correct {
   background-color: var(--cell-background-color-correct);
-  color: white;
+  color: var(--cell-text-color-correct);
   border-color: var(--cell-border-color-correct);
 }
 
 .cell--present {
   background-color: var(--cell-background-color-present);
-  color: white;
+  color: var(--cell-text-color-present);
   border-color: var(--cell-border-color-present);
 }
 
 .cell--absent {
   background-color: var(--cell-background-color-absent);
-  color: white;
+  color: var(--cell-text-color-absent);
   border-color: var(--cell-border-color-absent);
 }
 
 .cell--hidden {
-  color: rgba(0, 0, 0, 0);
+  color: var(--cell-text-color-hidden);
 }
 
 .cell--wrong {
-  color: white;
-  background-color: red;
+  color: var(--cell-text-color-wrong);
+  background-color: var(--cell-background-color-wrong);
+  border-color: var(--cell-border-color-wrong);
 }
 
-/* ===== Animations ===== */
 .cell--bounce {
   animation: bounce var(--motion-duration) ease forwards;
   animation-delay: var(--delay);

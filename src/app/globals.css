@@ -4,11 +4,20 @@
   --cell-background-color-absent: gray;
   --cell-background-color-present: yellow;
   --cell-background-color-correct: green;
+  --cell-background-color-wrong: red;
 
   --cell-border-color-default: #ccc;
   --cell-border-color-absent: gray;
   --cell-border-color-present: yellow;
   --cell-border-color-correct: green;
+  --cell-border-color-wrong: red;
+
+  --cell-text-color-default: black;
+  --cell-text-color-absent: white;
+  --cell-text-color-present: white;
+  --cell-text-color-correct: white;
+  --cell-text-color-wrong: white;
+  --cell-text-color-hidden: rgba(0, 0, 0, 0);
 }
 
 body {
