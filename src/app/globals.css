@@ -17,11 +17,13 @@
   --cell-text-color-present: white;
   --cell-text-color-correct: white;
   --cell-text-color-wrong: white;
-  --cell-text-color-hidden: rgba(0, 0, 0, 0);
+  --cell-text-color-hidden: transparent;
 }
 
 body {
   font-family: sans-serif;
+  touch-action: none;
+  overscroll-behavior: none;
 }
 
 html,
