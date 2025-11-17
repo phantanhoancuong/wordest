@@ -1,7 +1,12 @@
 .cell {
+  --cell-border-size-unit: clamp(0.1rem, 0.25dvw, 0.15rem);
+}
+
+.cell {
+  --cell-border-size: var(--cell-border-size-unit);
   display: grid;
   place-items: center;
-  border: 2px solid #ccc;
+  border: var(--cell-border-size) solid #ccc;
   aspect-ratio: 1;
   width: var(--grid-cell-size);
   font-size: var(--grid-font-size);

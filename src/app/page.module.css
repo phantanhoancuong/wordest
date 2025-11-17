@@ -25,23 +25,6 @@
   text-align: center;
 }
 
-@media (max-height: 500px) and (orientation: landscape) {
-  .app__banner,
-  .app__game,
-  .app__keyboard {
-    display: none;
-  }
-
-  .landscape-warning {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100dvh;
-    font-size: 1rem;
-    font-weight: bold;
-  }
-}
-
 .game__error {
   color: red;
   text-align: center;
@@ -74,4 +57,21 @@
   cursor: pointer;
   font-weight: bold;
   user-select: none;
+}
+
+@media (max-height: 600px) and (orientation: landscape) {
+  .app__banner,
+  .app__game,
+  .app__keyboard {
+    display: none;
+  }
+
+  .landscape-warning {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100dvh;
+    font-size: 1rem;
+    font-weight: bold;
+  }
 }
