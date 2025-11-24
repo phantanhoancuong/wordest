@@ -354,40 +354,52 @@ export const useGame = (): UseGameReturn => {
     )
       return;
 
-    playKeySound();
+    const isLetter = /^[A-Z]$/.test(key);
+    const isBackspace = key === "Backspace";
+    const isEnter = key === "Enter";
 
-    switch (key) {
-      case "Backspace":
-        return setColState((prev) => {
-          if (prev === 0) return prev;
-          const newCol = prev - 1;
-          gameGrid.updateCell(rowRef.current, newCol, {
-            char: "",
-            status: CellStatus.DEFAULT,
-            animation: CellAnimation.NONE,
-            animationDelay: 0,
-          });
-          return newCol;
+    if (isLetter || isBackspace || isEnter) {
+      playKeySound();
+    }
+
+    if (isBackspace) {
+      setColState((prev) => {
+        if (prev === 0) return prev;
+
+        const newCol = prev - 1;
+
+        gameGrid.updateCell(rowRef.current, newCol, {
+          char: "",
+          status: CellStatus.DEFAULT,
+          animation: CellAnimation.NONE,
+          animationDelay: 0,
         });
 
-      case "Enter":
-        if (colRef.current === gameGrid.colNum) submitGuess();
-        return;
+        return newCol;
+      });
+      return;
+    }
 
-      default:
-        const letter = key.toUpperCase();
-        if (/^[A-Z]$/.test(letter)) {
-          setColState((prev) => {
-            if (prev >= gameGrid.colNum) return prev;
-            gameGrid.updateCell(rowRef.current, prev, {
-              char: letter,
-              status: CellStatus.DEFAULT,
-              animation: CellAnimation.NONE,
-              animationDelay: 0,
-            });
-            return prev + 1;
-          });
-        }
+    if (isEnter) {
+      if (colRef.current === gameGrid.colNum) submitGuess();
+      return;
+    }
+
+    if (isLetter) {
+      const letter = key.toUpperCase();
+
+      setColState((prev) => {
+        if (prev >= gameGrid.colNum) return prev;
+
+        gameGrid.updateCell(rowRef.current, prev, {
+          char: letter,
+          status: CellStatus.DEFAULT,
+          animation: CellAnimation.NONE,
+          animationDelay: 0,
+        });
+
+        return prev + 1;
+      });
     }
   };
 
