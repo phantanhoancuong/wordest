@@ -76,7 +76,6 @@ export const useGame = (): UseGameReturn => {
       animation: CellAnimation.NONE,
       animationDelay: 0,
     }));
-    console.log(targetWord);
     return () => answerGrid.updateRow(0, newRow);
   }, [targetWord]);
 
