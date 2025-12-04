@@ -1,12 +1,14 @@
 .grid {
-  --grid-cell-size: clamp(
-    2rem,
-    min(40vw / var(--layout-cols), 40vh / var(--layout-rows)),
-    6rem
+  --short-side: min(75cqw, 60cqh);
+  --grid-cell-size: calc(
+    var(--short-side) / max(var(--layout-rows), var(--layout-cols))
   );
-
-  --grid-font-size: calc(var(--grid-cell-size) * 0.5);
-  --grid-gap: calc(var(--grid-cell-size) * 0.15);
+  --cell-font-scale: 0.5;
+  --cell-gap-scale: 0.15;
+  --cell-border-scale: 0.035;
+  --cell-font-size: calc(var(--cell-font-scale) * var(--grid-cell-size));
+  --cell-gap-size: calc(var(--cell-gap-scale) * var(--grid-cell-size));
+  --cell-border-size: calc(var(--cell-border-scale) * var(--grid-cell-size));
 
   display: grid;
   grid-template-rows: repeat(var(--data-rows), var(--grid-cell-size));
@@ -14,5 +16,5 @@
   justify-content: center;
   align-content: center;
   user-select: none;
-  gap: var(--grid-gap);
+  gap: var(--cell-gap-size);
 }

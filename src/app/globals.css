@@ -1,6 +1,6 @@
 :root {
   --key-font-size: 2rem;
-  --cell-background-color-default: white;
+  --cell-background-color-default: transparent;
   --cell-background-color-absent: gray;
   --cell-background-color-present: yellow;
   --cell-background-color-correct: green;

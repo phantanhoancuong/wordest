@@ -1,26 +1,23 @@
 .cell {
-  --cell-border-size-unit: clamp(0.1rem, 0.25dvw, 0.15rem);
-}
-
-.cell {
-  --cell-border-size: var(--cell-border-size-unit);
   display: grid;
   place-items: center;
-  border: var(--cell-border-size) solid #ccc;
-  aspect-ratio: 1;
+  border: var(--cell-border-size) solid var(--cell-border-color-default);
   width: var(--grid-cell-size);
-  font-size: var(--grid-font-size);
+  aspect-ratio: 1;
+  font-size: var(--cell-font-size);
   font-weight: bold;
   text-transform: uppercase;
-
+  box-sizing: border-box;
+  will-change: transform, background-color, border-color, color;
+  transform-origin: center;
   transition: background-color var(--color-duration) ease var(--delay),
     color var(--color-duration) ease var(--delay),
     border-color var(--color-duration) ease var(--delay);
 }
 
 .cell--default {
-  --target-background-color: var(--cell-background-color-default);
-  --target-text-color: var(--cell-text-color-default);
+  background-color: var(--cell-background-color-default);
+  color: var(--cell-text-color-default);
   border-color: var(--cell-border-color-default);
 }
 

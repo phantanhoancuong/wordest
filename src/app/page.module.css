@@ -37,6 +37,9 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
+
+  container-type: size;
+  container-name: gameboard;
 }
 
 .game-board__grid {
