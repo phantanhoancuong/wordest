@@ -5,8 +5,13 @@
   flex-direction: column;
 }
 
+.app::before {
+  content: "";
+  flex: 0 0 3%;
+}
+
 .app__banner {
-  flex: 0 0 10%;
+  flex: 0 0 7%;
 }
 
 .app__game {

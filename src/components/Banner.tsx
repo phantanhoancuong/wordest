@@ -6,7 +6,27 @@ import Image from "next/image";
  */
 const Banner = () => (
   <div className={styles["banner"]}>
-    <Image src="/images/logo.svg" alt="Logo" fill priority />
+    <div className={styles["banner__left"]}>
+      <div className={styles["banner__logo"]}>
+        <Image
+          src="/images/logo.svg"
+          alt="Logo"
+          fill
+          priority
+          onClick={() => window.location.reload()}
+        />
+      </div>
+    </div>
+    <div className={styles["banner__right"]}>
+      <div className={styles["banner__icon"]}>
+        <Image
+          src="/images/icons/settings_24dp_000000_FILL0_wght400_GRAD0_opsz24.svg"
+          alt="Settings icon"
+          fill
+          priority
+        />
+      </div>
+    </div>
   </div>
 );
 

@@ -1,7 +1,57 @@
 .banner {
-  position: relative;
   height: 100%;
   width: 100%;
   display: flex;
   align-items: center;
+}
+
+.banner__left {
+  height: 100%;
+  width: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 1rem;
+  padding-left: 10dvw;
+}
+
+.banner__right {
+  height: 100%;
+  width: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 1rem;
+  padding-right: 10dvw;
+}
+
+.banner__logo {
+  position: relative;
+  height: 100%;
+  aspect-ratio: 3;
+  cursor: pointer;
+}
+
+.banner__icon {
+  position: relative;
+  height: 60%;
+  aspect-ratio: 1;
+}
+
+.img {
+  object-fit: contain;
+}
+
+@media (max-width: 600px) {
+  .banner__left {
+    padding-left: 1rem;
+  }
+
+  .banner__right {
+    padding-right: 1rem;
+  }
+
+  .banner__logo {
+    height: 80%;
+  }
 }
