@@ -82,14 +82,14 @@
     --key-width: calc(var(--key-width-unit) * 1.6);
     --font-size: calc(var(--key-font-unit) * 1.6);
   }
+}
 
-  @media (orientation: landscape) {
-    .keyboard {
-      --key-gap: calc(var(--key-gap-unit) * 1.2);
-    }
-    .keyboard__key {
-      --key-width: calc(var(--key-width-unit) * 1.2);
-      --font-size: calc(var(--key-font-unit) * 1.2);
-    }
+@media (min-width: 1024px) and (orientation: landscape) {
+  .keyboard {
+    --key-gap: calc(var(--key-gap-unit) * 1.2);
+  }
+  .keyboard__key {
+    --key-width: calc(var(--key-width-unit) * 1.2);
+    --font-size: calc(var(--key-font-unit) * 1.2);
   }
 }

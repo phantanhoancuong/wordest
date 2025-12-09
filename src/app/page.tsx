@@ -26,7 +26,7 @@ export default function Home() {
         <Banner />
       </header>
 
-      <main className={styles["app__game"]}>
+      <main className={styles["app__content"]}>
         {game.wordFetchError ? (
           <section className={styles["game__error"]}>
             <p>{game.wordFetchError}</p>

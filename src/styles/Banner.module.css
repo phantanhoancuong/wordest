@@ -36,6 +36,7 @@
   position: relative;
   height: 60%;
   aspect-ratio: 1;
+  cursor: pointer;
 }
 
 .img {

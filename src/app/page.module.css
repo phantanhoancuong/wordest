@@ -14,7 +14,7 @@
   flex: 0 0 7%;
 }
 
-.app__game {
+.app__content {
   flex: 0 0 65%;
 }
 
@@ -44,7 +44,6 @@
   justify-content: center;
 
   container-type: size;
-  container-name: gameboard;
 }
 
 .game-board__grid {
@@ -69,7 +68,7 @@
 
 @media (max-height: 600px) and (orientation: landscape) {
   .app__banner,
-  .app__game,
+  .app__content,
   .app__keyboard {
     display: none;
   }

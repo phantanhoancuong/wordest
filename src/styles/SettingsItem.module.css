@@ -1,0 +1,47 @@
+.settings-item {
+  display: flex;
+  flex-direction: column;
+  user-select: none;
+  --item-font-scale: 1;
+}
+
+.settings-item h3 {
+  margin: calc(var(--item-font-scale) * 0.1rem) 0;
+  font-size: calc(var(--item-font-scale) * 1rem);
+}
+
+.settings-item p {
+  margin: calc(var(--item-font-scale) * 0.1rem) 0;
+  font-size: calc(var(--item-font-scale) * 1rem);
+}
+
+.settings-item button {
+  margin: calc(var(--item-font-scale) * 0.2rem) 0;
+  font-size: calc(var(--item-font-scale) * 1rem);
+}
+
+.settings-item__info {
+  display: flex;
+  flex-direction: column;
+}
+
+.settings-item__actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.settings-item__button {
+  flex: 1;
+}
+
+@media (min-width: 600px) {
+  .settings-item {
+    --item-font-scale: 1.3;
+  }
+}
+
+@media (min-width: 1024px) {
+  .settings-item {
+    --item-font-scale: 1.5;
+  }
+}
