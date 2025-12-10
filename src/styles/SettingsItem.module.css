@@ -30,7 +30,8 @@
   gap: 0.5rem;
 }
 
-.settings-item__button {
+.settings-item__actions input,
+.settings-item__actions button {
   flex: 1;
 }
 

@@ -13,25 +13,27 @@ export default function SettingsPage() {
         <div className={styles["setting__container"]}>
           <SettingsItem
             name="Sound"
-            description="Enable or disable game sounds."
-            buttons={[
-              { label: "Enable", onClick: () => console.log("Sound On") },
-              { label: "Disable", onClick: () => console.log("Sound Off") },
-            ]}
+            description="Change the volume of sound effects."
+            control={<input type="range" min="0" max="100" value="50" />}
           />
         </div>
         <div className={styles["setting__container"]}>
           <SettingsItem
             name="Animation speed"
             description="Change the speed of cell animations."
-            buttons={[
-              { label: "Slow", onClick: () => console.log("Slow animation") },
-              {
-                label: "Normal",
-                onClick: () => console.log("Normal animation"),
-              },
-              { label: "Fast", onClick: () => console.log("Fast animation") },
-            ]}
+            control={
+              <>
+                <button onClick={() => console.log("Slow animation")}>
+                  Slow
+                </button>
+                <button onClick={() => console.log("Normal animation")}>
+                  Normal
+                </button>
+                <button onClick={() => console.log("Fast animation")}>
+                  Fast
+                </button>
+              </>
+            }
           />
         </div>
       </div>

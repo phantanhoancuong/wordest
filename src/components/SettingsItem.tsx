@@ -1,22 +1,21 @@
 import styles from "../styles/SettingsItem.module.css";
 
-const SettingsItem = ({ name, description, buttons }) => {
+interface SettingsItemProps {
+  name: string;
+  description: string;
+  control: React.ReactNode;
+}
+
+/**
+ * Renders a labeled settings row with a description and controls like buttons, sliders, etc.
+ */
+const SettingsItem = ({ name, description, control }: SettingsItemProps) => {
   return (
     <div className={styles["settings-item"]}>
       <h3 className={styles["settings-item__name"]}>{name}</h3>
       <div className={styles["settings-item__info"]}>
         <p className={styles["settings-item__description"]}>{description}</p>
-        <div className={styles["settings-item__actions"]}>
-          {buttons.map((btn, index) => (
-            <button
-              className={styles["settings-item__button"]}
-              key={index}
-              onClick={btn.onClick}
-            >
-              {btn.label}
-            </button>
-          ))}
-        </div>
+        <div className={styles["settings-item__actions"]}>{control}</div>
       </div>
     </div>
   );
