@@ -15,8 +15,8 @@ export default function SettingsPage() {
             name="Sound"
             description="Enable or disable game sounds."
             buttons={[
-              { label: "On", onClick: () => console.log("Sound On") },
-              { label: "Off", onClick: () => console.log("Sound Off") },
+              { label: "Enable", onClick: () => console.log("Sound On") },
+              { label: "Disable", onClick: () => console.log("Sound Off") },
             ]}
           />
         </div>

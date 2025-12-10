@@ -3,22 +3,11 @@
   min-width: 100%;
   display: flex;
   flex-direction: column;
-  align-items: center;
+  padding-top: 3dvh;
 }
-
-.app::before {
-  content: "";
-  flex: 0 0 3%;
-}
-
 .app__banner {
   flex: 0 0 7%;
   width: 100%;
-}
-
-.app__content::before {
-  content: "";
-  flex: 0 0 5%;
 }
 
 .app__content {
@@ -28,6 +17,7 @@
   flex-direction: column;
   align-items: center;
   width: 100%;
+  padding-top: 5dvh;
 }
 
 .setting__container {
