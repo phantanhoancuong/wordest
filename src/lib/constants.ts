@@ -44,6 +44,21 @@ export enum GameState {
   LOST = "lost",
 }
 
+/**
+ * Used to determine the animation speed settings of the game.
+ */
+export enum AnimationSpeed {
+  FAST = "fast",
+  NORMAL = "normal",
+  SLOW = "slow",
+}
+
+export const AnimationSpeedMultiplier: Record<AnimationSpeed, number> = {
+  [AnimationSpeed.FAST]: 0.75,
+  [AnimationSpeed.NORMAL]: 1,
+  [AnimationSpeed.SLOW]: 1.5,
+};
+
 /** Animation timing configuration */
 interface AnimationTypeTiming {
   delay: number;
@@ -68,4 +83,14 @@ export const animationTiming: AnimationTiming = {
     motion: 0.3,
     color: 0.3,
   },
+};
+
+export const LocalStorageKeys = {
+  ANIMATION_SPEED: "wordest:animationSpeed",
+  VOLUME: "wordest:volume",
+};
+
+export const DefaultSettings = {
+  ANIMATION_SPEED: AnimationSpeed.NORMAL,
+  VOLUME: 0.5,
 };

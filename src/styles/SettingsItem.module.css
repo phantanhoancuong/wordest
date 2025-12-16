@@ -15,11 +15,6 @@
   font-size: calc(var(--item-font-scale) * 1rem);
 }
 
-.settings-item button {
-  margin: calc(var(--item-font-scale) * 0.2rem) 0;
-  font-size: calc(var(--item-font-scale) * 1rem);
-}
-
 .settings-item__info {
   display: flex;
   flex-direction: column;
@@ -28,11 +23,19 @@
 .settings-item__actions {
   display: flex;
   gap: 0.5rem;
+  align-self: flex-start;
+  align-items: center;
+  width: 100%;
 }
 
-.settings-item__actions input,
-.settings-item__actions button {
+.settings-item__actions input {
   flex: 1;
+  accent-color: var(--cell-background-color-correct);
+}
+
+.settings-item__actions img {
+  width: calc(var(--item-font-scale) * 1.5rem);
+  height: calc(var(--item-font-scale) * 1.5rem);
 }
 
 @media (min-width: 600px) {

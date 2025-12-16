@@ -6,10 +6,12 @@ import { useEffect, useRef } from "react";
  * Creates and caches audio elements from given file paths, allowing multiple sounds to overlap when played.
  *
  * @param soundPaths - Array of sound file URLs to preload.
+ * @param volume - Volume level for playback (0.0 to 1.0).
  * @returns Function that plays a random sound from the preloaded list.
  */
 export const useSoundPlayer = (
-  soundPaths: Array<string> = []
+  soundPaths: Array<string> = [],
+  volume: number
 ): (() => void) => {
   const sounds = useRef<Array<HTMLAudioElement>>([]);
 
@@ -28,6 +30,9 @@ export const useSoundPlayer = (
     const audioClone = sounds.current[randomIndex].cloneNode(
       true
     ) as HTMLAudioElement;
+
+    audioClone.volume = volume;
+
     audioClone.play().catch((err: unknown) => {
       console.error("Error playing audio:", err);
     });

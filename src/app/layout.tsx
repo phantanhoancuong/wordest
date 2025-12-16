@@ -1,4 +1,5 @@
 import "./globals.css";
+import { SettingsProvider } from "./contexts/SettingsContext";
 
 export const metadata = {
   title: "WORDest",
@@ -11,7 +12,9 @@ export const metadata = {
 export default function RootLayout({ children }) {
   return (
     <html lang="en">
-      <body>{children}</body>
+      <body>
+        <SettingsProvider>{children}</SettingsProvider>
+      </body>
     </html>
   );
 }

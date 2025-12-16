@@ -7,6 +7,7 @@ import {
   animationTiming,
   CellStatus,
   CellAnimation,
+  AnimationSpeedMultiplier,
 } from "../lib/constants";
 import { evaluateGuess, mapGuessToRow } from "../lib/utils";
 
@@ -20,6 +21,7 @@ import { useToasts } from "./useToasts";
 import { UseGameReturn } from "@/types/useGame.types";
 import { GameState } from "../lib/constants";
 import { useAnimationTracker } from "./useAnimationTracker";
+import { useSettingsContext } from "@/app/contexts/SettingsContext";
 /**
  * Hook to manage the state and logic of the game.
  *
@@ -47,6 +49,11 @@ export const useGame = (): UseGameReturn => {
   const { toastList, addToast, removeToast } = useToasts();
   const { keyStatuses, updateKeyStatuses, resetKeyStatuses } = useKeyStatuses();
 
+  const { volume, animationSpeed } = useSettingsContext();
+
+  const animationSpeedMultipler =
+    AnimationSpeedMultiplier[animationSpeed.value];
+
   const gameGrid = useGridState(
     ATTEMPTS,
     WORD_LENGTH,
@@ -63,10 +70,10 @@ export const useGame = (): UseGameReturn => {
     0
   );
 
-  const playKeySound = useSoundPlayer([
-    "/sounds/key_01.mp3",
-    "/sounds/key_02.mp3",
-  ]);
+  const playKeySound = useSoundPlayer(
+    ["/sounds/key_01.mp3", "/sounds/key_02.mp3"],
+    volume.value
+  );
 
   const updateAnswerGrid = useMemo(() => {
     if (!targetWord) return () => answerGrid.resetGrid();
@@ -208,7 +215,7 @@ export const useGame = (): UseGameReturn => {
       Array(gameGrid.colNum).fill(CellStatus.DEFAULT),
       {
         animation: CellAnimation.SHAKE,
-        animationDelay: animationTiming.shake.delay,
+        animationDelay: animationTiming.shake.delay * animationSpeedMultipler,
         isConsecutive: false,
       }
     );
@@ -233,7 +240,7 @@ export const useGame = (): UseGameReturn => {
 
     const newRow = mapGuessToRow(guess, statuses, {
       animation: CellAnimation.BOUNCE,
-      animationDelay: animationTiming.bounce.delay,
+      animationDelay: animationTiming.bounce.delay * animationSpeedMultipler,
       isConsecutive: true,
     });
 
@@ -253,7 +260,8 @@ export const useGame = (): UseGameReturn => {
           ...prevCell,
           status: CellStatus.CORRECT,
           animation: CellAnimation.BOUNCE,
-          animationDelay: i * animationTiming.bounce.delay,
+          animationDelay:
+            i * animationTiming.bounce.delay * animationSpeedMultipler,
         };
         changedCount++;
       }
