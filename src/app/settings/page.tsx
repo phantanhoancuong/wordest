@@ -51,7 +51,7 @@ export default function SettingsPage() {
                   type="range"
                   min="0"
                   max="100"
-                  step="5"
+                  step="11"
                   list="volume-ticks"
                   value={draftVolume}
                   onChange={(e) => {
@@ -64,9 +64,8 @@ export default function SettingsPage() {
                 />
                 <datalist id="volume-ticks">
                   <option value="0" />
-                  <option value="25" />
-                  <option value="50" />
-                  <option value="75" />
+                  <option value="33" />
+                  <option value="66" />
                   <option value="100" />
                 </datalist>
               </>

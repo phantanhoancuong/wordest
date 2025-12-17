@@ -12,7 +12,7 @@ export const VOLUME_ICONS = {
 
 export const getVolumeIcon = (volume: number) => {
   if (volume === 0) return VOLUME_ICONS.OFF;
-  if (volume <= 25) return VOLUME_ICONS.MUTE;
-  if (volume <= 75) return VOLUME_ICONS.DOWN;
+  if (volume <= 33) return VOLUME_ICONS.MUTE;
+  if (volume <= 66) return VOLUME_ICONS.DOWN;
   return VOLUME_ICONS.UP;
 };
