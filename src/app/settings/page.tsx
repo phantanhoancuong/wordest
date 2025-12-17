@@ -5,6 +5,7 @@ import { Banner, ButtonGroup, SettingsItem } from "../../components";
 import { useSettingsContext } from "../contexts/SettingsContext";
 import { AnimationSpeed } from "@/lib/constants";
 import { playVolumePreview } from "@/lib/audio";
+import { getVolumeIcon } from "@/lib/volumeIcons";
 import Image from "next/image";
 import styles from "./page.module.css";
 
@@ -26,16 +27,6 @@ export default function SettingsPage() {
     { label: "Normal", value: AnimationSpeed.NORMAL },
     { label: "Fast", value: AnimationSpeed.FAST },
   ];
-
-  const getVolumeIcon = (v: number) => {
-    if (v === 0)
-      return "/images/icons/volume_off_24dp_000000_FILL0_wght400_GRAD0_opsz24.svg";
-    if (v <= 25)
-      return "/images/icons/volume_mute_24dp_000000_FILL0_wght400_GRAD0_opsz24.svg";
-    if (v <= 75)
-      return "/images/icons/volume_down_24dp_000000_FILL0_wght400_GRAD0_opsz24.svg";
-    return "/images/icons/volume_up_24dp_000000_FILL0_wght400_GRAD0_opsz24.svg";
-  };
 
   return (
     <div className={styles["app"]}>
