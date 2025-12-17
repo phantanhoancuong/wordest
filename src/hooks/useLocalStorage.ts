@@ -1,4 +1,19 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
+
+/**
+ * Loads the stored value when key changes.
+ * Falls back to the initial value if parsing fails.
+ */
+function getLocalStorageValue<T>(key: string, defaultValue: T): T {
+  if (typeof window === "undefined") return defaultValue;
+
+  try {
+    const item = localStorage.getItem(key);
+    return item ? JSON.parse(item) : defaultValue;
+  } catch {
+    return defaultValue;
+  }
+}
 
 /**
  * Hook to persist a state in 'localStorage'.
@@ -11,25 +26,9 @@ export const useLocalStorage = <T>(
   key: string,
   initialValue: T
 ): [T, (value: T | ((value: T) => T)) => void] => {
-  const [storedValue, setStoredValue] = useState<T>(initialValue);
-
-  /**
-   * Loads the stored value when key changes.
-   * Falls back to the initial value if parsing fails.
-   */
-  useEffect(() => {
-    const item = localStorage.getItem(key);
-    if (item === null) {
-      setStoredValue(initialValue);
-      return;
-    }
-
-    try {
-      setStoredValue(JSON.parse(item));
-    } catch {
-      setStoredValue(initialValue);
-    }
-  }, [key, initialValue]);
+  const [storedValue, setStoredValue] = useState<T>(() =>
+    getLocalStorageValue(key, initialValue)
+  );
 
   /**
    * Updates state and syncs the value to 'localStorage'.

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Banner, ButtonGroup, SettingsItem } from "../../components";
 import { useSettingsContext } from "../contexts/SettingsContext";
 import { AnimationSpeed } from "@/lib/constants";
@@ -20,7 +20,15 @@ import styles from "./page.module.css";
  */
 export default function SettingsPage() {
   const { volume, animationSpeed } = useSettingsContext();
-  const [draftVolume, setDraftVolume] = useState(volume.value);
+  const [draftVolume, setDraftVolume] = useState(volume.value * 100);
+  const [hasHydrated, setHasHydrated] = useState(false);
+
+  useEffect(() => {
+    setDraftVolume(volume.value * 100);
+    setHasHydrated(true);
+  }, [volume.value]);
+
+  if (!hasHydrated) return null;
 
   const animationSpeedOptions = [
     { label: "Slow", value: AnimationSpeed.SLOW },
