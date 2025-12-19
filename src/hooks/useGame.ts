@@ -21,6 +21,7 @@ import { useToasts } from "./useToasts";
 import { UseGameReturn } from "@/types/useGame.types";
 import { GameState } from "../lib/constants";
 import { useAnimationTracker } from "./useAnimationTracker";
+import { useGameState } from "./useGameState";
 import { useSettingsContext } from "@/app/contexts/SettingsContext";
 /**
  * Hook to manage the state and logic of the game.
@@ -33,8 +34,7 @@ export const useGame = (): UseGameReturn => {
   const { targetWord, targetLetterCount, wordFetchError, reloadTargetWord } =
     useTargetWord();
 
-  const [gameState, setGameState] = useState<GameState>(GameState.PLAYING);
-  const pendingGameState = useRef<GameState | null>(null);
+  const gameState = useGameState();
 
   const [rowState, setRowState] = useState(0);
   const [colState, setColState] = useState(0);
@@ -94,7 +94,7 @@ export const useGame = (): UseGameReturn => {
     },
     () => {
       inputLocked.current = false;
-      if (pendingGameState.current != null) {
+      if (gameState.pendingState != null) {
         updateGameState();
       }
     }
@@ -147,14 +147,13 @@ export const useGame = (): UseGameReturn => {
    * - Updates the main `gameState` and clears the pending ref.
    */
   const updateGameState = (): void => {
-    const nextGameState = pendingGameState.current;
-    if (!nextGameState || nextGameState === gameState) return;
-    setGameState(nextGameState);
+    const nextState = gameState.pendingState;
+    const committed = gameState.commitState();
+    if (!committed) return;
 
-    if (nextGameState !== GameState.PLAYING) {
-      revealAnswerGrid(nextGameState);
+    if (nextState !== GameState.PLAYING) {
+      revealAnswerGrid(nextState);
     }
-    pendingGameState.current = null;
   };
 
   const revealAnswerGrid = (state: GameState) => {
@@ -177,7 +176,7 @@ export const useGame = (): UseGameReturn => {
    * Resets all game states, grid, keyboard, and target word to start a new game.
    */
   const restartGame = (): void => {
-    setGameState(GameState.PLAYING);
+    gameState.resetState();
     setRowState(0);
     setColState(0);
 
@@ -187,7 +186,6 @@ export const useGame = (): UseGameReturn => {
     gameGrid.resetGrid();
     answerGrid.resetGrid();
     gameGridAnimationTracker.reset();
-    pendingGameState.current = null;
     pendingRowIncrement.current = false;
     inputLocked.current = false;
 
@@ -278,14 +276,13 @@ export const useGame = (): UseGameReturn => {
 
     if (guess === targetWord) {
       addToast("You win!");
-      pendingGameState.current = GameState.WON;
+      gameState.queueState(GameState.WON);
       return;
     }
 
     if (row + 1 >= gameGrid.rowNum) {
       addToast(`The word was: ${targetWord}`);
-      pendingGameState.current = GameState.LOST;
-
+      gameState.queueState(GameState.LOST);
       return;
     }
 
@@ -354,7 +351,7 @@ export const useGame = (): UseGameReturn => {
    */
   const handleInput = (key: string): void => {
     if (
-      gameState !== GameState.PLAYING ||
+      gameState.state !== GameState.PLAYING ||
       !targetWord ||
       gameGridAnimationTracker.getCount() > 0 ||
       inputLocked.current
@@ -434,7 +431,7 @@ export const useGame = (): UseGameReturn => {
     },
 
     game: {
-      gameState,
+      gameState: gameState.state,
       validationError,
       wordFetchError,
       targetWord,
