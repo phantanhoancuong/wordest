@@ -1,28 +1,31 @@
-import { useMemo, useRef, useState, useEffect } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
-import { validateWord } from "../lib/api";
+import { validateWord } from "@/lib/api";
 import {
-  ATTEMPTS,
-  WORD_LENGTH,
   animationTiming,
-  CellStatus,
-  CellAnimation,
   AnimationSpeedMultiplier,
-} from "../lib/constants";
-import { evaluateGuess, mapGuessToRow } from "../lib/utils";
+  ATTEMPTS,
+  CellAnimation,
+  CellStatus,
+  GameState,
+  WORD_LENGTH,
+} from "@/lib/constants";
+import { evaluateGuess, mapGuessToRow } from "@/lib/utils";
 
+import { useAnimationTracker } from "./useAnimationTracker";
+import { useCursorController } from "./useCursorController";
+import { useGameState } from "./useGameState";
 import { useGridState } from "./useGridState";
 import { useKeyboardInput } from "./useKeyboardInput";
 import { useKeyStatuses } from "./useKeyStatuses";
-import { useLatest } from "./useLatest";
 import { useSoundPlayer } from "./useSoundPlayer";
 import { useTargetWord } from "./useTargetWord";
 import { useToasts } from "./useToasts";
+
 import { UseGameReturn } from "@/types/useGame.types";
-import { GameState } from "../lib/constants";
-import { useAnimationTracker } from "./useAnimationTracker";
-import { useGameState } from "./useGameState";
+
 import { useSettingsContext } from "@/app/contexts/SettingsContext";
+
 /**
  * Hook to manage the state and logic of the game.
  *
@@ -35,13 +38,8 @@ export const useGame = (): UseGameReturn => {
     useTargetWord();
 
   const gameState = useGameState();
+  const cursor = useCursorController();
 
-  const [rowState, setRowState] = useState(0);
-  const [colState, setColState] = useState(0);
-  const rowRef = useLatest(rowState);
-  const colRef = useLatest(colState);
-
-  const pendingRowIncrement = useRef(false);
   const inputLocked = useRef(false);
 
   const [validationError, setValidationError] = useState("");
@@ -119,11 +117,7 @@ export const useGame = (): UseGameReturn => {
   ): void => {
     gameGridAnimationTracker.markEnd(rowIndex, colIndex);
 
-    if (pendingRowIncrement.current === true) {
-      setColState(0);
-      setRowState((prevRow) => prevRow + 1);
-      pendingRowIncrement.current = false;
-    }
+    cursor.commitPendingRowAdvance();
   };
 
   /**
@@ -177,8 +171,7 @@ export const useGame = (): UseGameReturn => {
    */
   const restartGame = (): void => {
     gameState.resetState();
-    setRowState(0);
-    setColState(0);
+    cursor.resetCursor();
 
     resetKeyStatuses();
     reloadTargetWord();
@@ -186,7 +179,6 @@ export const useGame = (): UseGameReturn => {
     gameGrid.resetGrid();
     answerGrid.resetGrid();
     gameGridAnimationTracker.reset();
-    pendingRowIncrement.current = false;
     inputLocked.current = false;
 
     answerGridAnimationTracker.reset();
@@ -286,7 +278,7 @@ export const useGame = (): UseGameReturn => {
       return;
     }
 
-    pendingRowIncrement.current = true;
+    cursor.queueRowAdvance();
   };
 
   /**
@@ -308,11 +300,10 @@ export const useGame = (): UseGameReturn => {
    * Input is locked during submission to prevent race conditions.
    */
   const submitGuess = async (): Promise<void> => {
-    const row = rowRef.current;
     if (inputLocked.current) return;
     inputLocked.current = true;
 
-    const guess = gameGrid.gridRef.current[row]
+    const guess = gameGrid.gridRef.current[cursor.row.current]
       .map((cell) => cell.char)
       .join("");
     if (guess.length !== gameGrid.colNum) {
@@ -329,13 +320,13 @@ export const useGame = (): UseGameReturn => {
       }
 
       if (!data?.valid) {
-        handleInvalidGuess(guess, row);
+        handleInvalidGuess(guess, cursor.row.current);
         return;
       }
 
       setValidationError("");
 
-      handleValidGuess(guess, row);
+      handleValidGuess(guess, cursor.row.current);
     } catch (error: unknown) {
       console.error("submitGuess error:", error);
       addToast("Unexpected error occurred.");
@@ -367,42 +358,31 @@ export const useGame = (): UseGameReturn => {
     }
 
     if (isBackspace) {
-      setColState((prev) => {
-        if (prev === 0) return prev;
-
-        const newCol = prev - 1;
-
-        gameGrid.updateCell(rowRef.current, newCol, {
-          char: "",
-          status: CellStatus.DEFAULT,
-          animation: CellAnimation.NONE,
-          animationDelay: 0,
-        });
-
-        return newCol;
+      const colToUpdate = cursor.retreatCol();
+      if (colToUpdate === null) return;
+      gameGrid.updateCell(cursor.row.current, colToUpdate, {
+        char: "",
+        status: CellStatus.DEFAULT,
+        animation: CellAnimation.NONE,
+        animationDelay: 0,
       });
       return;
     }
 
     if (isEnter) {
-      if (colRef.current === gameGrid.colNum) submitGuess();
+      if (cursor.col.current === gameGrid.colNum) submitGuess();
       return;
     }
 
     if (isLetter) {
       const letter = key.toUpperCase();
-
-      setColState((prev) => {
-        if (prev >= gameGrid.colNum) return prev;
-
-        gameGrid.updateCell(rowRef.current, prev, {
-          char: letter,
-          status: CellStatus.DEFAULT,
-          animation: CellAnimation.NONE,
-          animationDelay: 0,
-        });
-
-        return prev + 1;
+      const colToUpdate = cursor.advanceCol(gameGrid.colNum);
+      if (colToUpdate === null) return;
+      gameGrid.updateCell(cursor.row.current, colToUpdate, {
+        char: letter,
+        status: CellStatus.DEFAULT,
+        animation: CellAnimation.NONE,
+        animationDelay: 0,
       });
     }
   };
