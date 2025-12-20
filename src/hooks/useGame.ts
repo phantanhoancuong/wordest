@@ -116,8 +116,8 @@ export const useGame = (): UseGameReturn => {
     colIndex: number
   ): void => {
     gameGridAnimationTracker.markEnd(rowIndex, colIndex);
-
-    cursor.commitPendingRowAdvance();
+    if (gameGridAnimationTracker.getCount() === 0)
+      cursor.commitPendingRowAdvance();
   };
 
   /**
