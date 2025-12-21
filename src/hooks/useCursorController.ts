@@ -1,12 +1,13 @@
 import { useRef, useState } from "react";
 import { useLatest } from "./useLatest";
+import { UseCursorControllerReturn } from "@/types/useCursorController.types";
 
 /**
  * Hook to manage cursor state.
  *
  * Tracks the current index of where the user is typing to guide grid rendering, animation, and game logic.
  */
-export const useCursorController = () => {
+export const useCursorController = (): UseCursorControllerReturn => {
   const [rowState, setRowState] = useState(0);
   const [colState, setColState] = useState(0);
   const rowRef = useLatest(rowState);
