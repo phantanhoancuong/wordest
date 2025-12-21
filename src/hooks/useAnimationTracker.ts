@@ -1,3 +1,4 @@
+import { UseAnimationTrackerReturn } from "@/types/useAnimationTracker.types";
 import { useRef } from "react";
 
 /**
@@ -14,12 +15,7 @@ import { useRef } from "react";
 export const useAnimationTracker = (
   flushCallback: (finishedMap: Map<number, Array<number>>) => void,
   onAllEnd?: () => void
-): {
-  getCount: () => number;
-  add: (num: number) => void;
-  markEnd: (row: number, col: number) => void;
-  reset: () => void;
-} => {
+): UseAnimationTrackerReturn => {
   const animatingCount = useRef(0);
   const finished = useRef(new Map<number, Array<number>>());
 
@@ -41,12 +37,12 @@ export const useAnimationTracker = (
     }
   };
 
-  const reset = () => {
+  const reset = (): void => {
     animatingCount.current = 0;
     finished.current.clear();
   };
 
-  const getCount = () => {
+  const getCount = (): number => {
     return animatingCount.current;
   };
 
