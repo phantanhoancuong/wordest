@@ -1,11 +1,13 @@
 import { useRef, useState } from "react";
 
-import { CellStatus, CellAnimation } from "../lib/constants";
-import { initEmptyGrid } from "../lib/utils";
+import { animationTiming, CellStatus, CellAnimation } from "@/lib/constants";
+
+import { initEmptyGrid, mapGuessToRow } from "@/lib/utils";
 
 import { useLatest } from "./useLatest";
-import { Cell, PartialCell } from "../types/cell";
-import { UseGridStateReturn } from "../types/useGridState.types";
+
+import { Cell, PartialCell } from "@/types/cell";
+import { UseGridStateReturn } from "@/types/useGridState.types";
 
 /**
  * Manages a 2D grid of cells representing player's guesses.
@@ -140,6 +142,63 @@ export const useGridState = (
     });
   };
 
+  const getRow = (rowIndex: number): Cell[] => {
+    return gridRef.current[rowIndex];
+  };
+
+  const getRowGuess = (rowIndex: number): string => {
+    const row = getRow(rowIndex);
+    return row.map((cell) => cell.char).join("");
+  };
+
+  const applyValidGuessAnimation = (
+    rowIndex: number,
+    statuses: CellStatus[],
+    animationSpeedMultiplier: number
+  ) => {
+    const guess = getRowGuess(rowIndex);
+    applyRowAnimation(
+      rowIndex,
+      guess,
+      statuses,
+      CellAnimation.BOUNCE,
+      animationTiming.bounce.delay * animationSpeedMultiplier,
+      true
+    );
+  };
+
+  const applyRowAnimation = (
+    rowIndex: number,
+    guess: string,
+    statuses: CellStatus[],
+    animation: CellAnimation,
+    delay: number,
+    isConsecutive: boolean
+  ): void => {
+    const newRow = mapGuessToRow(guess, statuses, {
+      animation,
+      animationDelay: delay,
+      isConsecutive,
+    });
+
+    updateRow(rowIndex, newRow);
+  };
+
+  const applyInvalidGuessAnimation = (
+    rowIndex: number,
+    animationSpeedMultiplier: number
+  ) => {
+    const guess = getRowGuess(rowIndex);
+    applyRowAnimation(
+      rowIndex,
+      guess,
+      Array(getRow(rowIndex).length).fill(CellStatus.DEFAULT),
+      CellAnimation.SHAKE,
+      animationTiming.shake.delay * animationSpeedMultiplier,
+      false
+    );
+  };
+
   return {
     grid,
     gridRef,
@@ -147,6 +206,8 @@ export const useGridState = (
     colNum: colNum.current,
     updateCell,
     updateRow,
+    applyValidGuessAnimation,
+    applyInvalidGuessAnimation,
     flushAnimation,
     resetGrid,
   };

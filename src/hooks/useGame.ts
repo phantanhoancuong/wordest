@@ -1,21 +1,19 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 
-import { validateWord } from "@/lib/api";
 import {
-  animationTiming,
-  AnimationSpeedMultiplier,
   ATTEMPTS,
+  WORD_LENGTH,
+  AnimationSpeedMultiplier,
   CellAnimation,
   CellStatus,
   GameState,
-  WORD_LENGTH,
 } from "@/lib/constants";
-import { evaluateGuess, mapGuessToRow } from "@/lib/utils";
 
 import { useAnimationTracker } from "./useAnimationTracker";
 import { useCursorController } from "./useCursorController";
 import { useGameState } from "./useGameState";
 import { useGridState } from "./useGridState";
+import { useGuessSubmission } from "./useGuessSubmission";
 import { useKeyboardInput } from "./useKeyboardInput";
 import { useKeyStatuses } from "./useKeyStatuses";
 import { useSoundPlayer } from "./useSoundPlayer";
@@ -41,15 +39,12 @@ export const useGame = (): UseGameReturn => {
   const cursor = useCursorController();
 
   const inputLocked = useRef(false);
-
   const [validationError, setValidationError] = useState("");
-
   const { toastList, addToast, removeToast } = useToasts();
   const { keyStatuses, updateKeyStatuses, resetKeyStatuses } = useKeyStatuses();
-
   const { volume, animationSpeed } = useSettingsContext();
 
-  const animationSpeedMultipler =
+  const animationSpeedMultiplier =
     AnimationSpeedMultiplier[animationSpeed.value];
 
   const gameGrid = useGridState(
@@ -179,160 +174,11 @@ export const useGame = (): UseGameReturn => {
     gameGrid.resetGrid();
     answerGrid.resetGrid();
     gameGridAnimationTracker.reset();
-    inputLocked.current = false;
-
     answerGridAnimationTracker.reset();
 
+    inputLocked.current = false;
+
     toastList.forEach((t) => removeToast(t.id));
-  };
-
-  /**
-   * Handles when the guessed word is not in the valid word list.
-   *
-   * Provides user feedback, applies a shake animation to the current row,
-   * and prevents further input until the animation finishes.
-   *
-   * @param guess - The invalid guessed word.
-   * @param row - The index of the current row being updated.
-   */
-  const handleInvalidGuess = (guess: string, row: number): void => {
-    const message = "Not in word list.";
-    setValidationError(message);
-    addToast(message);
-
-    const shakeRow = mapGuessToRow(
-      guess,
-      Array(gameGrid.colNum).fill(CellStatus.DEFAULT),
-      {
-        animation: CellAnimation.SHAKE,
-        animationDelay: animationTiming.shake.delay * animationSpeedMultipler,
-        isConsecutive: false,
-      }
-    );
-    gameGridAnimationTracker.add(gameGrid.colNum);
-    gameGrid.updateRow(row, shakeRow);
-  };
-
-  /**
-   * Handles a valid guess by evaluating letter correctness.
-   *
-   * Applies bounce animations, updates keyboard states, and manage game-over conditions.
-   *
-   * @param guess - The validated word.
-   * @param row - The index of the current row being updated.
-   */
-  const handleValidGuess = (guess: string, row: number) => {
-    const statuses = evaluateGuess(
-      guess,
-      targetWord,
-      targetLetterCount.current
-    );
-
-    const newRow = mapGuessToRow(guess, statuses, {
-      animation: CellAnimation.BOUNCE,
-      animationDelay: animationTiming.bounce.delay * animationSpeedMultipler,
-      isConsecutive: true,
-    });
-
-    const prevAnswerRow = answerGrid.gridRef.current[0];
-    const answerRow = [...prevAnswerRow];
-    let changedCount = 0;
-
-    for (let i = 0; i < answerRow.length; i++) {
-      const prevCell = prevAnswerRow[i];
-
-      // If it's already correct, skip it — no animation or change.
-      if (prevCell.status === CellStatus.CORRECT) continue;
-
-      // If this guess reveals a correct letter for the first time
-      if (statuses[i] === CellStatus.CORRECT) {
-        answerRow[i] = {
-          ...prevCell,
-          status: CellStatus.CORRECT,
-          animation: CellAnimation.BOUNCE,
-          animationDelay:
-            i * animationTiming.bounce.delay * animationSpeedMultipler,
-        };
-        changedCount++;
-      }
-    }
-
-    if (changedCount > 0) {
-      answerGridAnimationTracker.add(changedCount);
-      answerGrid.updateRow(0, answerRow);
-    }
-
-    gameGridAnimationTracker.add(gameGrid.colNum);
-    gameGrid.updateRow(row, newRow);
-    updateKeyStatuses(guess, statuses);
-
-    if (guess === targetWord) {
-      addToast("You win!");
-      gameState.queueState(GameState.WON);
-      return;
-    }
-
-    if (row + 1 >= gameGrid.rowNum) {
-      addToast(`The word was: ${targetWord}`);
-      gameState.queueState(GameState.LOST);
-      return;
-    }
-
-    cursor.queueRowAdvance();
-  };
-
-  /**
-   * Handles a general validation error.
-   */
-  const handleValidationError = (): void => {
-    const message = "Error validating word. Please try again.";
-    setValidationError(message);
-    addToast(message);
-  };
-
-  /**
-   * Submits the guess (current row) for evaluation and updates game states.
-   *
-   * 1. Reads the current row's guess
-   * 2. Validates it through the API.
-   * 3. Handles invalid, valid, and error cases.
-   *
-   * Input is locked during submission to prevent race conditions.
-   */
-  const submitGuess = async (): Promise<void> => {
-    if (inputLocked.current) return;
-    inputLocked.current = true;
-
-    const guess = gameGrid.gridRef.current[cursor.row.current]
-      .map((cell) => cell.char)
-      .join("");
-    if (guess.length !== gameGrid.colNum) {
-      inputLocked.current = false;
-      return;
-    }
-
-    try {
-      const { status, ok, data } = await validateWord(guess);
-
-      if (status >= 500 || !data) {
-        handleValidationError();
-        return;
-      }
-
-      if (!data?.valid) {
-        handleInvalidGuess(guess, cursor.row.current);
-        return;
-      }
-
-      setValidationError("");
-
-      handleValidGuess(guess, cursor.row.current);
-    } catch (error: unknown) {
-      console.error("submitGuess error:", error);
-      addToast("Unexpected error occurred.");
-    } finally {
-      inputLocked.current = false;
-    }
   };
 
   /**
@@ -386,6 +232,32 @@ export const useGame = (): UseGameReturn => {
       });
     }
   };
+
+  /**
+   * Handles a general validation error.
+   */
+  const handleValidationError = (): void => {
+    const message = "Error validating word. Please try again.";
+    setValidationError(message);
+    addToast(message);
+  };
+
+  const submitGuess = useGuessSubmission(
+    animationSpeedMultiplier,
+    inputLocked,
+    targetLetterCount,
+    targetWord,
+    answerGrid,
+    gameGrid,
+    gameState,
+    cursor,
+    addToast,
+    handleValidationError,
+    setValidationError,
+    updateKeyStatuses,
+    gameGridAnimationTracker,
+    answerGridAnimationTracker
+  );
 
   useKeyboardInput(handleInput);
 
