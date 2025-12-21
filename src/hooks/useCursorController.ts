@@ -37,7 +37,7 @@ export const useCursorController = (): UseCursorControllerReturn => {
    * @param colLimit - The maximum number of columns in the row.
    * @returns The current column index before advancing, or null if at limit.
    */
-  const advanceCol = (colLimit: number) => {
+  const advanceCol = (colLimit: number): number | null => {
     if (colRef.current >= colLimit) return null;
     const currentCol = colRef.current;
     setColState(currentCol + 1);
