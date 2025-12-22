@@ -6,7 +6,11 @@ import Image from "next/image";
 
 import styles from "./page.module.css";
 
-import { AnimationSpeed, DEFAULT_UNMUTE_VOLUME } from "@/lib/constants";
+import {
+  AnimationSpeed,
+  GameMode,
+  DEFAULT_UNMUTE_VOLUME,
+} from "@/lib/constants";
 
 import { Banner, ButtonGroup, SettingsItem } from "@/components";
 import { playVolumePreview } from "@/lib/audio";
@@ -24,7 +28,7 @@ import { useSettingsContext } from "@/app/contexts/SettingsContext";
  * Settings values are sourced from {@link useSettingsContext}.
  */
 export default function SettingsPage() {
-  const { volume, animationSpeed, isMuted } = useSettingsContext();
+  const { volume, animationSpeed, isMuted, gameMode } = useSettingsContext();
 
   // Local UI state for the volume slider (0-100)
   // This is decoupled from persisted volume (0-1) to avoid unnecessary writes during dragging.
@@ -72,6 +76,11 @@ export default function SettingsPage() {
     { label: "Fast", value: AnimationSpeed.FAST },
   ];
 
+  const gameModeOptions = [
+    { label: "Normal", value: GameMode.NORMAL },
+    { label: "Expert", value: GameMode.EXPERT },
+  ];
+
   return (
     <div className={styles["app"]}>
       <header className={`${styles["app__banner"]} flex-center`}>
@@ -112,7 +121,6 @@ export default function SettingsPage() {
                     // Persist volume once on release
                     volume.setValue(newVolume);
 
-                    // Sync mute state + optional preview
                     const shouldMute = newVolume === 0;
                     isMuted.setValue(shouldMute);
 
@@ -141,6 +149,19 @@ export default function SettingsPage() {
                 options={animationSpeedOptions}
                 selected={animationSpeed.value}
                 onSelect={animationSpeed.setValue}
+              />
+            }
+          />
+        </div>
+        <div className={styles["setting__container"]}>
+          <SettingsItem
+            name="Game mode (WIP)"
+            description="Normal mode is the classic WORDest experience. Export requires all future guesses to have correct letters stay in the same position, present letters must be included somewhere, and absent letters cannot be reused (with standard duplicate-letter rules)."
+            control={
+              <ButtonGroup
+                options={gameModeOptions}
+                selected={gameMode.value}
+                onSelect={gameMode.setValue}
               />
             }
           />

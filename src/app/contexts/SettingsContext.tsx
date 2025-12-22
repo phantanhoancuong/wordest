@@ -2,7 +2,7 @@
 
 import { createContext, useContext } from "react";
 
-import { AnimationSpeed } from "@/lib/constants";
+import { AnimationSpeed, GameMode } from "@/lib/constants";
 
 import { useSettings } from "@/hooks/useSettings";
 
@@ -21,6 +21,10 @@ interface SettingsContextType {
   isMuted: {
     value: boolean;
     setValue: (v: boolean) => void;
+  };
+  gameMode: {
+    value: string;
+    setValue: (v: GameMode) => void;
   };
 }
 

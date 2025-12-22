@@ -5,7 +5,8 @@
 
 .button-group__button {
   flex: 1;
-  font-size: calc(var(--item-font-scale) * 1rem);
+  font-size: calc(var(--item-font-scale) * 0.8rem);
+  height: calc(var(--item-font-scale) * 2.5rem);
   margin: calc(var(--item-font-scale) * 0.2rem);
   background-color: var(--cell-background-color-absent);
   color: var(--cell-text-color-absent);

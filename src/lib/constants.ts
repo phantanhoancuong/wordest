@@ -45,6 +45,14 @@ export enum GameState {
 }
 
 /**
+ * Used to determine the game mode (difficulty level) of the game.
+ */
+export enum GameMode {
+  NORMAL = "normal",
+  EXPERT = "expert",
+}
+
+/**
  * Used to determine the animation speed settings of the game.
  */
 export enum AnimationSpeed {
@@ -90,12 +98,14 @@ export const LocalStorageKeys = {
   ANIMATION_SPEED: "wordest:animationSpeed",
   VOLUME: "wordest:volume",
   IS_MUTED: "wordest:isMuted",
+  GAME_MODE: "wordest:gameMode",
 };
 
 export const DefaultSettings = {
   ANIMATION_SPEED: AnimationSpeed.NORMAL,
   VOLUME: 0.5,
   IS_MUTED: false,
+  GAME_MODE: GameMode.NORMAL,
 };
 
 // Default volume applied when unmuting from a zero-volume state.

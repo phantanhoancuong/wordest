@@ -1,6 +1,7 @@
 import {
   AnimationSpeed,
   DefaultSettings,
+  GameMode,
   LocalStorageKeys,
 } from "@/lib/constants";
 
@@ -27,10 +28,15 @@ export const useSettings = () => {
     LocalStorageKeys.IS_MUTED,
     DefaultSettings.IS_MUTED
   );
+  const [gameMode, setGameMode] = useLocalStorage<GameMode>(
+    LocalStorageKeys.GAME_MODE,
+    DefaultSettings.GAME_MODE
+  );
 
   return {
     animationSpeed: { value: animationSpeed, setValue: setAnimationSpeed },
     volume: { value: volume, setValue: setVolume },
     isMuted: { value: isMuted, setValue: setIsMuted },
+    gameMode: { value: gameMode, setValue: setGameMode },
   };
 };
