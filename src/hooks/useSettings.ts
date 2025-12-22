@@ -1,5 +1,9 @@
-import { LocalStorageKeys, DefaultSettings } from "@/lib/constants";
-import { AnimationSpeed } from "@/lib/constants";
+import {
+  AnimationSpeed,
+  DefaultSettings,
+  LocalStorageKeys,
+} from "@/lib/constants";
+
 import { useLocalStorage } from "./useLocalStorage";
 
 /**
@@ -8,7 +12,7 @@ import { useLocalStorage } from "./useLocalStorage";
  * Persists settings to localStorage and keeps React state in sync.
  * Provides both the current value and a setter for each setting.
  *
- * @returns An object to deal with animation speed and volume.
+ * @returns An object to deal with animation speed, volume value, and whether or not the volume is muted.
  */
 export const useSettings = () => {
   const [animationSpeed, setAnimationSpeed] = useLocalStorage<AnimationSpeed>(
@@ -19,9 +23,14 @@ export const useSettings = () => {
     LocalStorageKeys.VOLUME,
     DefaultSettings.VOLUME
   );
+  const [isMuted, setIsMuted] = useLocalStorage<boolean>(
+    LocalStorageKeys.IS_MUTED,
+    DefaultSettings.IS_MUTED
+  );
 
   return {
     animationSpeed: { value: animationSpeed, setValue: setAnimationSpeed },
     volume: { value: volume, setValue: setVolume },
+    isMuted: { value: isMuted, setValue: setIsMuted },
   };
 };

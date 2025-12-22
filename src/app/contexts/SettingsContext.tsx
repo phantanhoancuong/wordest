@@ -1,8 +1,10 @@
 "use client";
 
 import { createContext, useContext } from "react";
-import { useSettings } from "@/hooks/useSettings";
+
 import { AnimationSpeed } from "@/lib/constants";
+
+import { useSettings } from "@/hooks/useSettings";
 
 /**
  * Shape of the settings context.
@@ -15,6 +17,10 @@ interface SettingsContextType {
   volume: {
     value: number;
     setValue: (v: number) => void;
+  };
+  isMuted: {
+    value: boolean;
+    setValue: (v: boolean) => void;
   };
 }
 

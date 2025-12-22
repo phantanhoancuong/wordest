@@ -1,13 +1,18 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Banner, ButtonGroup, SettingsItem } from "../../components";
-import { useSettingsContext } from "../contexts/SettingsContext";
-import { AnimationSpeed } from "@/lib/constants";
+
+import Image from "next/image";
+
+import styles from "./page.module.css";
+
+import { AnimationSpeed, DEFAULT_UNMUTE_VOLUME } from "@/lib/constants";
+
+import { Banner, ButtonGroup, SettingsItem } from "@/components";
 import { playVolumePreview } from "@/lib/audio";
 import { getVolumeIcon } from "@/lib/volumeIcons";
-import Image from "next/image";
-import styles from "./page.module.css";
+
+import { useSettingsContext } from "@/app/contexts/SettingsContext";
 
 /**
  * Settings page component.
@@ -19,16 +24,47 @@ import styles from "./page.module.css";
  * Settings values are sourced from {@link useSettingsContext}.
  */
 export default function SettingsPage() {
-  const { volume, animationSpeed } = useSettingsContext();
+  const { volume, animationSpeed, isMuted } = useSettingsContext();
+
+  // Local UI state for the volume slider (0-100)
+  // This is decoupled from persisted volume (0-1) to avoid unnecessary writes during dragging.
+  // Also to enable mute + persisted volume functionality.
   const [draftVolume, setDraftVolume] = useState(volume.value * 100);
+
+  // Prevents rendering until client hydration completes to avoid mismatches
   const [hasHydrated, setHasHydrated] = useState(false);
 
+  /**
+   * Sync the draft slider value with the persisted volume once hydrated.
+   */
   useEffect(() => {
     setDraftVolume(volume.value * 100);
     setHasHydrated(true);
   }, [volume.value]);
 
   if (!hasHydrated) return null;
+
+  const handleVolumeIconClick = () => {
+    const nextMuted = !isMuted.value;
+    isMuted.setValue(nextMuted);
+
+    // Muting: reflect state in the UI only.
+    if (nextMuted) {
+      setDraftVolume(0);
+      return;
+    }
+
+    // Unmuting: restore volume or apply default.
+    const nextVolume =
+      volume.value === 0 ? DEFAULT_UNMUTE_VOLUME : volume.value;
+
+    if (nextVolume !== volume.value) {
+      volume.setValue(nextVolume);
+    }
+
+    setDraftVolume(nextVolume * 100);
+    playVolumePreview(nextVolume);
+  };
 
   const animationSpeedOptions = [
     { label: "Slow", value: AnimationSpeed.SLOW },
@@ -51,9 +87,10 @@ export default function SettingsPage() {
               <>
                 <Image
                   alt="Volume icon"
-                  src={getVolumeIcon(draftVolume)}
+                  src={getVolumeIcon(isMuted.value ? 0 : draftVolume)}
                   width={24}
                   height={24}
+                  onClick={handleVolumeIconClick}
                 />
                 <input
                   type="range"
@@ -66,8 +103,15 @@ export default function SettingsPage() {
                     setDraftVolume(Number(e.target.value));
                   }}
                   onPointerUp={() => {
-                    volume.setValue(draftVolume / 100);
-                    playVolumePreview(draftVolume / 100);
+                    const newVolume = draftVolume / 100;
+                    volume.setValue(newVolume);
+
+                    if (newVolume === 0) {
+                      isMuted.setValue(true);
+                    } else {
+                      isMuted.setValue(false);
+                      playVolumePreview(newVolume);
+                    }
                   }}
                 />
                 <datalist id="volume-ticks">

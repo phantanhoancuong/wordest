@@ -85,12 +85,18 @@ export const animationTiming: AnimationTiming = {
   },
 };
 
+// Keys and default values used for persisted user settings.
 export const LocalStorageKeys = {
   ANIMATION_SPEED: "wordest:animationSpeed",
   VOLUME: "wordest:volume",
+  IS_MUTED: "wordest:isMuted",
 };
 
 export const DefaultSettings = {
   ANIMATION_SPEED: AnimationSpeed.NORMAL,
   VOLUME: 0.5,
+  IS_MUTED: false,
 };
+
+// Default volume applied when unmuting from a zero-volume state.
+export const DEFAULT_UNMUTE_VOLUME = 0.33;
