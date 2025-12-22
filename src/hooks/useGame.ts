@@ -42,7 +42,7 @@ export const useGame = (): UseGameReturn => {
   const [validationError, setValidationError] = useState("");
   const { toastList, addToast, removeToast } = useToasts();
   const { keyStatuses, updateKeyStatuses, resetKeyStatuses } = useKeyStatuses();
-  const { volume, animationSpeed } = useSettingsContext();
+  const { volume, animationSpeed, isMuted } = useSettingsContext();
 
   const animationSpeedMultiplier =
     AnimationSpeedMultiplier[animationSpeed.value];
@@ -65,7 +65,7 @@ export const useGame = (): UseGameReturn => {
 
   const playKeySound = useSoundPlayer(
     ["/sounds/key_01.mp3", "/sounds/key_02.mp3"],
-    volume.value
+    isMuted ? 0 : volume.value
   );
 
   const updateAnswerGrid = useMemo(() => {

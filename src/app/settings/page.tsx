@@ -100,16 +100,23 @@ export default function SettingsPage() {
                   list="volume-ticks"
                   value={draftVolume}
                   onChange={(e) => {
-                    setDraftVolume(Number(e.target.value));
+                    const value = Number(e.target.value);
+                    setDraftVolume(value);
+
+                    // Slider interaction always implies unmute intent
+                    if (isMuted.value) isMuted.setValue(false);
                   }}
                   onPointerUp={() => {
                     const newVolume = draftVolume / 100;
+
+                    // Persist volume once on release
                     volume.setValue(newVolume);
 
-                    if (newVolume === 0) {
-                      isMuted.setValue(true);
-                    } else {
-                      isMuted.setValue(false);
+                    // Sync mute state + optional preview
+                    const shouldMute = newVolume === 0;
+                    isMuted.setValue(shouldMute);
+
+                    if (!shouldMute) {
                       playVolumePreview(newVolume);
                     }
                   }}
