@@ -65,7 +65,7 @@ export const useGame = (): UseGameReturn => {
 
   const playKeySound = useSoundPlayer(
     ["/sounds/key_01.mp3", "/sounds/key_02.mp3"],
-    isMuted ? 0 : volume.value
+    isMuted.value ? 0 : volume.value
   );
 
   const updateAnswerGrid = useMemo(() => {
