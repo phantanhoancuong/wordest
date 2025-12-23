@@ -1,4 +1,5 @@
-import styles from "../styles/Keyboard.module.css";
+import styles from "@/styles/Keyboard.module.css";
+
 import { UseGameReturn } from "@/types/useGame.types";
 
 interface KeyboardProps {
@@ -6,36 +7,89 @@ interface KeyboardProps {
   onKeyClick: UseGameReturn["input"]["handle"];
 }
 
-/**
- * On-screen keyboard component.
- *
- * Displays a clickable keyboard layout with visual feedback for each key's status.
- */
 const Keyboard = ({ keyStatuses, onKeyClick }: KeyboardProps) => {
-  const layout = [
-    ["Q", "W", "E", "R", "T", "Y", "U", "I", "O", "P"],
-    ["A", "S", "D", "F", "G", "H", "J", "K", "L"],
-    ["Enter", "Z", "X", "C", "V", "B", "N", "M", "Backspace"],
+  const keyboardLayout = [
+    {
+      keys: [
+        { label: "Q" },
+        { label: "W" },
+        { label: "E" },
+        { label: "R" },
+        { label: "T" },
+        { label: "Y" },
+        { label: "U" },
+        { label: "I" },
+        { label: "O" },
+        { label: "P" },
+      ],
+    },
+    {
+      keys: [
+        { label: "A" },
+        { label: "S" },
+        { label: "D" },
+        { label: "F" },
+        { label: "G" },
+        { label: "H" },
+        { label: "J" },
+        { label: "K" },
+        { label: "L" },
+      ],
+    },
+    {
+      keys: [
+        { label: "Enter", unit: 1.5 },
+        { label: "Z" },
+        { label: "X" },
+        { label: "C" },
+        { label: "V" },
+        { label: "B" },
+        { label: "N" },
+        { label: "M" },
+        { label: "Backspace", unit: 1.5 }, // Backspace
+      ],
+    },
   ];
 
+  const maxRowUnit = Math.max(
+    ...keyboardLayout.map((row) =>
+      row.keys.reduce((sum, key) => sum + (key.unit ?? 1), 0)
+    )
+  );
+
+  const rows = keyboardLayout.map((row) => {
+    const rowUnit = row.keys.reduce((sum, key) => sum + (key.unit ?? 1), 0);
+
+    const columns = row.keys
+      .map((key) => (key.unit ?? 1) / maxRowUnit + "fr")
+      .join(" ");
+
+    return {
+      keys: row.keys,
+      rowUnit,
+      columns,
+    };
+  });
+
   return (
-    <div className={styles.keyboard}>
-      {layout.map((row, r) => (
-        <div key={r} className={styles.keyboard__row}>
-          {row.map((key) => {
-            const wide = key === "Enter" || key === "Backspace";
-            const status = keyStatuses[key] || "default";
+    <div className={styles["keyboard"]}>
+      {rows.map((row, rowIndex) => (
+        <div
+          key={rowIndex}
+          className={styles["keyboard__row"]}
+          style={{ "--columns": row.columns } as React.CSSProperties}
+        >
+          {row.keys.map((key) => {
+            const status = keyStatuses[key.label] || "default";
             return (
               <button
-                key={key}
-                onClick={() => onKeyClick(key)}
-                className={`${styles.keyboard__key} ${
-                  wide
-                    ? styles["keyboard__key--wide"]
-                    : styles["keyboard__key--narrow"]
-                } ${styles[`keyboard__key--${status}`]}`}
+                key={key.label}
+                onClick={() => onKeyClick(key.label)}
+                className={`${styles["keyboard__key"]} ${
+                  styles[`keyboard__key--${status}`]
+                }`}
               >
-                {key === "Backspace" ? "\u232B" : key}
+                {key.label === "Backspace" ? "\u232B" : key.label}
               </button>
             );
           })}
