@@ -57,8 +57,14 @@ export const useGuessSubmission = (
     setValidationError(message);
     addToast(message);
 
+    cancelPendingRowAdvance();
+
     gameGridAnimationTracker.add(gameGrid.colNum);
     gameGrid.applyInvalidGuessAnimation(row, animationSpeedMultiplier);
+  };
+
+  const cancelPendingRowAdvance = () => {
+    cursor.pendingRowAdvance.current = false;
   };
 
   /**
