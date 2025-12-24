@@ -59,12 +59,14 @@ export enum AnimationSpeed {
   FAST = "fast",
   NORMAL = "normal",
   SLOW = "slow",
+  INSTANT = "instant",
 }
 
 export const AnimationSpeedMultiplier: Record<AnimationSpeed, number> = {
   [AnimationSpeed.FAST]: 0.75,
   [AnimationSpeed.NORMAL]: 1,
   [AnimationSpeed.SLOW]: 1.5,
+  [AnimationSpeed.INSTANT]: 0,
 };
 
 /** Animation timing configuration */

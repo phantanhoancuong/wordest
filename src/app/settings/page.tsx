@@ -74,6 +74,7 @@ export default function SettingsPage() {
     { label: "Slow", value: AnimationSpeed.SLOW },
     { label: "Normal", value: AnimationSpeed.NORMAL },
     { label: "Fast", value: AnimationSpeed.FAST },
+    { label: "Instant", value: AnimationSpeed.INSTANT },
   ];
 
   const gameModeOptions = [
