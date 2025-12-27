@@ -1,15 +1,15 @@
 :root {
   --key-font-size: 2rem;
   --cell-background-color-default: transparent;
-  --cell-background-color-absent: gray;
-  --cell-background-color-present: yellow;
-  --cell-background-color-correct: green;
+  --cell-background-color-absent: rgba(166, 166, 166);
+  --cell-background-color-present: rgba(255, 222, 89);
+  --cell-background-color-correct: rgba(89, 162, 31);
   --cell-background-color-wrong: red;
 
   --cell-border-color-default: #ccc;
-  --cell-border-color-absent: gray;
-  --cell-border-color-present: yellow;
-  --cell-border-color-correct: green;
+  --cell-border-color-absent: rgba(166, 166, 166);
+  --cell-border-color-present: rgba(255, 222, 89);
+  --cell-border-color-correct: rgba(89, 162, 31);
   --cell-border-color-wrong: red;
 
   --cell-text-color-default: black;
