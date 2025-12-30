@@ -1,14 +1,17 @@
-import { CellStatus, CellAnimation } from "../lib/constants";
+import { CellAnimation, CellStatus } from "@/lib/constants";
 
-export interface Cell {
+export interface DataCell {
   char: string;
   status: CellStatusType;
+}
+
+export interface RenderCell extends DataCell {
   animation: CellAnimationType;
   animationDelay: number;
   animationKey?: number;
 }
 
-export type PartialCell = Partial<Cell>;
+export type PartialRenderCell = Partial<RenderCell>;
 
 export type CellStatusType = (typeof CellStatus)[keyof typeof CellStatus];
 
@@ -16,5 +19,5 @@ export type CellAnimationType =
   (typeof CellAnimation)[keyof typeof CellAnimation];
 
 export interface Grid {
-  grid: Array<Array<Cell>>;
+  grid: Array<Array<RenderCell>>;
 }

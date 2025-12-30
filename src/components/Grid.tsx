@@ -1,13 +1,14 @@
-import styles from "../styles/Grid.module.css";
-import Cell from "./Cell";
-import { Cell as CellType } from "../types/cell";
+import Cell from "@/components/Cell";
+
+import { RenderCell } from "@/types/cell";
 import { UseGameReturn } from "@/types/useGame.types";
 
+import styles from "@/styles/Grid.module.css";
 /**
  * Props for the {@link Grid} component.
  */
 interface GridProps {
-  grid: Array<Array<CellType>>;
+  grid: Array<Array<RenderCell>>;
   dataRows?: number;
   dataCols?: number;
   layoutRows?: number;
@@ -44,8 +45,8 @@ const Grid = ({
 
   return (
     <div className={styles.grid} style={style}>
-      {grid.map((row: Array<CellType>, rowIndex: number) =>
-        row.map((cell: CellType, colIndex: number) => (
+      {grid.map((row: Array<RenderCell>, rowIndex: number) =>
+        row.map((cell: RenderCell, colIndex: number) => (
           <Cell
             key={`${rowIndex}-${colIndex}-${cell.animationKey}`}
             cell={cell}

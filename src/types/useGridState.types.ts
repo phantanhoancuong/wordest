@@ -2,19 +2,19 @@ import { RefObject } from "react";
 
 import { CellStatus } from "@/lib/constants";
 
-import { Cell, PartialCell } from "./cell";
+import { RenderCell, PartialRenderCell } from "@/types/cell";
 
 export interface UseGridStateReturn {
-  grid: Array<Array<Cell>>;
-  gridRef: RefObject<Array<Array<Cell>>>;
+  grid: Array<Array<RenderCell>>;
+  gridRef: RefObject<Array<Array<RenderCell>>>;
   rowNum: number;
   colNum: number;
   updateCell: (
     rowIndex: number,
     colIndex: number,
-    options?: PartialCell
+    options?: PartialRenderCell
   ) => void;
-  updateRow: (rowIndex: number, newRow: Array<Cell>) => void;
+  updateRow: (rowIndex: number, newRow: Array<RenderCell>) => void;
   applyValidGuessAnimation: (
     rowIndex: number,
     statuses: CellStatus[],

@@ -1,15 +1,17 @@
 import { memo } from "react";
-import styles from "../styles/Cell.module.css";
-import { animationTiming } from "@/lib/constants";
-import { Cell as CellData } from "@/types/cell";
+
+import { animationTiming, CellAnimation } from "@/lib/constants";
+
+import { RenderCell } from "@/types/cell";
 import { UseGameReturn } from "@/types/useGame.types";
-import { CellAnimation } from "@/lib/constants";
+
+import styles from "@/styles/Cell.module.css";
 
 /**
  * Props for the {@link Cell} component.
  */
 interface CellProps {
-  cell: CellData;
+  cell: RenderCell;
   row: number;
   col: number;
   onAnimationEnd?: UseGameReturn["gameGrid"]["handleAnimationEnd"];

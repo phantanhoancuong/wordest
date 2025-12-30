@@ -1,5 +1,6 @@
-import { CellStatusType, CellAnimationType, Cell } from "@/types/cell";
-import { WORD_LENGTH, CellAnimation, CellStatus } from "./constants";
+import { WORD_LENGTH, CellAnimation, CellStatus } from "@/lib/constants";
+
+import { CellAnimationType, CellStatusType, RenderCell } from "@/types/cell";
 
 /**
  * Counts the occurrences of each letter in a word.
@@ -33,7 +34,7 @@ export const initEmptyGrid = (
   defaultStatus: CellStatusType = CellStatus.DEFAULT,
   defaultAnimation: CellAnimationType = CellAnimation.NONE,
   animationDelay = 0
-): Array<Array<Cell>> => {
+): Array<Array<RenderCell>> => {
   return Array.from({ length: rowNum }, () =>
     Array.from({ length: colNum }, () => ({
       char: "",
@@ -100,7 +101,7 @@ export const mapGuessToRow = (
   guess: string,
   statuses: Array<CellStatusType>,
   options: MapGuessToRowOptions = {}
-): Array<Cell> => {
+): Array<RenderCell> => {
   const {
     animation = CellAnimation.NONE,
     animationDelay = 0,
