@@ -1,5 +1,9 @@
-import { useRef, useState } from "react";
+import { useRef } from "react";
+
+import { useGameStore } from "@/store/useGameStore";
+
 import { GameState } from "@/lib/constants";
+
 import { UseGameStateReturn } from "@/types/useGameState.types";
 
 /**
@@ -13,7 +17,8 @@ import { UseGameStateReturn } from "@/types/useGameState.types";
  * 3. Call 'commitState()' to apply the queued state.
  */
 export const useGameState = (): UseGameStateReturn => {
-  const [gameState, setGameState] = useState<GameState>(GameState.PLAYING);
+  const gameState = useGameStore((s) => s.gameState);
+  const setGameState = useGameStore((s) => s.setGameState);
   const pendingGameState = useRef<GameState | null>(null);
 
   const queueState = (newState: GameState): void => {
