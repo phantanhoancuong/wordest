@@ -4,17 +4,34 @@ import { GameState } from "@/lib/constants";
 /**
  * Global game store.
  *
- * This is used so preserve states of the game when the user switches to another page
- * then switches back.
+ * Persists game state across client-side route changes
+ * within the same application session.
  */
 type GameStore = {
-  // states of 'useGameState' hook.
+  // Phase of the game.
   gameState: GameState;
   setGameState: (state: GameState) => void;
+
+  // Active cursor position within the grid.
+  row: number;
+  col: number;
+  setRow: (row: number | ((prev: number) => number)) => void;
+  setCol: (col: number | ((prev: number) => number)) => void;
 };
 
 export const useGameStore = create<GameStore>((set) => ({
   gameState: GameState.PLAYING,
+  setGameState: (gameState) => set({ gameState }),
 
-  setGameState: (state) => set({ gameState: state }),
+  row: 0,
+  col: 0,
+  setRow: (row) =>
+    set((state) => ({
+      row: typeof row === "function" ? row(state.row) : row,
+    })),
+
+  setCol: (col) =>
+    set((state) => ({
+      col: typeof col === "function" ? col(state.col) : col,
+    })),
 }));
