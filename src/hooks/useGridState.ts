@@ -6,7 +6,7 @@ import { initEmptyGrid, mapGuessToRow } from "@/lib/utils";
 
 import { useLatest } from "./useLatest";
 
-import { Cell, PartialCell } from "@/types/cell";
+import { RenderCell, PartialRenderCell } from "@/types/cell";
 import { UseGridStateReturn } from "@/types/useGridState.types";
 
 /**
@@ -71,7 +71,7 @@ export const useGridState = (
    * @param rowIndex - Index of the row to replace.
    * @param newRow - The new row of cell objects.
    */
-  const updateRow = (rowIndex: number, newRow: Array<Cell>): void => {
+  const updateRow = (rowIndex: number, newRow: Array<RenderCell>): void => {
     setGrid((prevGrid) => {
       const newGrid = [...prevGrid];
       newGrid[rowIndex] = newRow;
@@ -91,7 +91,7 @@ export const useGridState = (
   const updateCell = (
     rowIndex: number,
     colIndex: number,
-    options: PartialCell = {}
+    options: PartialRenderCell = {}
   ): void => {
     const {
       char = "",
@@ -142,7 +142,7 @@ export const useGridState = (
     });
   };
 
-  const getRow = (rowIndex: number): Cell[] => {
+  const getRow = (rowIndex: number): RenderCell[] => {
     return gridRef.current[rowIndex];
   };
 
