@@ -1,11 +1,12 @@
-import { UseGridStateReturn } from "./useGridState.types";
-import { UseKeyStatusesReturn } from "./useKeyStatuses.types";
-import { UseTargetWordReturn } from "./useTargetWord.types";
-import { UseToastsReturn } from "./useToasts";
 import { GameState } from "@/lib/constants";
 
+import { UseGridStateReturn } from "@/types/useGridState.types";
+import { UseKeyStatusesReturn } from "@/types/useKeyStatuses.types";
+import { UseTargetWordReturn } from "@/types/useTargetWord.types";
+import { UseToastsReturn } from "@/types/useToasts";
+
 type GameGridSection = {
-  data: UseGridStateReturn["grid"];
+  renderGrid: UseGridStateReturn["renderGrid"];
   rowNum: UseGridStateReturn["rowNum"];
   colNum: UseGridStateReturn["colNum"];
   handleAnimationEnd: (rowIndex: number, colIndex: number) => void;

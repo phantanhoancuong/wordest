@@ -23,7 +23,7 @@ import { useToasts } from "./useToasts";
 import { UseGameReturn } from "@/types/useGame.types";
 
 import { useSettingsContext } from "@/app/contexts/SettingsContext";
-
+import { useGameStore } from "@/store/useGameStore";
 /**
  * Hook to manage the state and logic of the game.
  *
@@ -47,20 +47,31 @@ export const useGame = (): UseGameReturn => {
   const animationSpeedMultiplier =
     AnimationSpeedMultiplier[animationSpeed.value];
 
+  const dataGameGrid = useGameStore((s) => s.gameGrid);
+  const setDataGameGrid = useGameStore((s) => s.setGameGrid);
+  const resetDataGameGrid = useGameStore((s) => s.resetGameGrid);
+  const dataAnswerGrid = useGameStore((s) => s.answerGrid);
+  const setDataAnswerGrid = useGameStore((s) => s.setAnswerGrid);
+  const resetDataAnswerGrid = useGameStore((s) => s.resetAnswerGrid);
+
   const gameGrid = useGridState(
     ATTEMPTS,
     WORD_LENGTH,
-    CellStatus.DEFAULT,
     CellAnimation.NONE,
-    0
+    0,
+    dataGameGrid,
+    setDataGameGrid,
+    resetDataGameGrid
   );
 
   const answerGrid = useGridState(
     1,
     WORD_LENGTH,
-    CellStatus.HIDDEN,
     CellAnimation.NONE,
-    0
+    0,
+    dataAnswerGrid,
+    setDataAnswerGrid,
+    resetDataAnswerGrid
   );
 
   const playKeySound = useSoundPlayer(
@@ -98,13 +109,12 @@ export const useGame = (): UseGameReturn => {
   });
 
   /**
-   * Handles the cell's data at the end of its animation.
+   * Handles the completion of a single cell's animation in the main game grid.
    *
-   * Decrements the active animation counter, clears finished animations when all have ended,
-   * and advances to the next row if needed.
+   * Marks the animation as finished and advances the cursor if all animations in the current row are completed.
    *
-   * @param rowIndex - The row index of the animated cell.
-   * @param colIndex - The column index of the animated cell.
+   * @param rowIndex - Index of the row of the animated cell.
+   * @param colIndex - Index of the column of the animated cell.
    */
   const handleGameGridAnimationEnd = (
     rowIndex: number,
@@ -116,13 +126,12 @@ export const useGame = (): UseGameReturn => {
   };
 
   /**
-   * Handles the cell's data at the end of its animation.
+   * Handles the completion of a single cell's animation in the answer grid.
    *
-   * Decrements the active animation counter and
-   * clears finished animations when all have ended,
+   * Marks the animation as finished in the answer grid. Row index is ignored.
    *
    * @param rowIndex - Always 0 (ignored).
-   * @param colIndex - The column index of the animated cell.
+   * @param colIndex - Index of the column on the animated cell.
    */
   const handleAnswerGridAnimationEnd = (rowIndex: number, colIndex: number) => {
     rowIndex = 0;
@@ -130,10 +139,9 @@ export const useGame = (): UseGameReturn => {
   };
 
   /**
-   * Applies the pending game state (if any).
+   * Applies the pending game state if one exists.
    *
-   * - Called when cell animations finish.
-   * - Updates the main `gameState` and clears the pending ref.
+   * Called after animations finish. Commits the pending game state and, if the game has ended. triggers revealing the answer grid.
    */
   const updateGameState = (): void => {
     const nextState = gameState.pendingState;
@@ -145,11 +153,18 @@ export const useGame = (): UseGameReturn => {
     }
   };
 
+  /**
+   * Reveals the target word on the answer grid.
+   *
+   * Animates each cell to indicate correctness depending on whether the game was won or lost.
+   *
+   * @param state - The final game state (WON or LOST).
+   */
   const revealAnswerGrid = (state: GameState) => {
     requestAnimationFrame(() => {
       answerGridAnimationTracker.add(answerGrid.colNum);
 
-      const revealedRow = answerGrid.gridRef.current[0].map((cell, i) => ({
+      const revealedRow = answerGrid.renderGridRef.current[0].map((cell) => ({
         ...cell,
         status: state === GameState.WON ? CellStatus.CORRECT : CellStatus.WRONG,
         animation: CellAnimation.BOUNCE,
@@ -162,7 +177,10 @@ export const useGame = (): UseGameReturn => {
   };
 
   /**
-   * Resets all game states, grid, keyboard, and target word to start a new game.
+   * Resets the game to its initial state.
+   *
+   * Clears the game grid, answer grid, keyboard statuses, animations, toasts,
+   * and reloads a new target word.
    */
   const restartGame = (): void => {
     gameState.resetState();
@@ -182,9 +200,12 @@ export const useGame = (): UseGameReturn => {
   };
 
   /**
-   * Handles keyboard input for the game.
+   * Handles a single keyboard input from the user.
    *
-   * @param key - The key pressed by the user.
+   * Updates the game grid based on letter input, backspace, or enter.
+   * Plays key sounds and prevents input when locked or during animations.
+   *
+   * @param key - The pressed key (already capitalized).
    */
   const handleInput = (key: string): void => {
     if (
@@ -234,7 +255,9 @@ export const useGame = (): UseGameReturn => {
   };
 
   /**
-   * Handles a general validation error.
+   * Handles a word validation error.
+   *
+   * Displays a toast notification and sets the validation error state.
    */
   const handleValidationError = (): void => {
     const message = "Error validating word. Please try again.";
@@ -263,14 +286,14 @@ export const useGame = (): UseGameReturn => {
 
   return {
     gameGrid: {
-      data: gameGrid.grid,
+      renderGrid: gameGrid.renderGrid,
       rowNum: gameGrid.rowNum,
       colNum: gameGrid.colNum,
       handleAnimationEnd: handleGameGridAnimationEnd,
     },
 
     answerGrid: {
-      data: answerGrid.grid,
+      renderGrid: answerGrid.renderGrid,
       rowNum: answerGrid.rowNum,
       colNum: answerGrid.colNum,
       handleAnimationEnd: handleAnswerGridAnimationEnd,
