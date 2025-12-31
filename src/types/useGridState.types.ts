@@ -5,8 +5,8 @@ import { CellStatus } from "@/lib/constants";
 import { RenderCell, PartialRenderCell } from "@/types/cell";
 
 export interface UseGridStateReturn {
-  grid: Array<Array<RenderCell>>;
-  gridRef: RefObject<Array<Array<RenderCell>>>;
+  renderGrid: RenderCell[][];
+  renderGridRef: RefObject<RenderCell[][]>;
   rowNum: number;
   colNum: number;
   updateCell: (

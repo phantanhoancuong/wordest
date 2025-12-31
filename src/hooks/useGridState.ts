@@ -1,14 +1,14 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import { animationTiming, CellStatus, CellAnimation } from "@/lib/constants";
 
-import { initEmptyGrid, mapGuessToRow } from "@/lib/utils";
+import { mapGuessToRow, renderGridToDataGrid } from "@/lib/utils";
 
-import { useLatest } from "./useLatest";
+import { useLatest } from "@/hooks/useLatest";
 
-import { RenderCell, PartialRenderCell } from "@/types/cell";
+import { DataCell, RenderCell, PartialRenderCell } from "@/types/cell";
 import { UseGridStateReturn } from "@/types/useGridState.types";
-
+import { dataGridToRenderGrid } from "@/lib/utils";
 /**
  * Manages a 2D grid of cells representing player's guesses.
  *
@@ -17,9 +17,10 @@ import { UseGridStateReturn } from "@/types/useGridState.types";
  *
  * @param row - Number of rows.
  * @param col - Number of columns.
- * @param status - Default cell status. Defaults to `CellStatus.DEFAULT`.
  * @param animation - Default cell animation. Defaults to `CellAnimation.NONE`.
  * @param animationDelay - Default animation delay (seconds). Defaults to 0.
+ * @param dataGrid - The grid of DataCell holding character and status information, to be converted and rendered.
+ * @param resetDataGrid - The method to reset the grid of DataCell above.
  * @returns Grid state and utility functions:
  *   - `grid` - 2D array of cells.
  *   - `gridRef` - Ref always pointing to the latest grid.
@@ -29,36 +30,35 @@ import { UseGridStateReturn } from "@/types/useGridState.types";
 export const useGridState = (
   row: number,
   col: number,
-  status: CellStatus = CellStatus.DEFAULT,
   animation: CellAnimation = CellAnimation.NONE,
-  animationDelay: number = 0
+  animationDelay: number = 0,
+  dataGrid: DataCell[][],
+  setDataGrid: (grid: DataCell[][]) => void,
+  resetDataGrid: () => void
 ): UseGridStateReturn => {
   const rowNum = useRef(row);
   const colNum = useRef(col);
-  const defaultStatus = useRef(status);
   const defaultAnimation = useRef(animation);
   const defaultAnimationDelay = useRef(animationDelay);
 
-  const [grid, setGrid] = useState(
-    initEmptyGrid(
-      rowNum.current,
-      colNum.current,
-      defaultStatus.current,
+  const [renderGrid, setRenderGrid] = useState(() =>
+    dataGridToRenderGrid(
+      dataGrid,
       defaultAnimation.current,
       defaultAnimationDelay.current
     )
   );
-  const gridRef = useLatest(grid);
+  const renderGridRef = useLatest(renderGrid);
 
-  /**
-   * Resets the grid to its initial empty state.
-   */
+  /** Syncs the render grid to the external store whenever it changes. */
+  useEffect(() => setDataGrid(renderGridToDataGrid(renderGrid)), [renderGrid]);
+
+  /** Resets the grid to its initial empty state.*/
   const resetGrid = () => {
-    setGrid(
-      initEmptyGrid(
-        rowNum.current,
-        colNum.current,
-        defaultStatus.current,
+    resetDataGrid();
+    setRenderGrid(() =>
+      dataGridToRenderGrid(
+        dataGrid,
         defaultAnimation.current,
         defaultAnimationDelay.current
       )
@@ -72,7 +72,7 @@ export const useGridState = (
    * @param newRow - The new row of cell objects.
    */
   const updateRow = (rowIndex: number, newRow: Array<RenderCell>): void => {
-    setGrid((prevGrid) => {
+    setRenderGrid((prevGrid) => {
       const newGrid = [...prevGrid];
       newGrid[rowIndex] = newRow;
       return newGrid;
@@ -100,7 +100,7 @@ export const useGridState = (
       animationDelay = 0,
     } = options;
 
-    const newRow = [...gridRef.current[rowIndex]];
+    const newRow = [...renderGridRef.current[rowIndex]];
     const prevCell = newRow[colIndex];
 
     newRow[colIndex] = {
@@ -121,7 +121,7 @@ export const useGridState = (
   const flushAnimation = (
     finishedCellMap: Map<number, Array<number>>
   ): void => {
-    setGrid((prevGrid) => {
+    setRenderGrid((prevGrid: RenderCell[][]) => {
       const newGrid = [...prevGrid];
 
       for (const [rowIndex, finishedCols] of finishedCellMap.entries()) {
@@ -142,31 +142,31 @@ export const useGridState = (
     });
   };
 
+  /** Returns the RenderCell array for a given row. */
   const getRow = (rowIndex: number): RenderCell[] => {
-    return gridRef.current[rowIndex];
+    return renderGridRef.current[rowIndex];
   };
 
+  /** Returns the guessed string for a row
+   *
+   * @param rowIndex - Index of the row to convert.
+   * @returns The guessed word for that row.
+   */
   const getRowGuess = (rowIndex: number): string => {
     const row = getRow(rowIndex);
     return row.map((cell) => cell.char).join("");
   };
 
-  const applyValidGuessAnimation = (
-    rowIndex: number,
-    statuses: CellStatus[],
-    animationSpeedMultiplier: number
-  ) => {
-    const guess = getRowGuess(rowIndex);
-    applyRowAnimation(
-      rowIndex,
-      guess,
-      statuses,
-      CellAnimation.BOUNCE,
-      animationTiming.bounce.delay * animationSpeedMultiplier,
-      true
-    );
-  };
-
+  /**
+   * Maps a string and an array of CellStatus to a RenderCell row and applies animation.
+   *
+   * @param rowIndex - Row to animate.
+   * @param guess - Guess string for the row.
+   * @param statuses - Cell statuses for the row.
+   * @param animation - Animation type to apply.
+   * @param delay - Animation delay in seconds.
+   * @param isConsecutive - Whether animation is consecutive per cell.
+   */
   const applyRowAnimation = (
     rowIndex: number,
     guess: string,
@@ -182,6 +182,29 @@ export const useGridState = (
     });
 
     updateRow(rowIndex, newRow);
+  };
+
+  /**
+   * Applies the "valid guess" animation to a row.
+   *
+   * @param rowIndex - Row to animate.
+   * @param statuses - Cell statuses for the row.
+   * @param animationSpeedMultiplier - Multiplier for animation delay.
+   */
+  const applyValidGuessAnimation = (
+    rowIndex: number,
+    statuses: CellStatus[],
+    animationSpeedMultiplier: number
+  ) => {
+    const guess = getRowGuess(rowIndex);
+    applyRowAnimation(
+      rowIndex,
+      guess,
+      statuses,
+      CellAnimation.BOUNCE,
+      animationTiming.bounce.delay * animationSpeedMultiplier,
+      true
+    );
   };
 
   const applyInvalidGuessAnimation = (
@@ -200,8 +223,8 @@ export const useGridState = (
   };
 
   return {
-    grid,
-    gridRef,
+    renderGrid,
+    renderGridRef,
     rowNum: rowNum.current,
     colNum: colNum.current,
     updateCell,

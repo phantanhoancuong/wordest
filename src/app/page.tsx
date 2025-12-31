@@ -35,7 +35,7 @@ export default function Home() {
           <section className={`${styles["game-board"]} flex-center`}>
             <div className={styles["game-board__grid"]}>
               <Grid
-                grid={gameGrid.data}
+                grid={gameGrid.renderGrid}
                 onAnimationEnd={gameGrid.handleAnimationEnd}
                 dataRows={gameGrid.rowNum}
                 dataCols={gameGrid.colNum}
@@ -46,7 +46,7 @@ export default function Home() {
 
             <div className={styles["game-board__controls"]}>
               <Grid
-                grid={answerGrid.data}
+                grid={answerGrid.renderGrid}
                 layoutRows={6}
                 layoutCols={gameGrid.colNum}
                 onAnimationEnd={answerGrid.handleAnimationEnd}

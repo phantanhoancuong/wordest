@@ -63,6 +63,11 @@ export const useGuessSubmission = (
     gameGrid.applyInvalidGuessAnimation(row, animationSpeedMultiplier);
   };
 
+  /**
+   * Cancels any pending row advancement in the cursor.
+   *
+   * Used when an invalid guess prevents the row from advancing.
+   */
   const cancelPendingRowAdvance = () => {
     cursor.pendingRowAdvance.current = false;
   };
@@ -86,7 +91,7 @@ export const useGuessSubmission = (
       targetLetterCount.current
     );
 
-    const prevAnswerRow = answerGrid.gridRef.current[0];
+    const prevAnswerRow = answerGrid.renderGridRef.current[0];
     const answerRow = [...prevAnswerRow];
     let changedCount = 0;
 
@@ -144,7 +149,7 @@ export const useGuessSubmission = (
     if (inputLocked.current) return;
     inputLocked.current = true;
 
-    const guess = gameGrid.gridRef.current[cursor.row.current]
+    const guess = gameGrid.renderGridRef.current[cursor.row.current]
       .map((cell) => cell.char)
       .join("");
 
