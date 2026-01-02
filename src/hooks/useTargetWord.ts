@@ -1,7 +1,11 @@
 import { useEffect, useRef, useState } from "react";
-import { fetchWordFromApi } from "../lib/api";
-import { countLetter } from "../lib/utils";
-import { UseTargetWordReturn } from "../types/useTargetWord.types";
+
+import { useGameStore } from "@/store/useGameStore";
+
+import { fetchWordFromApi } from "@/lib/api";
+import { countLetter } from "@/lib/utils";
+
+import { UseTargetWordReturn } from "@/types/useTargetWord.types";
 
 /**
  * Hook to manage the game's target word.
@@ -10,9 +14,21 @@ import { UseTargetWordReturn } from "../types/useTargetWord.types";
  * and exposing any fetch errors.
  */
 export const useTargetWord = (): UseTargetWordReturn => {
-  const [targetWord, setTargetWord] = useState<string>("");
+  const targetWord = useGameStore((s) => s.targetWord);
+  const setTargetWord = useGameStore((s) => s.setTargetWord);
+
   const [error, setError] = useState<string>("");
   const targetLetterCount = useRef<Record<string, number>>({});
+
+  /**
+   * Clears the current target word from the store.
+   *
+   * Does not automatically fetch a new word.
+   * Call 'reloadTargetWord' to explicitly load a replacement.
+   */
+  const resetTargetWord = () => {
+    setTargetWord("");
+  };
 
   /** Fetches a new target word from the API and updates state. */
   const loadWord = async (): Promise<string | null> => {
@@ -20,7 +36,6 @@ export const useTargetWord = (): UseTargetWordReturn => {
       setError("");
       const word = await fetchWordFromApi();
       setTargetWord(word);
-      targetLetterCount.current = countLetter(word);
       return word;
     } catch (err: unknown) {
       console.error("Failed to fetch word:", err);
@@ -29,15 +44,24 @@ export const useTargetWord = (): UseTargetWordReturn => {
     }
   };
 
-  // Load initial word on mount
+  // Load initial word on mount.
   useEffect(() => {
-    loadWord();
+    if (!targetWord) {
+      loadWord();
+    }
   }, []);
+
+  useEffect(() => {
+    if (targetWord) {
+      targetLetterCount.current = countLetter(targetWord);
+    }
+  }, [targetWord]);
 
   return {
     targetWord,
     targetLetterCount,
     wordFetchError: error,
     reloadTargetWord: loadWord,
+    resetTargetWord,
   };
 };

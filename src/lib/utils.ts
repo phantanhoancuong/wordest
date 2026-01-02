@@ -22,35 +22,6 @@ export const countLetter = (word: string): Record<string, number> => {
 };
 
 /**
- * Creates an empty 2D grid of cell objects.
- *
- * Each cell includes default `char`, `status`, `animation`, and `animationDelay` values.
- *
- * @param rowNum - Number of rows in the grid.
- * @param colNum - Number of columns in the grid.
- * @param defaultStatus- Default cell status.
- * @param defaultAnimation - Default animation type.
- * @param animationDelay - Default animation delay (in seconds).
- * @returns A 2D array representing the initialized grid.
- */
-export const initEmptyGrid = (
-  rowNum: number,
-  colNum: number,
-  defaultStatus: CellStatusType = CellStatus.DEFAULT,
-  defaultAnimation: CellAnimationType = CellAnimation.NONE,
-  animationDelay = 0
-): Array<Array<RenderCell>> => {
-  return Array.from({ length: rowNum }, () =>
-    Array.from({ length: colNum }, () => ({
-      char: "",
-      status: defaultStatus,
-      animation: defaultAnimation,
-      animationDelay,
-    }))
-  );
-};
-
-/**
  * Convert a 2D grid of DataCell to a 2d grid of RenderCell[][].
  *
  * - Adds in default animation information ready to be rendered.
@@ -95,6 +66,7 @@ export const renderGridToDataGrid = (
 
 /**
  * Create a grid of data cells (no animation information).
+ *
  * @param rowNum - Number of rows in the grid.
  * @param colNum - Number of columns in the grid.
  * @param defaultStatus - The status value for the grid.
@@ -109,6 +81,33 @@ export const initEmptyDataGrid = (
     Array.from({ length: colNum }, () => ({
       char: "",
       status: defaultStatus,
+    }))
+  );
+};
+
+/**
+ * Create a grid of RenderCell (character, status, and animation information).
+ *
+ * @param rowNum - Number of rows in the grid.
+ * @param colNum - Number of columns in the grid.
+ * @param defaultStatus- Default cell status.
+ * @param defaultAnimation - Default animation type.
+ * @param animationDelay - Default animation delay (in seconds).
+ * @returns A 2D RenderCell grid.
+ */
+export const initEmptyRenderGrid = (
+  rowNum: number,
+  colNum: number,
+  defaultStatus: CellStatusType = CellStatus.DEFAULT,
+  defaultAnimation: CellAnimationType = CellAnimation.NONE,
+  animationDelay = 0
+): Array<Array<RenderCell>> => {
+  return Array.from({ length: rowNum }, () =>
+    Array.from({ length: colNum }, () => ({
+      char: "",
+      status: defaultStatus,
+      animation: defaultAnimation,
+      animationDelay,
     }))
   );
 };
