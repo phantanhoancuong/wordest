@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import {
   ATTEMPTS,
@@ -32,8 +32,13 @@ import { useGameStore } from "@/store/useGameStore";
  * @returns Game controller and associated utilities.
  */
 export const useGame = (): UseGameReturn => {
-  const { targetWord, targetLetterCount, wordFetchError, reloadTargetWord } =
-    useTargetWord();
+  const {
+    targetWord,
+    targetLetterCount,
+    wordFetchError,
+    reloadTargetWord,
+    resetTargetWord,
+  } = useTargetWord();
 
   const gameState = useGameState();
   const cursor = useCursorController();
@@ -57,6 +62,7 @@ export const useGame = (): UseGameReturn => {
   const gameGrid = useGridState(
     ATTEMPTS,
     WORD_LENGTH,
+    CellStatus.DEFAULT,
     CellAnimation.NONE,
     0,
     dataGameGrid,
@@ -67,6 +73,7 @@ export const useGame = (): UseGameReturn => {
   const answerGrid = useGridState(
     1,
     WORD_LENGTH,
+    CellStatus.HIDDEN,
     CellAnimation.NONE,
     0,
     dataAnswerGrid,
@@ -79,18 +86,40 @@ export const useGame = (): UseGameReturn => {
     isMuted.value ? 0 : volume.value
   );
 
-  const updateAnswerGrid = useMemo(() => {
-    if (!targetWord) return () => answerGrid.resetGrid();
+  const gameId = useGameStore((s) => s.gameId);
+  const incrementGameId = useGameStore((s) => s.incrementGameId);
+  const answerGridId = useGameStore((s) => s.answerGridId);
+  const setAnswerGridId = useGameStore((s) => s.setAnswerGridId);
+
+  /**
+   * Initializes the answer grid for the current game.
+   *
+   * The answer grid is populated once per gameId using the current target word.
+   * 'answerGridId' is used to prevent re-initialization when resuming or re-rendering the same game.
+   *
+   * This effect runs when:
+   * - A new target word is loaded.
+   * - A new gameId is issued.
+   */
+  useEffect(() => {
+    if (!targetWord) return;
+
+    // Resume the game.
+    if (answerGridId === gameId) {
+      return;
+    }
+
+    // Populate the answer grid from the target word.
     const newRow = targetWord.split("").map((ch) => ({
       char: ch,
       status: CellStatus.HIDDEN,
       animation: CellAnimation.NONE,
       animationDelay: 0,
     }));
-    return () => answerGrid.updateRow(0, newRow);
-  }, [targetWord]);
 
-  useEffect(() => updateAnswerGrid(), [updateAnswerGrid]);
+    answerGrid.updateRow(0, newRow);
+    setAnswerGridId(gameId);
+  }, [targetWord, gameId, answerGridId]);
 
   const gameGridAnimationTracker = useAnimationTracker(
     (finishedMap) => {
@@ -187,10 +216,17 @@ export const useGame = (): UseGameReturn => {
     cursor.resetCursor();
 
     resetKeyStatuses();
+
+    incrementGameId();
+    setAnswerGridId(null);
+
+    resetTargetWord();
+
     reloadTargetWord();
 
     gameGrid.resetGrid();
     answerGrid.resetGrid();
+
     gameGridAnimationTracker.reset();
     answerGridAnimationTracker.reset();
 

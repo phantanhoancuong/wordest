@@ -6,9 +6,14 @@ import { mapGuessToRow, renderGridToDataGrid } from "@/lib/utils";
 
 import { useLatest } from "@/hooks/useLatest";
 
-import { DataCell, RenderCell, PartialRenderCell } from "@/types/cell";
+import {
+  DataCell,
+  RenderCell,
+  PartialRenderCell,
+  CellStatusType,
+} from "@/types/cell";
 import { UseGridStateReturn } from "@/types/useGridState.types";
-import { dataGridToRenderGrid } from "@/lib/utils";
+import { initEmptyRenderGrid, dataGridToRenderGrid } from "@/lib/utils";
 /**
  * Manages a 2D grid of cells representing player's guesses.
  *
@@ -30,6 +35,7 @@ import { dataGridToRenderGrid } from "@/lib/utils";
 export const useGridState = (
   row: number,
   col: number,
+  status: CellStatusType,
   animation: CellAnimation = CellAnimation.NONE,
   animationDelay: number = 0,
   dataGrid: DataCell[][],
@@ -38,6 +44,7 @@ export const useGridState = (
 ): UseGridStateReturn => {
   const rowNum = useRef(row);
   const colNum = useRef(col);
+  const defaultStatus = useRef(status);
   const defaultAnimation = useRef(animation);
   const defaultAnimationDelay = useRef(animationDelay);
 
@@ -55,14 +62,16 @@ export const useGridState = (
 
   /** Resets the grid to its initial empty state.*/
   const resetGrid = () => {
-    resetDataGrid();
-    setRenderGrid(() =>
-      dataGridToRenderGrid(
-        dataGrid,
+    setRenderGrid(
+      initEmptyRenderGrid(
+        rowNum.current,
+        colNum.current,
+        defaultStatus.current,
         defaultAnimation.current,
         defaultAnimationDelay.current
       )
     );
+    resetDataGrid();
   };
 
   /**

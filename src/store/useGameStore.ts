@@ -30,6 +30,15 @@ type GameStore = {
   setGameGrid: (grid: DataCell[][]) => void;
   resetAnswerGrid: () => void;
   resetGameGrid: () => void;
+
+  // Target word for the player to guess
+  targetWord: string;
+  setTargetWord: (word: string) => void;
+
+  gameId: number;
+  incrementGameId: () => void;
+  answerGridId: number | null;
+  setAnswerGridId: (id: number) => void;
 };
 
 export const useGameStore = create<GameStore>((set, get) => ({
@@ -50,6 +59,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
       col: typeof col === "function" ? col(state.col) : col,
     })),
 
+  // Grids
   gameGrid: initEmptyDataGrid(ATTEMPTS, WORD_LENGTH),
   answerGrid: initEmptyDataGrid(1, WORD_LENGTH),
 
@@ -65,4 +75,15 @@ export const useGameStore = create<GameStore>((set, get) => ({
     set({
       answerGrid: initEmptyDataGrid(1, WORD_LENGTH, CellStatus.HIDDEN),
     }),
+
+  // Target word
+  targetWord: "",
+  setTargetWord: (word) => set({ targetWord: word }),
+
+  // Game ID to check whether or not to resume the game states.
+  gameId: 0,
+  incrementGameId: () => set((state) => ({ gameId: state.gameId + 1 })),
+
+  answerGridId: null,
+  setAnswerGridId: (id) => set({ answerGridId: id }),
 }));
