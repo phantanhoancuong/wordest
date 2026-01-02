@@ -4,7 +4,7 @@ import { initEmptyDataGrid } from "@/lib/utils";
 
 import { WORD_LENGTH, ATTEMPTS, CellStatus, GameState } from "@/lib/constants";
 
-import { DataCell } from "@/types/cell";
+import { CellStatusType, DataCell } from "@/types/cell";
 
 /**
  * Global game store.
@@ -23,7 +23,8 @@ type GameStore = {
   setRow: (row: number | ((prev: number) => number)) => void;
   setCol: (col: number | ((prev: number) => number)) => void;
 
-  // Data of grid.
+  // Persistent grid data.
+  // These store the raw cell data so the game can be resumed when navigating away and back.
   answerGrid: DataCell[][];
   gameGrid: DataCell[][];
   setAnswerGrid: (grid: DataCell[][]) => void;
@@ -31,14 +32,30 @@ type GameStore = {
   resetAnswerGrid: () => void;
   resetGameGrid: () => void;
 
-  // Target word for the player to guess
+  // Target word for the player to guess.
+  // Stored globally to avoid refetching on route changes.
   targetWord: string;
   setTargetWord: (word: string) => void;
 
+  // Identifier for the current game session.
+  // Incremented on restart to invalidate derived state.
   gameId: number;
   incrementGameId: () => void;
+
+  // Tracks whether the answer grid has been initialized for the current gameId.
   answerGridId: number | null;
   setAnswerGridId: (id: number) => void;
+
+  // Keyboard key status map.
+  // Stores the strongest status per letter (correct > present > absent)
+  // and persists across navigation.
+  keyStatuses: Partial<Record<string, CellStatusType>>;
+  setKeyStatuses: (
+    updater: (
+      prevKeyStatuses: Partial<Record<string, CellStatusType>>
+    ) => Partial<Record<string, CellStatusType>>
+  ) => void;
+  resetKeyStatuses: () => void;
 };
 
 export const useGameStore = create<GameStore>((set, get) => ({
@@ -80,10 +97,21 @@ export const useGameStore = create<GameStore>((set, get) => ({
   targetWord: "",
   setTargetWord: (word) => set({ targetWord: word }),
 
-  // Game ID to check whether or not to resume the game states.
+  // Game ID
   gameId: 0,
   incrementGameId: () => set((state) => ({ gameId: state.gameId + 1 })),
 
   answerGridId: null,
   setAnswerGridId: (id) => set({ answerGridId: id }),
+
+  // Keyboard
+  keyStatuses: {},
+  setKeyStatuses: (updater) =>
+    set((state) => ({
+      keyStatuses: updater(state.keyStatuses),
+    })),
+  resetKeyStatuses: () =>
+    set({
+      keyStatuses: {},
+    }),
 }));
