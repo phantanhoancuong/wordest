@@ -1,7 +1,11 @@
 import { useState } from "react";
-import { CellStatusType } from "../types/cell";
-import { CellStatus } from "../lib/constants";
-import { UseKeyStatusesReturn } from "../types/useKeyStatuses.types";
+
+import { useGameStore } from "@/store/useGameStore";
+
+import { CellStatus } from "@/lib/constants";
+
+import { CellStatusType } from "@/types/cell";
+import { UseKeyStatusesReturn } from "@/types/useKeyStatuses.types";
 
 /**
  * Hook to manage the visual status of keyboard keys.
@@ -10,9 +14,9 @@ import { UseKeyStatusesReturn } from "../types/useKeyStatuses.types";
  * and provides utilities to update or reset these states.
  */
 export const useKeyStatuses = (): UseKeyStatusesReturn => {
-  const [keyStatuses, setKeyStatuses] = useState<
-    Partial<Record<string, CellStatusType>>
-  >({});
+  const keyStatuses = useGameStore((s) => s.keyStatuses);
+  const setKeyStatuses = useGameStore((s) => s.setKeyStatuses);
+  const resetKeyStatuses = useGameStore((s) => s.resetKeyStatuses);
 
   /**
    * Updates key statuses based on the latest guess.
@@ -20,17 +24,18 @@ export const useKeyStatuses = (): UseKeyStatusesReturn => {
    */
   const updateKeyStatuses = (
     guess: string,
-    statuses: Array<CellStatusType>
+    statuses: CellStatusType[]
   ): void => {
     setKeyStatuses((prev) => {
       const next = { ...prev };
+
       for (let i = 0; i < guess.length; i++) {
         const letter = guess[i];
         const newStatus = statuses[i];
         const current = next[letter];
 
-        if (current === CellStatus.CORRECT) continue;
-        if (current === CellStatus.PRESENT && newStatus === CellStatus.ABSENT)
+        if (current == CellStatus.CORRECT) continue;
+        if (current == CellStatus.PRESENT && newStatus === CellStatus.ABSENT)
           continue;
 
         next[letter] = newStatus;
@@ -38,9 +43,6 @@ export const useKeyStatuses = (): UseKeyStatusesReturn => {
       return next;
     });
   };
-
-  /** Resets all key statuses to their initial empty state. */
-  const resetKeyStatuses = (): void => setKeyStatuses({});
 
   return { keyStatuses, updateKeyStatuses, resetKeyStatuses };
 };
