@@ -43,7 +43,6 @@ export const useGame = (): UseGameReturn => {
   const gameState = useGameState();
   const cursor = useCursorController();
 
-  const inputLocked = useRef(false);
   const [validationError, setValidationError] = useState("");
   const { toastList, addToast, removeToast } = useToasts();
   const { keyStatuses, updateKeyStatuses, resetKeyStatuses } = useKeyStatuses();
@@ -126,7 +125,6 @@ export const useGame = (): UseGameReturn => {
       gameGrid.flushAnimation(finishedMap);
     },
     () => {
-      inputLocked.current = false;
       if (gameState.pendingState != null) {
         updateGameState();
       }
@@ -136,6 +134,11 @@ export const useGame = (): UseGameReturn => {
   const answerGridAnimationTracker = useAnimationTracker((finishedMap) => {
     answerGrid.flushAnimation(finishedMap);
   });
+
+  const isInputLocked =
+    gameState.state !== GameState.PLAYING ||
+    gameGridAnimationTracker.getCount() > 0 ||
+    gameState.pendingState !== null;
 
   /**
    * Handles the completion of a single cell's animation in the main game grid.
@@ -230,8 +233,6 @@ export const useGame = (): UseGameReturn => {
     gameGridAnimationTracker.reset();
     answerGridAnimationTracker.reset();
 
-    inputLocked.current = false;
-
     toastList.forEach((t) => removeToast(t.id));
   };
 
@@ -244,13 +245,7 @@ export const useGame = (): UseGameReturn => {
    * @param key - The pressed key (already capitalized).
    */
   const handleInput = (key: string): void => {
-    if (
-      gameState.state !== GameState.PLAYING ||
-      !targetWord ||
-      gameGridAnimationTracker.getCount() > 0 ||
-      inputLocked.current
-    )
-      return;
+    if (!targetWord || isInputLocked) return;
 
     const isLetter = /^[A-Z]$/.test(key);
     const isBackspace = key === "Backspace";
@@ -310,7 +305,6 @@ export const useGame = (): UseGameReturn => {
 
   const submitGuess = useGuessSubmission(
     animationSpeedMultiplier,
-    inputLocked,
     targetLetterCount,
     targetWord,
     answerGrid,

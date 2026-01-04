@@ -29,7 +29,6 @@ import { UseGridStateReturn } from "@/types/useGridState.types";
  */
 export const useGuessSubmission = (
   animationSpeedMultiplier: number,
-  inputLocked: React.RefObject<boolean>,
   targetLetterCount: React.RefObject<Record<string, number>>,
   targetWord: string,
   answerGrid: UseGridStateReturn,
@@ -146,17 +145,11 @@ export const useGuessSubmission = (
    * - Ensures input lock is released on completion.
    */
   const submitGuess = async (): Promise<void> => {
-    if (inputLocked.current) return;
-    inputLocked.current = true;
-
     const guess = gameGrid.renderGridRef.current[cursor.row.current]
       .map((cell) => cell.char)
       .join("");
 
-    if (guess.length !== gameGrid.colNum) {
-      inputLocked.current = false;
-      return;
-    }
+    if (guess.length !== gameGrid.colNum) return;
 
     try {
       const { status, data } = await validateWord(guess);
@@ -176,8 +169,6 @@ export const useGuessSubmission = (
     } catch (error: unknown) {
       console.error("submitGuess error:", error);
       addToast("Unexpected error occurred.");
-    } finally {
-      inputLocked.current = false;
     }
   };
 
