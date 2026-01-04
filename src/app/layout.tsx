@@ -1,5 +1,6 @@
-import "./globals.css";
-import { SettingsProvider } from "./contexts/SettingsContext";
+import { SettingsProvider } from "@/app/contexts/SettingsContext";
+
+import "@/app/globals.css";
 
 export const metadata = {
   title: "WORDest",
