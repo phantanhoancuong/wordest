@@ -273,7 +273,14 @@ export const useGame = (): UseGameReturn => {
     }
 
     if (isEnter) {
-      if (cursor.col.current === gameGrid.colNum) submitGuess();
+      if (cursor.col.current !== gameGrid.colNum) {
+        addToast("Incomplete guess");
+        gameGridAnimationTracker.add(gameGrid.colNum);
+        gameGrid.applyInvalidGuessAnimation(
+          cursor.row.current,
+          animationSpeedMultiplier
+        );
+      } else submitGuess();
       return;
     }
 
