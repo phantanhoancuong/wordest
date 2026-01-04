@@ -147,37 +147,3 @@ export const evaluateGuess = (
 
   return statuses;
 };
-
-interface MapGuessToRowOptions {
-  animation?: CellAnimationType;
-  animationDelay?: number;
-  isConsecutive?: boolean;
-}
-
-/**
- * Maps a guessed word and its evaluation statuses into an array of cell objects.
- *
- * Useful for rendering animated rows in the game grid.
- *
- * @param guess - The guessed word.
- * @param statuses - Array of `CellStatus` values for each character.
- * @param options - Optional animation configuration.
- * @returns Array of cell objects representing the row.
- */
-export const mapGuessToRow = (
-  guess: string,
-  statuses: Array<CellStatusType>,
-  options: MapGuessToRowOptions = {}
-): Array<RenderCell> => {
-  const {
-    animation = CellAnimation.NONE,
-    animationDelay = 0,
-    isConsecutive = false,
-  } = options;
-  return guess.split("").map((char, i) => ({
-    char,
-    status: statuses[i],
-    animation,
-    animationDelay: isConsecutive ? i * animationDelay : animationDelay,
-  }));
-};

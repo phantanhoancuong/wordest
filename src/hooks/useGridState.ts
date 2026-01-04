@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 
 import { animationTiming, CellStatus, CellAnimation } from "@/lib/constants";
 
-import { mapGuessToRow, renderGridToDataGrid } from "@/lib/utils";
+import { renderGridToDataGrid } from "@/lib/utils";
 
 import { useLatest } from "@/hooks/useLatest";
 
@@ -14,6 +14,8 @@ import {
 } from "@/types/cell";
 import { UseGridStateReturn } from "@/types/useGridState.types";
 import { initEmptyRenderGrid, dataGridToRenderGrid } from "@/lib/utils";
+import { CellAnimationType } from "@/types/cell";
+
 /**
  * Manages a 2D grid of cells representing player's guesses.
  *
@@ -151,48 +153,6 @@ export const useGridState = (
     });
   };
 
-  /** Returns the RenderCell array for a given row. */
-  const getRow = (rowIndex: number): RenderCell[] => {
-    return renderGridRef.current[rowIndex];
-  };
-
-  /** Returns the guessed string for a row
-   *
-   * @param rowIndex - Index of the row to convert.
-   * @returns The guessed word for that row.
-   */
-  const getRowGuess = (rowIndex: number): string => {
-    const row = getRow(rowIndex);
-    return row.map((cell) => cell.char).join("");
-  };
-
-  /**
-   * Maps a string and an array of CellStatus to a RenderCell row and applies animation.
-   *
-   * @param rowIndex - Row to animate.
-   * @param guess - Guess string for the row.
-   * @param statuses - Cell statuses for the row.
-   * @param animation - Animation type to apply.
-   * @param delay - Animation delay in seconds.
-   * @param isConsecutive - Whether animation is consecutive per cell.
-   */
-  const applyRowAnimation = (
-    rowIndex: number,
-    guess: string,
-    statuses: CellStatus[],
-    animation: CellAnimation,
-    delay: number,
-    isConsecutive: boolean
-  ): void => {
-    const newRow = mapGuessToRow(guess, statuses, {
-      animation,
-      animationDelay: delay,
-      isConsecutive,
-    });
-
-    updateRow(rowIndex, newRow);
-  };
-
   /**
    * Applies the "valid guess" animation to a row.
    *
@@ -204,31 +164,35 @@ export const useGridState = (
     rowIndex: number,
     statuses: CellStatus[],
     animationSpeedMultiplier: number
-  ) => {
-    const guess = getRowGuess(rowIndex);
-    applyRowAnimation(
-      rowIndex,
-      guess,
-      statuses,
-      CellAnimation.BOUNCE,
-      animationTiming.bounce.delay * animationSpeedMultiplier,
-      true
+  ): void => {
+    const animatedRow = renderGridRef.current[rowIndex].map(
+      (cell: RenderCell, i: number) => ({
+        ...cell,
+        status: statuses[i],
+        animation: CellAnimation.BOUNCE,
+        animationDelay:
+          i * animationTiming.bounce.delay * animationSpeedMultiplier,
+      })
     );
+
+    updateRow(rowIndex, animatedRow);
   };
 
-  const applyInvalidGuessAnimation = (
-    rowIndex: number,
-    animationSpeedMultiplier: number
-  ) => {
-    const guess = getRowGuess(rowIndex);
-    applyRowAnimation(
-      rowIndex,
-      guess,
-      Array(getRow(rowIndex).length).fill(CellStatus.DEFAULT),
-      CellAnimation.SHAKE,
-      animationTiming.shake.delay * animationSpeedMultiplier,
-      false
+  /**
+   * Applies the "invalid guess" animation to a row (incomplete guess, words that are not in the list, etc.).
+   *
+   * @param rowIndex - Row to animate.
+   */
+  const applyInvalidGuessAnimation = (rowIndex: number): void => {
+    const animatedRow = renderGridRef.current[rowIndex].map(
+      (cell: RenderCell) => ({
+        ...cell,
+        animation: CellAnimation.SHAKE,
+        animationDelay: 0,
+      })
     );
+
+    updateRow(rowIndex, animatedRow);
   };
 
   return {
