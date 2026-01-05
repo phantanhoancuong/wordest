@@ -16,7 +16,6 @@ import { UseTargetWordReturn } from "@/types/useTargetWord.types";
 export const useTargetWord = (): UseTargetWordReturn => {
   const targetWord = useGameStore((s) => s.targetWord);
   const setTargetWord = useGameStore((s) => s.setTargetWord);
-
   const [error, setError] = useState<string>("");
   const targetLetterCount = useRef<Record<string, number>>({});
 
@@ -31,7 +30,7 @@ export const useTargetWord = (): UseTargetWordReturn => {
   };
 
   /** Fetches a new target word from the API and updates state. */
-  const loadWord = async (): Promise<string | null> => {
+  const loadTargetWord = async (): Promise<string | null> => {
     try {
       setError("");
       const word = await fetchWordFromApi();
@@ -44,13 +43,6 @@ export const useTargetWord = (): UseTargetWordReturn => {
     }
   };
 
-  // Load initial word on mount.
-  useEffect(() => {
-    if (!targetWord) {
-      loadWord();
-    }
-  }, []);
-
   useEffect(() => {
     if (targetWord) {
       targetLetterCount.current = countLetter(targetWord);
@@ -61,7 +53,7 @@ export const useTargetWord = (): UseTargetWordReturn => {
     targetWord,
     targetLetterCount,
     wordFetchError: error,
-    reloadTargetWord: loadWord,
+    loadTargetWord,
     resetTargetWord,
   };
 };

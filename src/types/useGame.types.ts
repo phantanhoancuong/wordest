@@ -39,4 +39,8 @@ export interface UseGameReturn {
   input: {
     handle: (key: string) => void;
   };
+
+  render: {
+    hasHydrated: boolean;
+  };
 }

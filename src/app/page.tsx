@@ -1,9 +1,10 @@
 "use client";
 
-import { Grid, Keyboard, ToastBar, Banner } from "../components";
-import styles from "./page.module.css";
+import { Grid, Keyboard, ToastBar, Banner } from "@/components";
+import styles from "@/app/page.module.css";
 
-import { useGame } from "../hooks/useGame";
+import { useGame } from "@/hooks/useGame";
+import { renderEmptyGrid } from "@/lib/utils";
 
 /**
  * Main game page component.
@@ -18,7 +19,14 @@ import { useGame } from "../hooks/useGame";
  * Uses the {@link useGame} hook to manage game state, user input, and UI updates.
  */
 export default function Home() {
-  const { gameGrid, answerGrid, keyboard, game, toasts, input } = useGame();
+  const { gameGrid, answerGrid, keyboard, game, toasts, input, render } =
+    useGame();
+  const displayGameGrid = render.hasHydrated
+    ? gameGrid.renderGrid
+    : renderEmptyGrid(gameGrid.rowNum, gameGrid.colNum);
+  const displayAnswerGrid = render.hasHydrated
+    ? answerGrid.renderGrid
+    : renderEmptyGrid(answerGrid.rowNum, answerGrid.colNum);
 
   return (
     <div className={styles["app"]}>
@@ -28,17 +36,17 @@ export default function Home() {
 
       <main className={styles["app__content"]}>
         {game.wordFetchError ? (
-          <section className={styles["game__error"]}>
-            <p>{game.wordFetchError}</p>
-          </section>
+          <p className={styles["game__error"]}>{game.wordFetchError}</p>
         ) : (
           <section className={`${styles["game-board"]} flex-center`}>
             <div className={styles["game-board__grid"]}>
               <Grid
-                grid={gameGrid.renderGrid}
-                onAnimationEnd={gameGrid.handleAnimationEnd}
-                dataRows={gameGrid.rowNum}
-                dataCols={gameGrid.colNum}
+                grid={displayGameGrid}
+                onAnimationEnd={
+                  displayGameGrid === gameGrid.renderGrid
+                    ? gameGrid.handleAnimationEnd
+                    : undefined
+                }
                 layoutRows={gameGrid.rowNum}
                 layoutCols={gameGrid.colNum}
               />
@@ -46,10 +54,14 @@ export default function Home() {
 
             <div className={styles["game-board__controls"]}>
               <Grid
-                grid={answerGrid.renderGrid}
-                layoutRows={6}
+                grid={displayAnswerGrid}
+                onAnimationEnd={
+                  displayAnswerGrid === answerGrid.renderGrid
+                    ? answerGrid.handleAnimationEnd
+                    : undefined
+                }
+                layoutRows={gameGrid.rowNum}
                 layoutCols={gameGrid.colNum}
-                onAnimationEnd={answerGrid.handleAnimationEnd}
               />
               <button
                 className={styles["game-board__button"]}
@@ -58,12 +70,13 @@ export default function Home() {
                 Restart
               </button>
             </div>
+
             <ToastBar toasts={toasts.list} removeToast={toasts.removeToast} />
           </section>
         )}
       </main>
 
-      <footer className={`${styles["app__keyboard"]}`}>
+      <footer className={styles["app__keyboard"]}>
         <Keyboard keyStatuses={keyboard.statuses} onKeyClick={input.handle} />
       </footer>
 

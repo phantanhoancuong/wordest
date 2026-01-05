@@ -2,7 +2,13 @@ import { create } from "zustand";
 
 import { initEmptyDataGrid } from "@/lib/utils";
 
-import { WORD_LENGTH, ATTEMPTS, CellStatus, GameState } from "@/lib/constants";
+import {
+  WORD_LENGTH,
+  ATTEMPTS,
+  CellStatus,
+  GameState,
+  GameMode,
+} from "@/lib/constants";
 
 import { CellStatusType, DataCell } from "@/types/cell";
 
@@ -40,7 +46,7 @@ type GameStore = {
   // Identifier for the current game session.
   // Incremented on restart to invalidate derived state.
   gameId: number;
-  incrementGameId: () => void;
+  incrementGameId: () => number;
 
   // Tracks whether the answer grid has been initialized for the current gameId.
   answerGridId: number | null;
@@ -56,6 +62,9 @@ type GameStore = {
     ) => Partial<Record<string, CellStatusType>>
   ) => void;
   resetKeyStatuses: () => void;
+
+  sessionGameMode: GameMode | null;
+  setSessionGameMode: (newGameMode: GameMode) => void;
 };
 
 export const useGameStore = create<GameStore>((set, get) => ({
@@ -99,7 +108,10 @@ export const useGameStore = create<GameStore>((set, get) => ({
 
   // Game ID
   gameId: 0,
-  incrementGameId: () => set((state) => ({ gameId: state.gameId + 1 })),
+  incrementGameId: () => {
+    set((state) => ({ gameId: state.gameId + 1 }));
+    return get().gameId;
+  },
 
   answerGridId: null,
   setAnswerGridId: (id) => set({ answerGridId: id }),
@@ -114,4 +126,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
     set({
       keyStatuses: {},
     }),
+
+  sessionGameMode: null,
+  setSessionGameMode: (newGameMode) => set({ sessionGameMode: newGameMode }),
 }));

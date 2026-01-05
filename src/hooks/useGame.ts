@@ -40,7 +40,7 @@ export const useGame = (): UseGameReturn => {
     targetWord,
     targetLetterCount,
     wordFetchError,
-    reloadTargetWord,
+    loadTargetWord,
     resetTargetWord,
   } = useTargetWord();
 
@@ -50,7 +50,7 @@ export const useGame = (): UseGameReturn => {
   const [validationError, setValidationError] = useState("");
   const { toastList, addToast, removeToast } = useToasts();
   const { keyStatuses, updateKeyStatuses, resetKeyStatuses } = useKeyStatuses();
-  const { volume, animationSpeed, isMuted } = useSettingsContext();
+  const { volume, animationSpeed, isMuted, gameMode } = useSettingsContext();
 
   const animationSpeedMultiplier =
     AnimationSpeedMultiplier[animationSpeed.value];
@@ -89,6 +89,9 @@ export const useGame = (): UseGameReturn => {
     isMuted.value ? 0 : volume.value
   );
 
+  const sessionGameMode = useGameStore((s) => s.sessionGameMode);
+  const setSessionGameMode = useGameStore((s) => s.setSessionGameMode);
+
   const gameId = useGameStore((s) => s.gameId);
   const incrementGameId = useGameStore((s) => s.incrementGameId);
   const answerGridId = useGameStore((s) => s.answerGridId);
@@ -104,25 +107,6 @@ export const useGame = (): UseGameReturn => {
    * - A new target word is loaded.
    * - A new gameId is issued.
    */
-  useEffect(() => {
-    if (!targetWord) return;
-
-    // Resume the game.
-    if (answerGridId === gameId) {
-      return;
-    }
-
-    // Populate the answer grid from the target word.
-    const newRow = targetWord.split("").map((ch) => ({
-      char: ch,
-      status: CellStatus.HIDDEN,
-      animation: CellAnimation.NONE,
-      animationDelay: 0,
-    }));
-
-    answerGrid.updateRow(0, newRow);
-    setAnswerGridId(gameId);
-  }, [targetWord, gameId, answerGridId]);
 
   const gameGridAnimationTracker = useAnimationTracker(
     (finishedMap) => {
@@ -134,6 +118,56 @@ export const useGame = (): UseGameReturn => {
       }
     }
   );
+
+  /**
+   * Initialize the answer grid according to the fetched target word.
+   *
+   * @param word - The target word.
+   */
+  const populateAnswerGrid = (word: string) => {
+    const currentWord = useGameStore.getState().targetWord;
+    const newRow = currentWord.split("").map((ch) => ({
+      char: ch,
+      status: CellStatus.HIDDEN,
+      animation: CellAnimation.NONE,
+      animationDelay: 0,
+    }));
+    answerGrid.updateRow(0, newRow);
+  };
+
+  const [hasHydrated, setHasHydrated] = useState(false);
+
+  // Initialize the game
+  useEffect(() => {
+    // Mark client as hydrated to render
+    setHasHydrated(true);
+
+    // If game mode changed, restart and fetch new word
+    if (gameMode.value !== sessionGameMode) {
+      setSessionGameMode(gameMode.value);
+      restartGame(); // restart handles target word fetch
+      return;
+    }
+
+    // Only populate grid if we have a target word
+    if (!targetWord) return;
+
+    // If this is a new game, reset UI and populate grid
+    if (answerGridId !== gameId) {
+      // Reset state & UI (but does not increment the ID unlike restartGame)
+      gameState.resetState();
+      cursor.resetCursor();
+      resetKeyStatuses();
+      gameGrid.resetGrid();
+      answerGrid.resetGrid();
+      gameGridAnimationTracker.reset();
+      answerGridAnimationTracker.reset();
+      toastList.forEach((t) => removeToast(t.id));
+
+      populateAnswerGrid(targetWord);
+      setAnswerGridId(useGameStore.getState().gameId);
+    }
+  }, []);
 
   const answerGridAnimationTracker = useAnimationTracker((finishedMap) => {
     answerGrid.flushAnimation(finishedMap);
@@ -293,18 +327,14 @@ export const useGame = (): UseGameReturn => {
    * Clears the game grid, answer grid, keyboard statuses, animations, toasts,
    * and reloads a new target word.
    */
-  const restartGame = (): void => {
+  const restartGame = async (): Promise<void> => {
     gameState.resetState();
     cursor.resetCursor();
 
     resetKeyStatuses();
 
-    incrementGameId();
+    const newGameId = incrementGameId();
     setAnswerGridId(null);
-
-    resetTargetWord();
-
-    reloadTargetWord();
 
     gameGrid.resetGrid();
     answerGrid.resetGrid();
@@ -313,6 +343,13 @@ export const useGame = (): UseGameReturn => {
     answerGridAnimationTracker.reset();
 
     toastList.forEach((t) => removeToast(t.id));
+
+    resetTargetWord();
+    const word = await loadTargetWord();
+    if (!word) return;
+
+    populateAnswerGrid(word);
+    setAnswerGridId(newGameId);
   };
 
   /**
@@ -380,6 +417,10 @@ export const useGame = (): UseGameReturn => {
 
     input: {
       handle: handleInput,
+    },
+
+    render: {
+      hasHydrated,
     },
   };
 };

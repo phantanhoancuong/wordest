@@ -23,7 +23,7 @@ interface SettingsContextType {
     setValue: (v: boolean) => void;
   };
   gameMode: {
-    value: string;
+    value: GameMode;
     setValue: (v: GameMode) => void;
   };
 }
