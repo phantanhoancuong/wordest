@@ -34,6 +34,7 @@ export const useCursorController = (): UseCursorControllerReturn => {
    * Advances the cursor to the next row and resets the column index to 0.
    */
   const advanceRow = (): void => {
+    pendingRowAdvance.current = false;
     setColState(0);
     setRowState((prevRow) => prevRow + 1);
   };
