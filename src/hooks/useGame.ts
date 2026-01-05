@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 
 import {
   ATTEMPTS,
@@ -9,21 +9,25 @@ import {
   GameState,
 } from "@/lib/constants";
 
-import { useAnimationTracker } from "./useAnimationTracker";
-import { useCursorController } from "./useCursorController";
-import { useGameState } from "./useGameState";
-import { useGridState } from "./useGridState";
-import { useGuessSubmission } from "./useGuessSubmission";
-import { useKeyboardInput } from "./useKeyboardInput";
-import { useKeyStatuses } from "./useKeyStatuses";
-import { useSoundPlayer } from "./useSoundPlayer";
-import { useTargetWord } from "./useTargetWord";
-import { useToasts } from "./useToasts";
+import { useAnimationTracker } from "@/hooks/useAnimationTracker";
+import { useCursorController } from "@/hooks/useCursorController";
+import { useGameState } from "@/hooks/useGameState";
+import { useGridState } from "@/hooks/useGridState";
+import { useGuessSubmission } from "@/hooks/useGuessSubmission";
+import { useKeyboardInput } from "@/hooks/useKeyboardInput";
+import { useKeyStatuses } from "@/hooks/useKeyStatuses";
+import { useSoundPlayer } from "@/hooks/useSoundPlayer";
+import { useTargetWord } from "@/hooks/useTargetWord";
+import { useToasts } from "@/hooks/useToasts";
 
 import { UseGameReturn } from "@/types/useGame.types";
 
 import { useSettingsContext } from "@/app/contexts/SettingsContext";
 import { useGameStore } from "@/store/useGameStore";
+
+/** Matches a single uppercase character, used to validate keyboard letter input. */
+const LETTER_REGEX = /^[A-Z]$/;
+
 /**
  * Hook to manage the state and logic of the game.
  *
@@ -165,7 +169,10 @@ export const useGame = (): UseGameReturn => {
    * @param rowIndex - Always 0 (ignored).
    * @param colIndex - Index of the column on the animated cell.
    */
-  const handleAnswerGridAnimationEnd = (rowIndex: number, colIndex: number) => {
+  const handleAnswerGridAnimationEnd = (
+    rowIndex: number,
+    colIndex: number
+  ): void => {
     rowIndex = 0;
     answerGridAnimationTracker.markEnd(rowIndex, colIndex);
   };
@@ -192,20 +199,92 @@ export const useGame = (): UseGameReturn => {
    *
    * @param state - The final game state (WON or LOST).
    */
-  const revealAnswerGrid = (state: GameState) => {
-    requestAnimationFrame(() => {
-      answerGridAnimationTracker.add(answerGrid.colNum);
+  const revealAnswerGrid = (state: GameState): void => {
+    answerGridAnimationTracker.add(answerGrid.colNum);
+    const revealedRow = answerGrid.renderGridRef.current[0].map((cell) => ({
+      ...cell,
+      status: state === GameState.WON ? CellStatus.CORRECT : CellStatus.WRONG,
+      animation: CellAnimation.BOUNCE,
+      animationDelay: 0,
+      animationKey: (cell.animationKey ?? 0) + 1,
+    }));
+    answerGrid.updateRow(0, revealedRow);
+  };
 
-      const revealedRow = answerGrid.renderGridRef.current[0].map((cell) => ({
-        ...cell,
-        status: state === GameState.WON ? CellStatus.CORRECT : CellStatus.WRONG,
-        animation: CellAnimation.BOUNCE,
-        animationDelay: 0,
-        animationKey: (cell.animationKey ?? 0) + 1,
-      }));
+  /**
+   * Handles guess submission.
+   *
+   * If the current row is incomplete, triggers an invalid-guess animation and shows a toast.
+   * Otherwise, submits the guess for validation.
+   */
+  const handleSubmit = (): void => {
+    if (cursor.col.current !== gameGrid.colNum) {
+      addToast("Incomplete guess");
+      gameGridAnimationTracker.add(gameGrid.colNum);
+      gameGrid.applyInvalidGuessAnimation(
+        cursor.row.current,
+        animationSpeedMultiplier
+      );
+    } else submitGuess();
+  };
 
-      answerGrid.updateRow(0, revealedRow);
+  /**
+   * Handles backspace input.
+   *
+   * Moves the cursor one position backward (if possible) and
+   * clears the corresponding cell in the current row.
+   */
+  const handleBackspace = (): void => {
+    const colToUpdate = cursor.retreatCol();
+    if (colToUpdate === null) return;
+    gameGrid.updateCell(cursor.row.current, colToUpdate, {
+      char: "",
+      status: CellStatus.DEFAULT,
+      animation: CellAnimation.NONE,
+      animationDelay: 0,
     });
+  };
+
+  /**
+   * Handles a valid letter input.
+   *
+   * Advances the cursor and writes the letter into the current cell of the active row.
+   *
+   * @param letter - Uppercase letter to insert.
+   */
+  const handleLetter = (letter: string): void => {
+    const colToUpdate = cursor.advanceCol(gameGrid.colNum);
+    if (colToUpdate === null) return;
+    gameGrid.updateCell(cursor.row.current, colToUpdate, {
+      char: letter,
+      status: CellStatus.DEFAULT,
+      animation: CellAnimation.NONE,
+      animationDelay: 0,
+    });
+  };
+
+  /**
+   * Handles a single keyboard input from the user.
+   *
+   * Updates the game grid based on letter input, backspace, or enter.
+   * Plays key sounds and prevents input when locked or during animations.
+   *
+   * @param key - The pressed key (already capitalized).
+   */
+  const handleInput = (key: string): void => {
+    if (!targetWord || isInputLocked) return;
+
+    const isBackspace = key === "Backspace";
+    const isEnter = key === "Enter";
+    const isLetter = LETTER_REGEX.test(key);
+
+    if (!isBackspace && !isEnter && !isLetter) return;
+
+    playKeySound();
+
+    if (isBackspace) return handleBackspace();
+    else if (isEnter) return handleSubmit();
+    else handleLetter(key);
   };
 
   /**
@@ -234,62 +313,6 @@ export const useGame = (): UseGameReturn => {
     answerGridAnimationTracker.reset();
 
     toastList.forEach((t) => removeToast(t.id));
-  };
-
-  /**
-   * Handles a single keyboard input from the user.
-   *
-   * Updates the game grid based on letter input, backspace, or enter.
-   * Plays key sounds and prevents input when locked or during animations.
-   *
-   * @param key - The pressed key (already capitalized).
-   */
-  const handleInput = (key: string): void => {
-    if (!targetWord || isInputLocked) return;
-
-    const isLetter = /^[A-Z]$/.test(key);
-    const isBackspace = key === "Backspace";
-    const isEnter = key === "Enter";
-
-    if (isLetter || isBackspace || isEnter) {
-      playKeySound();
-    }
-
-    if (isBackspace) {
-      const colToUpdate = cursor.retreatCol();
-      if (colToUpdate === null) return;
-      gameGrid.updateCell(cursor.row.current, colToUpdate, {
-        char: "",
-        status: CellStatus.DEFAULT,
-        animation: CellAnimation.NONE,
-        animationDelay: 0,
-      });
-      return;
-    }
-
-    if (isEnter) {
-      if (cursor.col.current !== gameGrid.colNum) {
-        addToast("Incomplete guess");
-        gameGridAnimationTracker.add(gameGrid.colNum);
-        gameGrid.applyInvalidGuessAnimation(
-          cursor.row.current,
-          animationSpeedMultiplier
-        );
-      } else submitGuess();
-      return;
-    }
-
-    if (isLetter) {
-      const letter = key.toUpperCase();
-      const colToUpdate = cursor.advanceCol(gameGrid.colNum);
-      if (colToUpdate === null) return;
-      gameGrid.updateCell(cursor.row.current, colToUpdate, {
-        char: letter,
-        status: CellStatus.DEFAULT,
-        animation: CellAnimation.NONE,
-        animationDelay: 0,
-      });
-    }
   };
 
   /**
