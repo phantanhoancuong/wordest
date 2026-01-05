@@ -19,6 +19,10 @@
   gap: calc(var(--font-size-scale) * 0.4rem);
 }
 
+.keyboard__key {
+  user-select: none;
+}
+
 .keyboard__key--default {
   background-color: var(--cell-background-color-default);
   border-color: var(--cell-border-color-default);
