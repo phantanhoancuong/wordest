@@ -4,6 +4,6 @@ export interface UseTargetWordReturn {
   targetWord: string;
   targetLetterCount: RefObject<Record<string, number>>;
   wordFetchError: string;
-  reloadTargetWord: () => Promise<string | null>;
+  loadTargetWord: () => Promise<string | null>;
   resetTargetWord: () => void;
 }

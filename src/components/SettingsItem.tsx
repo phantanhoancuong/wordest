@@ -1,8 +1,8 @@
-import styles from "../styles/SettingsItem.module.css";
+import styles from "@/styles/SettingsItem.module.css";
 
 interface SettingsItemProps {
   name: string;
-  description: string;
+  description: React.ReactNode;
   control: React.ReactNode;
 }
 

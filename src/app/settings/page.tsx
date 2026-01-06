@@ -163,8 +163,18 @@ export default function SettingsPage() {
         </div>
         <div className={styles["setting__container"]}>
           <SettingsItem
-            name="Game mode (WIP)"
-            description="Normal mode is the classic WORDest experience. Export requires all future guesses to have correct letters stay in the same position, present letters must be included somewhere, and absent letters cannot be reused (with standard duplicate-letter rules)."
+            name="Game mode"
+            description={
+              <>
+                Normal mode is the classic WORDest experience.
+                <br />
+                Expert mode enforces hard constraints based on previous guesses:
+                letters confirmed in the correct position must stay in that
+                position, and any letter revealed as present must be used in
+                future guesses at least as many times as it has been confirmed
+                so far.
+              </>
+            }
             control={
               <ButtonGroup
                 options={gameModeOptions}

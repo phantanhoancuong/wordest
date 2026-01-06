@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import {
   ATTEMPTS,
@@ -7,6 +7,7 @@ import {
   CellAnimation,
   CellStatus,
   GameState,
+  GameMode,
 } from "@/lib/constants";
 
 import { useAnimationTracker } from "@/hooks/useAnimationTracker";
@@ -20,7 +21,7 @@ import { useSoundPlayer } from "@/hooks/useSoundPlayer";
 import { useTargetWord } from "@/hooks/useTargetWord";
 import { useToasts } from "@/hooks/useToasts";
 
-import { UseGameReturn } from "@/types/useGame.types";
+import { ExpertModeConstraints, UseGameReturn } from "@/types/useGame.types";
 
 import { useSettingsContext } from "@/app/contexts/SettingsContext";
 import { useGameStore } from "@/store/useGameStore";
@@ -40,7 +41,7 @@ export const useGame = (): UseGameReturn => {
     targetWord,
     targetLetterCount,
     wordFetchError,
-    reloadTargetWord,
+    loadTargetWord,
     resetTargetWord,
   } = useTargetWord();
 
@@ -50,7 +51,7 @@ export const useGame = (): UseGameReturn => {
   const [validationError, setValidationError] = useState("");
   const { toastList, addToast, removeToast } = useToasts();
   const { keyStatuses, updateKeyStatuses, resetKeyStatuses } = useKeyStatuses();
-  const { volume, animationSpeed, isMuted } = useSettingsContext();
+  const { volume, animationSpeed, isMuted, gameMode } = useSettingsContext();
 
   const animationSpeedMultiplier =
     AnimationSpeedMultiplier[animationSpeed.value];
@@ -89,10 +90,25 @@ export const useGame = (): UseGameReturn => {
     isMuted.value ? 0 : volume.value
   );
 
+  const sessionGameMode = useGameStore((s) => s.sessionGameMode);
+  const setSessionGameMode = useGameStore((s) => s.setSessionGameMode);
+
   const gameId = useGameStore((s) => s.gameId);
   const incrementGameId = useGameStore((s) => s.incrementGameId);
   const answerGridId = useGameStore((s) => s.answerGridId);
   const setAnswerGridId = useGameStore((s) => s.setAnswerGridId);
+
+  /** Stores accumulated constraints for Expert Mode.
+   *
+   * - lockedPositions: Maps column indices to letters that are confirmed correct (green).
+   * Future guesses must place the same letter at these exact positions.
+   *
+   * - minimumLetterCounts: Maps letters to the minimum number of times they must appear in a guess.
+   */
+  const expertModeConstraints = useRef<ExpertModeConstraints>({
+    lockedPositions: new Map(),
+    minimumLetterCounts: new Map(),
+  });
 
   /**
    * Initializes the answer grid for the current game.
@@ -104,25 +120,6 @@ export const useGame = (): UseGameReturn => {
    * - A new target word is loaded.
    * - A new gameId is issued.
    */
-  useEffect(() => {
-    if (!targetWord) return;
-
-    // Resume the game.
-    if (answerGridId === gameId) {
-      return;
-    }
-
-    // Populate the answer grid from the target word.
-    const newRow = targetWord.split("").map((ch) => ({
-      char: ch,
-      status: CellStatus.HIDDEN,
-      animation: CellAnimation.NONE,
-      animationDelay: 0,
-    }));
-
-    answerGrid.updateRow(0, newRow);
-    setAnswerGridId(gameId);
-  }, [targetWord, gameId, answerGridId]);
 
   const gameGridAnimationTracker = useAnimationTracker(
     (finishedMap) => {
@@ -134,6 +131,56 @@ export const useGame = (): UseGameReturn => {
       }
     }
   );
+
+  /**
+   * Initialize the answer grid according to the fetched target word.
+   *
+   * @param word - The target word.
+   */
+  const populateAnswerGrid = (word: string) => {
+    const currentWord = useGameStore.getState().targetWord;
+    const newRow = currentWord.split("").map((ch) => ({
+      char: ch,
+      status: CellStatus.HIDDEN,
+      animation: CellAnimation.NONE,
+      animationDelay: 0,
+    }));
+    answerGrid.updateRow(0, newRow);
+  };
+
+  const [hasHydrated, setHasHydrated] = useState(false);
+
+  // Initialize the game
+  useEffect(() => {
+    // Mark client as hydrated to render
+    setHasHydrated(true);
+
+    // If game mode changed, restart and fetch new word
+    if (gameMode.value !== sessionGameMode) {
+      setSessionGameMode(gameMode.value);
+      restartGame(); // restart handles target word fetch
+      return;
+    }
+
+    // Only populate grid if we have a target word
+    if (!targetWord) return;
+
+    // If this is a new game, reset UI and populate grid
+    if (answerGridId !== gameId) {
+      // Reset state & UI (but does not increment the ID unlike restartGame)
+      gameState.resetState();
+      cursor.resetCursor();
+      resetKeyStatuses();
+      gameGrid.resetGrid();
+      answerGrid.resetGrid();
+      gameGridAnimationTracker.reset();
+      answerGridAnimationTracker.reset();
+      toastList.forEach((t) => removeToast(t.id));
+
+      populateAnswerGrid(targetWord);
+      setAnswerGridId(useGameStore.getState().gameId);
+    }
+  }, []);
 
   const answerGridAnimationTracker = useAnimationTracker((finishedMap) => {
     answerGrid.flushAnimation(finishedMap);
@@ -212,6 +259,37 @@ export const useGame = (): UseGameReturn => {
   };
 
   /**
+   * Validates a guess against Expert Mode constraints.
+   *
+   * @param guess - The full guess string to validate.
+   * @returns True if the guess satisfies all expert-mode constraints; otherwise false.
+   */
+  const checkValidExpertGuess = (guess: string): boolean => {
+    const { lockedPositions, minimumLetterCounts } =
+      expertModeConstraints.current;
+
+    for (const [index, letter] of lockedPositions) {
+      if (guess[index] !== letter) {
+        addToast(`Must use ${letter} in position ${index + 1}`);
+        return false;
+      }
+    }
+
+    const guessCounts = new Map<string, number>();
+    for (const ch of guess) {
+      guessCounts.set(ch, (guessCounts.get(ch) ?? 0) + 1);
+    }
+
+    for (const [letter, minCount] of minimumLetterCounts) {
+      if ((guessCounts.get(letter) ?? 0) < minCount) {
+        addToast(`Guess must use ${letter}`);
+        return false;
+      }
+    }
+    return true;
+  };
+
+  /**
    * Handles guess submission.
    *
    * If the current row is incomplete, triggers an invalid-guess animation and shows a toast.
@@ -221,11 +299,29 @@ export const useGame = (): UseGameReturn => {
     if (cursor.col.current !== gameGrid.colNum) {
       addToast("Incomplete guess");
       gameGridAnimationTracker.add(gameGrid.colNum);
+      cursor.pendingRowAdvance.current = false;
       gameGrid.applyInvalidGuessAnimation(
         cursor.row.current,
         animationSpeedMultiplier
       );
-    } else submitGuess();
+      return;
+    }
+    const guess = gameGrid.renderGridRef.current[cursor.row.current]
+      .map((cell) => cell.char)
+      .join("");
+    if (gameMode.value === GameMode.EXPERT) {
+      if (!checkValidExpertGuess(guess)) {
+        gameGridAnimationTracker.add(gameGrid.colNum);
+        cursor.pendingRowAdvance.current = false;
+        gameGrid.applyInvalidGuessAnimation(
+          cursor.row.current,
+          animationSpeedMultiplier
+        );
+        return;
+      }
+    }
+
+    submitGuess();
   };
 
   /**
@@ -293,18 +389,14 @@ export const useGame = (): UseGameReturn => {
    * Clears the game grid, answer grid, keyboard statuses, animations, toasts,
    * and reloads a new target word.
    */
-  const restartGame = (): void => {
+  const restartGame = async (): Promise<void> => {
     gameState.resetState();
     cursor.resetCursor();
 
     resetKeyStatuses();
 
-    incrementGameId();
+    const newGameId = incrementGameId();
     setAnswerGridId(null);
-
-    resetTargetWord();
-
-    reloadTargetWord();
 
     gameGrid.resetGrid();
     answerGrid.resetGrid();
@@ -313,6 +405,13 @@ export const useGame = (): UseGameReturn => {
     answerGridAnimationTracker.reset();
 
     toastList.forEach((t) => removeToast(t.id));
+
+    resetTargetWord();
+    const word = await loadTargetWord();
+    if (!word) return;
+
+    populateAnswerGrid(word);
+    setAnswerGridId(newGameId);
   };
 
   /**
@@ -327,6 +426,7 @@ export const useGame = (): UseGameReturn => {
   };
 
   const submitGuess = useGuessSubmission(
+    gameMode.value === GameMode.EXPERT,
     animationSpeedMultiplier,
     targetLetterCount,
     targetWord,
@@ -339,7 +439,8 @@ export const useGame = (): UseGameReturn => {
     setValidationError,
     updateKeyStatuses,
     gameGridAnimationTracker,
-    answerGridAnimationTracker
+    answerGridAnimationTracker,
+    expertModeConstraints
   );
 
   useKeyboardInput(handleInput);
@@ -380,6 +481,10 @@ export const useGame = (): UseGameReturn => {
 
     input: {
       handle: handleInput,
+    },
+
+    render: {
+      hasHydrated,
     },
   };
 };

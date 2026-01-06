@@ -147,3 +147,28 @@ export const evaluateGuess = (
 
   return statuses;
 };
+
+/**
+ * Generates an empty grid of DataCells.
+ *
+ * @param rows - Number of rows in the grid.
+ * @param cols - Number of columns in the grid.
+ * @param hidden - If true, cells use HIDDEN status (for answer grid), otherwise DEFAULT.
+ * @returns 2D array of RenderCell objects.
+ */
+export const renderEmptyGrid = (
+  rows: number,
+  cols: number,
+  hidden = false
+): RenderCell[][] => {
+  const status = hidden ? CellStatus.HIDDEN : CellStatus.DEFAULT;
+
+  return Array.from({ length: rows }, () =>
+    Array.from({ length: cols }, () => ({
+      char: "",
+      status,
+      animation: CellAnimation.NONE,
+      animationDelay: 0,
+    }))
+  );
+};
