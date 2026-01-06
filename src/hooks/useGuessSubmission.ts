@@ -11,6 +11,7 @@ import { evaluateGuess } from "@/lib/utils";
 import { CellStatusType } from "@/types/cell";
 import { UseAnimationTrackerReturn } from "@/types/useAnimationTracker.types";
 import { UseCursorControllerReturn } from "@/types/useCursorController.types";
+import { ExpertModeConstraints } from "@/types/useGame.types";
 import { UseGameStateReturn } from "@/types/useGameState.types";
 import { UseGridStateReturn } from "@/types/useGridState.types";
 
@@ -28,6 +29,7 @@ import { UseGridStateReturn } from "@/types/useGridState.types";
  * when the user presses Enter.
  */
 export const useGuessSubmission = (
+  isExpertMode: boolean,
   animationSpeedMultiplier: number,
   targetLetterCount: React.RefObject<Record<string, number>>,
   targetWord: string,
@@ -40,7 +42,8 @@ export const useGuessSubmission = (
   setValidationError: React.Dispatch<React.SetStateAction<string>>,
   updateKeyStatuses: (guess: string, statuses: CellStatusType[]) => void,
   gameGridAnimationTracker: UseAnimationTrackerReturn,
-  answerGridAnimationTracker: UseAnimationTrackerReturn
+  answerGridAnimationTracker: UseAnimationTrackerReturn,
+  expertModeConstraints: React.RefObject<ExpertModeConstraints>
 ): (() => void) => {
   /**
    * Handles an invalid guess (not in dictionary).
@@ -74,14 +77,17 @@ export const useGuessSubmission = (
   /**
    * Handles a valid guess.
    *
-   * - Evaluates the guess against the target word.
-   * - Updates the answer grid for newly revealed correct letters.
-   * - Applies animations to the guess row.
-   * - Updates keyboard key statuses.
-   * - Queues game state transitions (win / lose) when applicable.
+   * - Evaluates the guess against the target word to produce cell statuses.
+   * - Updates Expert mode constraints by:
+   *   - Locking confirmed correct letters to their positions.
+   *   - Tracking the minimum required count of revealed letters.
+   * - Reveals newly confirmed correct letters in the answer grid.
+   * - Applies flip/bounce animations to the guess row.
+   * - Updates keyboard key statuses based on the evaluation.
+   * - Queues game state transitions (win/lose) when applicable.
    *
-   * @param guess - Submitted guess string
-   * @param row - Current row index
+   * @param guess - The submitted guess string.
+   * @param row - Index of the current guess row.
    */
   const handleValidGuess = (guess: string, row: number): void => {
     const statuses = evaluateGuess(
@@ -89,6 +95,31 @@ export const useGuessSubmission = (
       targetWord,
       targetLetterCount.current
     );
+
+    if (isExpertMode) {
+      const { lockedPositions, minimumLetterCounts } =
+        expertModeConstraints.current;
+
+      const guessMinCounts = new Map<string, number>();
+
+      for (let i = 0; i < statuses.length; i++) {
+        const status = statuses[i];
+        const letter = guess[i];
+
+        if (status === CellStatus.CORRECT) {
+          lockedPositions.set(i, letter);
+        }
+
+        if (status === CellStatus.CORRECT || status === CellStatus.PRESENT) {
+          guessMinCounts.set(letter, (guessMinCounts.get(letter) ?? 0) + 1);
+        }
+      }
+
+      for (const [letter, count] of guessMinCounts.entries()) {
+        const prev = minimumLetterCounts.get(letter) ?? 0;
+        minimumLetterCounts.set(letter, Math.max(prev, count));
+      }
+    }
 
     const prevAnswerRow = answerGrid.renderGridRef.current[0];
     const answerRow = [...prevAnswerRow];
@@ -98,6 +129,7 @@ export const useGuessSubmission = (
       const prevCell = prevAnswerRow[i];
 
       if (prevCell.status === CellStatus.CORRECT) continue;
+
       if (statuses[i] === CellStatus.CORRECT) {
         answerRow[i] = {
           ...prevCell,
@@ -117,7 +149,6 @@ export const useGuessSubmission = (
 
     gameGridAnimationTracker.add(gameGrid.colNum);
     gameGrid.applyValidGuessAnimation(row, statuses, animationSpeedMultiplier);
-
     updateKeyStatuses(guess, statuses);
 
     if (guess === targetWord) {
@@ -138,11 +169,9 @@ export const useGuessSubmission = (
   /**
    * Submits the current guess.
    *
-   * - Locks input to prevent concurrent submissions.
    * - Validates guess length.
    * - Calls dictionary validation API.
    * - Delegates to valid / invalid handlers.
-   * - Ensures input lock is released on completion.
    */
   const submitGuess = async (): Promise<void> => {
     const guess = gameGrid.renderGridRef.current[cursor.row.current]

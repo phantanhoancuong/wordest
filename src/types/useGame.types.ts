@@ -5,6 +5,11 @@ import { UseKeyStatusesReturn } from "@/types/useKeyStatuses.types";
 import { UseTargetWordReturn } from "@/types/useTargetWord.types";
 import { UseToastsReturn } from "@/types/useToasts";
 
+export type ExpertModeConstraints = {
+  lockedPositions: Map<number, string>;
+  minimumLetterCounts: Map<string, number>;
+};
+
 type GameGridSection = {
   renderGrid: UseGridStateReturn["renderGrid"];
   rowNum: UseGridStateReturn["rowNum"];

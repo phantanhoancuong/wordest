@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import {
   ATTEMPTS,
@@ -7,6 +7,7 @@ import {
   CellAnimation,
   CellStatus,
   GameState,
+  GameMode,
 } from "@/lib/constants";
 
 import { useAnimationTracker } from "@/hooks/useAnimationTracker";
@@ -20,7 +21,7 @@ import { useSoundPlayer } from "@/hooks/useSoundPlayer";
 import { useTargetWord } from "@/hooks/useTargetWord";
 import { useToasts } from "@/hooks/useToasts";
 
-import { UseGameReturn } from "@/types/useGame.types";
+import { ExpertModeConstraints, UseGameReturn } from "@/types/useGame.types";
 
 import { useSettingsContext } from "@/app/contexts/SettingsContext";
 import { useGameStore } from "@/store/useGameStore";
@@ -96,6 +97,18 @@ export const useGame = (): UseGameReturn => {
   const incrementGameId = useGameStore((s) => s.incrementGameId);
   const answerGridId = useGameStore((s) => s.answerGridId);
   const setAnswerGridId = useGameStore((s) => s.setAnswerGridId);
+
+  /** Stores accumulated constraints for Expert Mode.
+   *
+   * - lockedPositions: Maps column indices to letters that are confirmed correct (green).
+   * Future guesses must place the same letter at these exact positions.
+   *
+   * - minimumLetterCounts: Maps letters to the minimum number of times they must appear in a guess.
+   */
+  const expertModeConstraints = useRef<ExpertModeConstraints>({
+    lockedPositions: new Map(),
+    minimumLetterCounts: new Map(),
+  });
 
   /**
    * Initializes the answer grid for the current game.
@@ -246,6 +259,37 @@ export const useGame = (): UseGameReturn => {
   };
 
   /**
+   * Validates a guess against Expert Mode constraints.
+   *
+   * @param guess - The full guess string to validate.
+   * @returns True if the guess satisfies all expert-mode constraints; otherwise false.
+   */
+  const checkValidExpertGuess = (guess: string): boolean => {
+    const { lockedPositions, minimumLetterCounts } =
+      expertModeConstraints.current;
+
+    for (const [index, letter] of lockedPositions) {
+      if (guess[index] !== letter) {
+        addToast(`Must use ${letter} in position ${index + 1}`);
+        return false;
+      }
+    }
+
+    const guessCounts = new Map<string, number>();
+    for (const ch of guess) {
+      guessCounts.set(ch, (guessCounts.get(ch) ?? 0) + 1);
+    }
+
+    for (const [letter, minCount] of minimumLetterCounts) {
+      if ((guessCounts.get(letter) ?? 0) < minCount) {
+        addToast(`Guess must use ${letter}`);
+        return false;
+      }
+    }
+    return true;
+  };
+
+  /**
    * Handles guess submission.
    *
    * If the current row is incomplete, triggers an invalid-guess animation and shows a toast.
@@ -255,11 +299,29 @@ export const useGame = (): UseGameReturn => {
     if (cursor.col.current !== gameGrid.colNum) {
       addToast("Incomplete guess");
       gameGridAnimationTracker.add(gameGrid.colNum);
+      cursor.pendingRowAdvance.current = false;
       gameGrid.applyInvalidGuessAnimation(
         cursor.row.current,
         animationSpeedMultiplier
       );
-    } else submitGuess();
+      return;
+    }
+    const guess = gameGrid.renderGridRef.current[cursor.row.current]
+      .map((cell) => cell.char)
+      .join("");
+    if (gameMode.value === GameMode.EXPERT) {
+      if (!checkValidExpertGuess(guess)) {
+        gameGridAnimationTracker.add(gameGrid.colNum);
+        cursor.pendingRowAdvance.current = false;
+        gameGrid.applyInvalidGuessAnimation(
+          cursor.row.current,
+          animationSpeedMultiplier
+        );
+        return;
+      }
+    }
+
+    submitGuess();
   };
 
   /**
@@ -364,6 +426,7 @@ export const useGame = (): UseGameReturn => {
   };
 
   const submitGuess = useGuessSubmission(
+    gameMode.value === GameMode.EXPERT,
     animationSpeedMultiplier,
     targetLetterCount,
     targetWord,
@@ -376,7 +439,8 @@ export const useGame = (): UseGameReturn => {
     setValidationError,
     updateKeyStatuses,
     gameGridAnimationTracker,
-    answerGridAnimationTracker
+    answerGridAnimationTracker,
+    expertModeConstraints
   );
 
   useKeyboardInput(handleInput);
