@@ -1,3 +1,6 @@
+import { useSettingsContext } from "@/app/contexts/SettingsContext";
+import { useSoundPlayer } from "@/hooks/useSoundPlayer";
+
 import styles from "@/styles/ButtonGroup.module.css";
 
 /**
@@ -27,6 +30,12 @@ const ButtonGroup = <T,>({
   selected,
   onSelect,
 }: ButtonGroupProps<T>) => {
+  const { volume, isMuted } = useSettingsContext();
+  const playKeySound = useSoundPlayer(
+    ["/sounds/key_01.mp3", "/sounds/key_02.mp3"],
+    isMuted.value ? 0 : volume.value
+  );
+
   return (
     <div className={styles["button-group"]}>
       {options.map((option) => {
@@ -38,7 +47,10 @@ const ButtonGroup = <T,>({
             className={`${styles["button-group__button"]} ${
               isActive ? styles["button-group__button--active"] : ""
             }`}
-            onClick={() => onSelect(option.value)}
+            onClick={() => {
+              onSelect(option.value);
+              playKeySound();
+            }}
           >
             {option.label}
           </button>

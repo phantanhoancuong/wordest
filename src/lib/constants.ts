@@ -105,10 +105,10 @@ export const LocalStorageKeys = {
 
 export const DefaultSettings = {
   ANIMATION_SPEED: AnimationSpeed.NORMAL,
-  VOLUME: 0.5,
+  VOLUME: 2 / 3,
   IS_MUTED: false,
   GAME_MODE: GameMode.NORMAL,
 };
 
 // Default volume applied when unmuting from a zero-volume state.
-export const DEFAULT_UNMUTE_VOLUME = 0.33;
+export const DEFAULT_UNMUTE_VOLUME = 1 / 3;
