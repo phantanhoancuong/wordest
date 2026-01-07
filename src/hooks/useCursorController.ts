@@ -2,7 +2,7 @@ import { useRef } from "react";
 
 import { useGameStore } from "@/store/useGameStore";
 
-import { useLatest } from "./useLatest";
+import { useLatest } from "@/hooks/useLatest";
 
 import { UseCursorControllerReturn } from "@/types/useCursorController.types";
 
@@ -20,6 +20,15 @@ export const useCursorController = (): UseCursorControllerReturn => {
   const rowRef = useLatest(rowState);
   const colRef = useLatest(colState);
   const pendingRowAdvance = useRef(false);
+
+  /**
+   * Cancels any pending row advancement in the cursor.
+   *
+   * Used when an invalid guess prevents the row from advancing.
+   */
+  const cancelPendingRowAdvance = () => {
+    pendingRowAdvance.current = false;
+  };
 
   /**
    * Resets the cursor index to its initial position.
@@ -90,5 +99,6 @@ export const useCursorController = (): UseCursorControllerReturn => {
     queueRowAdvance,
     commitPendingRowAdvance,
     resetCursor,
+    cancelPendingRowAdvance,
   };
 };

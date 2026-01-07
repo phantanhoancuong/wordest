@@ -11,6 +11,7 @@ import { evaluateGuess } from "@/lib/utils";
 import { CellStatusType } from "@/types/cell";
 import { UseAnimationTrackerReturn } from "@/types/useAnimationTracker.types";
 import { UseCursorControllerReturn } from "@/types/useCursorController.types";
+import { UseExpertModeConstraintsReturn } from "@/types/useExpertModeConstraints.types";
 import { UseGameStateReturn } from "@/types/useGameState.types";
 import { UseGridStateReturn } from "@/types/useGridState.types";
 
@@ -38,12 +39,11 @@ export const useGuessSubmission = (
   cursor: UseCursorControllerReturn,
   gameGridAnimationTracker: UseAnimationTrackerReturn,
   answerGridAnimationTracker: UseAnimationTrackerReturn,
+  useExpertModeConstraints: UseExpertModeConstraintsReturn,
   addToast: (message: string) => void,
   handleValidationError: () => void,
   setValidationError: React.Dispatch<React.SetStateAction<string>>,
-  updateKeyStatuses: (guess: string, statuses: CellStatusType[]) => void,
-
-  updateExpertConstraints: (guess: string, statuses: CellStatusType[]) => void
+  updateKeyStatuses: (guess: string, statuses: CellStatusType[]) => void
 ): (() => void) => {
   /**
    * Handles an invalid guess (not in dictionary).
@@ -54,24 +54,15 @@ export const useGuessSubmission = (
    *
    * @param row - Current row index
    */
-  const handleInvalidGuess = (row: number): void => {
-    const message = "Not in word list";
+  const handleInvalidGuess = (
+    row: number,
+    message: string = "Not in word list."
+  ): void => {
     setValidationError(message);
     addToast(message);
-
-    cancelPendingRowAdvance();
-
+    cursor.cancelPendingRowAdvance();
     gameGridAnimationTracker.add(gameGrid.colNum);
     gameGrid.applyInvalidGuessAnimation(row, animationSpeedMultiplier);
-  };
-
-  /**
-   * Cancels any pending row advancement in the cursor.
-   *
-   * Used when an invalid guess prevents the row from advancing.
-   */
-  const cancelPendingRowAdvance = () => {
-    cursor.pendingRowAdvance.current = false;
   };
 
   /**
@@ -97,7 +88,7 @@ export const useGuessSubmission = (
     );
 
     if (isExpertMode) {
-      updateExpertConstraints(guess, statuses);
+      useExpertModeConstraints.updateExpertConstraints(guess, statuses);
     }
 
     const prevAnswerRow = answerGrid.renderGridRef.current[0];
@@ -131,13 +122,13 @@ export const useGuessSubmission = (
     updateKeyStatuses(guess, statuses);
 
     if (guess === targetWord) {
-      addToast("You win!");
+      addToast("You won!");
       gameState.queueState(GameState.WON);
       return;
     }
 
     if (row + 1 >= gameGrid.rowNum) {
-      addToast(`The word was: ${targetWord}`);
+      addToast(`You lost!`);
       gameState.queueState(GameState.LOST);
       return;
     }
@@ -146,18 +137,31 @@ export const useGuessSubmission = (
   };
 
   /**
-   * Submits the current guess.
+   * Submits the current guess and evaluate step-by-step:
+   * 1. Is the guess complete (fill all columns).
+   * 2. Does the guess fulfill all expert mode constraints (if expert mode is enabled).
+   * 3. Does the guessed word exist in the dictionary of allowed words.
    *
-   * - Validates guess length.
-   * - Calls dictionary validation API.
-   * - Delegates to valid / invalid handlers.
+   * If invalid at any step, calls 'handleInvalidGuess()' with an appropriate message.
    */
   const submitGuess = async (): Promise<void> => {
+    if (cursor.col.current !== gameGrid.colNum) {
+      handleInvalidGuess(cursor.row.current, "Incomplete guess.");
+      return;
+    }
+
     const guess = gameGrid.renderGridRef.current[cursor.row.current]
       .map((cell) => cell.char)
       .join("");
 
-    if (guess.length !== gameGrid.colNum) return;
+    if (isExpertMode) {
+      const { isValid, message } =
+        useExpertModeConstraints.checkValidExpertGuess(guess);
+      if (!isValid) {
+        handleInvalidGuess(cursor.row.current, message);
+        return;
+      }
+    }
 
     try {
       const { status, data } = await validateWord(guess);

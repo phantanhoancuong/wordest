@@ -8,4 +8,5 @@ export interface UseCursorControllerReturn {
   queueRowAdvance: () => void;
   commitPendingRowAdvance: () => void;
   resetCursor: () => void;
+  cancelPendingRowAdvance: () => void;
 }

@@ -86,7 +86,7 @@ export const useGame = (): UseGameReturn => {
     resetDataAnswerGrid
   );
 
-  const useExpertModeConstraints = UseExpertModeConstraints(addToast);
+  const useExpertModeConstraints = UseExpertModeConstraints();
 
   const playKeySound = useSoundPlayer(
     ["/sounds/key_01.mp3", "/sounds/key_02.mp3"],
@@ -250,37 +250,9 @@ export const useGame = (): UseGameReturn => {
   };
 
   /**
-   * Handles guess submission.
-   *
-   * If the current row is incomplete, triggers an invalid-guess animation and shows a toast.
-   * Otherwise, submits the guess for validation.
+   * Handles Enter key press for guess submission.
    */
   const handleSubmit = (): void => {
-    if (cursor.col.current !== gameGrid.colNum) {
-      addToast("Incomplete guess");
-      gameGridAnimationTracker.add(gameGrid.colNum);
-      cursor.pendingRowAdvance.current = false;
-      gameGrid.applyInvalidGuessAnimation(
-        cursor.row.current,
-        animationSpeedMultiplier
-      );
-      return;
-    }
-    const guess = gameGrid.renderGridRef.current[cursor.row.current]
-      .map((cell) => cell.char)
-      .join("");
-    if (gameMode.value === GameMode.EXPERT) {
-      if (!useExpertModeConstraints.checkValidExpertGuess(guess)) {
-        gameGridAnimationTracker.add(gameGrid.colNum);
-        cursor.pendingRowAdvance.current = false;
-        gameGrid.applyInvalidGuessAnimation(
-          cursor.row.current,
-          animationSpeedMultiplier
-        );
-        return;
-      }
-    }
-
     submitGuess();
   };
 
@@ -396,11 +368,11 @@ export const useGame = (): UseGameReturn => {
     cursor,
     gameGridAnimationTracker,
     answerGridAnimationTracker,
+    useExpertModeConstraints,
     addToast,
     handleValidationError,
     setValidationError,
-    updateKeyStatuses,
-    useExpertModeConstraints.updateExpertConstraints
+    updateKeyStatuses
   );
 
   useKeyboardInput(handleInput);

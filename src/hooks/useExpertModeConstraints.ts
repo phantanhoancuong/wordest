@@ -18,9 +18,7 @@ import { UseExpertModeConstraintsReturn } from "@/types/useExpertModeConstraints
  *
  *@param addToast - Function used to display validation error messages.
  */
-export const UseExpertModeConstraints = (
-  addToast: (message: string) => void
-): UseExpertModeConstraintsReturn => {
+export const UseExpertModeConstraints = (): UseExpertModeConstraintsReturn => {
   const lockedPositions = useRef<Map<number, string>>(new Map());
   const minimumLetterCounts = useRef<Map<string, number>>(new Map());
 
@@ -28,14 +26,18 @@ export const UseExpertModeConstraints = (
    * Validates a guess against expert-mode constraints.
    *
    * @param guess - The guess string to validate.
-   * @returns True if the guess satisfies all expert-mode constraints; otherwise false.
+   * @returns An object with `isValid` and `message`:
+   *  - isValid: true if the guess satisfies all expert-mode constraints.
+   *  - message: explanation if invalid, empty string if valid.
    */
-  const checkValidExpertGuess = (guess: string): boolean => {
+  const checkValidExpertGuess = (
+    guess: string
+  ): { isValid: boolean; message: string } => {
     // Enforce locked (green) positions.
     for (const [index, letter] of lockedPositions.current) {
       if (guess[index] !== letter) {
-        addToast(`Must use ${letter} in position ${index + 1}`);
-        return false;
+        const message = `${letter} must be in cell ${index + 1}`;
+        return { isValid: false, message };
       }
     }
 
@@ -43,11 +45,11 @@ export const UseExpertModeConstraints = (
     const guessCounts = new Map(Object.entries(countLetter(guess)));
     for (const [letter, minCount] of minimumLetterCounts.current) {
       if ((guessCounts.get(letter) ?? 0) < minCount) {
-        addToast(`Guess must use ${letter}`);
-        return false;
+        const message = `You must use ${letter}`;
+        return { isValid: false, message };
       }
     }
-    return true;
+    return { isValid: true, message: "" };
   };
 
   /**
