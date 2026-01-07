@@ -11,7 +11,6 @@ import { evaluateGuess } from "@/lib/utils";
 import { CellStatusType } from "@/types/cell";
 import { UseAnimationTrackerReturn } from "@/types/useAnimationTracker.types";
 import { UseCursorControllerReturn } from "@/types/useCursorController.types";
-import { ExpertModeConstraints } from "@/types/useGame.types";
 import { UseGameStateReturn } from "@/types/useGameState.types";
 import { UseGridStateReturn } from "@/types/useGridState.types";
 
@@ -37,13 +36,14 @@ export const useGuessSubmission = (
   gameGrid: UseGridStateReturn,
   gameState: UseGameStateReturn,
   cursor: UseCursorControllerReturn,
+  gameGridAnimationTracker: UseAnimationTrackerReturn,
+  answerGridAnimationTracker: UseAnimationTrackerReturn,
   addToast: (message: string) => void,
   handleValidationError: () => void,
   setValidationError: React.Dispatch<React.SetStateAction<string>>,
   updateKeyStatuses: (guess: string, statuses: CellStatusType[]) => void,
-  gameGridAnimationTracker: UseAnimationTrackerReturn,
-  answerGridAnimationTracker: UseAnimationTrackerReturn,
-  expertModeConstraints: React.RefObject<ExpertModeConstraints>
+
+  updateExpertConstraints: (guess: string, statuses: CellStatusType[]) => void
 ): (() => void) => {
   /**
    * Handles an invalid guess (not in dictionary).
@@ -97,28 +97,7 @@ export const useGuessSubmission = (
     );
 
     if (isExpertMode) {
-      const { lockedPositions, minimumLetterCounts } =
-        expertModeConstraints.current;
-
-      const guessMinCounts = new Map<string, number>();
-
-      for (let i = 0; i < statuses.length; i++) {
-        const status = statuses[i];
-        const letter = guess[i];
-
-        if (status === CellStatus.CORRECT) {
-          lockedPositions.set(i, letter);
-        }
-
-        if (status === CellStatus.CORRECT || status === CellStatus.PRESENT) {
-          guessMinCounts.set(letter, (guessMinCounts.get(letter) ?? 0) + 1);
-        }
-      }
-
-      for (const [letter, count] of guessMinCounts.entries()) {
-        const prev = minimumLetterCounts.get(letter) ?? 0;
-        minimumLetterCounts.set(letter, Math.max(prev, count));
-      }
+      updateExpertConstraints(guess, statuses);
     }
 
     const prevAnswerRow = answerGrid.renderGridRef.current[0];
