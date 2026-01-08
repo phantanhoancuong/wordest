@@ -3,11 +3,11 @@ import { create } from "zustand";
 import { initEmptyDataGrid } from "@/lib/utils";
 
 import {
-  WORD_LENGTH,
   ATTEMPTS,
   CellStatus,
   GameState,
   GameMode,
+  WordLength,
 } from "@/lib/constants";
 
 import { CellStatusType, DataCell } from "@/types/cell";
@@ -65,9 +65,16 @@ type GameStore = {
 
   sessionGameMode: GameMode | null;
   setSessionGameMode: (newGameMode: GameMode) => void;
+
+  wordLength: WordLength | null;
+  setWordLength: (newWordLength: WordLength) => void;
 };
 
 export const useGameStore = create<GameStore>((set, get) => ({
+  wordLength: WordLength.FIVE,
+  setWordLength: (newWordLength: WordLength) =>
+    set({ wordLength: newWordLength }),
+
   // Game state
   gameState: GameState.PLAYING,
   setGameState: (gameState) => set({ gameState }),
@@ -86,20 +93,24 @@ export const useGameStore = create<GameStore>((set, get) => ({
     })),
 
   // Grids
-  gameGrid: initEmptyDataGrid(ATTEMPTS, WORD_LENGTH),
-  answerGrid: initEmptyDataGrid(1, WORD_LENGTH),
+  gameGrid: initEmptyDataGrid(ATTEMPTS, WordLength.FIVE),
+  answerGrid: initEmptyDataGrid(1, WordLength.FIVE),
 
   setGameGrid: (grid) => set({ gameGrid: grid }),
   setAnswerGrid: (grid) => set({ answerGrid: grid }),
 
   resetGameGrid: () =>
     set({
-      gameGrid: initEmptyDataGrid(ATTEMPTS, WORD_LENGTH, CellStatus.DEFAULT),
+      gameGrid: initEmptyDataGrid(
+        ATTEMPTS,
+        WordLength.FIVE,
+        CellStatus.DEFAULT
+      ),
     }),
 
   resetAnswerGrid: () =>
     set({
-      answerGrid: initEmptyDataGrid(1, WORD_LENGTH, CellStatus.HIDDEN),
+      answerGrid: initEmptyDataGrid(1, WordLength.FIVE, CellStatus.HIDDEN),
     }),
 
   // Target word

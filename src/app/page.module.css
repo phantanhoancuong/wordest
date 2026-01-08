@@ -4,6 +4,8 @@
   display: flex;
   flex-direction: column;
   padding-top: 3dvh;
+  overscroll-behavior: none;
+  overflow: hidden;
 }
 
 .app__banner {

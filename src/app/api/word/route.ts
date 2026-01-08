@@ -1,20 +1,21 @@
-import answer_list from "@/data/answer_list.json";
+import { WORD_LISTS, SupportedWordLength } from "@/types/wordList.types";
 
-export async function GET() {
+export async function GET(req: Request) {
   try {
-    if (!answer_list || answer_list.length === 0) {
-      return Response.json({ error: "No words available" }, { status: 500 });
-    }
-    const randomIndex = Math.floor(Math.random() * answer_list.length);
-    const target = answer_list[randomIndex];
+    const { searchParams } = new URL(req.url);
+    const length = Number(searchParams.get("length")) as SupportedWordLength;
 
-    if (!target) {
-      return Response.json({ error: "Failed to pick a word" }, { status: 500 });
+    const lists = WORD_LISTS[length];
+    if (!lists || lists.answers.length === 0) {
+      return Response.json({ error: "Invalid word length" }, { status: 400 });
     }
+
+    const randomIndex = Math.floor(Math.random() * lists.answers.length);
+    const target = lists.answers[randomIndex];
 
     return Response.json({ target });
   } catch (err) {
-    console.error("API Error:", err);
+    console.error(err);
     return Response.json({ error: "Internal Server Error" }, { status: 500 });
   }
 }

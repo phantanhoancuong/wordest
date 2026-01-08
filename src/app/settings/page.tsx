@@ -14,6 +14,7 @@ import {
   AnimationSpeed,
   GameMode,
   DEFAULT_UNMUTE_VOLUME,
+  WordLength,
 } from "@/lib/constants";
 
 import arrowBackIcon from "@/assets/icons/arrow_back_24dp_000000_FILL0_wght400_GRAD0_opsz24.svg";
@@ -29,7 +30,8 @@ import styles from "@/app/settings/page.module.css";
  * Settings values are sourced from {@link useSettingsContext}.
  */
 export default function SettingsPage() {
-  const { volume, animationSpeed, isMuted, gameMode } = useSettingsContext();
+  const { volume, animationSpeed, isMuted, gameMode, wordLength } =
+    useSettingsContext();
 
   // Local UI state for the volume slider (0-100)
   // This is decoupled from persisted volume (0-1) to avoid unnecessary writes during dragging.
@@ -81,6 +83,12 @@ export default function SettingsPage() {
   const gameModeOptions = [
     { label: "Normal", value: GameMode.NORMAL },
     { label: "Expert", value: GameMode.EXPERT },
+  ];
+
+  const wordLengthOptions = [
+    { label: "5", value: WordLength.FIVE },
+    { label: "6", value: WordLength.SIX },
+    { label: "7", value: WordLength.SEVEN },
   ];
 
   return (
@@ -184,8 +192,20 @@ export default function SettingsPage() {
             }
           />
         </div>
+        <div className={styles["setting__container"]}>
+          <SettingsItem
+            name="Word length"
+            description="The number of letters in each word."
+            control={
+              <ButtonGroup
+                options={wordLengthOptions}
+                selected={wordLength.value}
+                onSelect={wordLength.setValue}
+              />
+            }
+          />
+        </div>
       </div>
-
       <div className={styles["landscape-warning"]}>
         The game doesn't fit on your screen in this orientation.
         <br />

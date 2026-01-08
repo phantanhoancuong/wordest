@@ -1,3 +1,5 @@
+import { WordLength } from "@/lib/constants";
+
 interface FetchWordReponse {
   target: string;
   error?: string;
@@ -21,17 +23,27 @@ interface ValidationResult {
  * Converts the returned word to uppercase before returning.
  *
  * @async
+ * @wordLength - The length of the guess.
  * @returns The target word in uppercase.
  * @throws {Error} If the HTTP request fails or the response is invalid.
  */
-export const fetchWordFromApi = async (): Promise<string> => {
-  const res = await fetch("/api/word");
-  if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
+export const fetchWordFromApi = async (
+  wordLength: WordLength
+): Promise<string> => {
+  const res = await fetch(`/api/word?length=${wordLength}`);
+
+  if (!res.ok) {
+    throw new Error(`HTTP error! Status: ${res.status}`);
+  }
+
   const data: FetchWordReponse = await res.json();
-  if (data.error) throw new Error(data.error || "Invalid server response");
+
+  if (data.error || !data.target) {
+    throw new Error(data.error ?? "Invalid server response");
+  }
+
   return data.target.toUpperCase();
 };
-
 /**
  * Validates a guessed word against the dictionary API.
  *
@@ -39,18 +51,30 @@ export const fetchWordFromApi = async (): Promise<string> => {
  *
  * @async
  * @param {string} word - The guessed word to validate.
+ * @param wordLenght - Length of the word being played.
  * @returns {Promise<{status: number, ok: boolean, data: any}>} The validation result object.
  */
-export const validateWord = async (word: string): Promise<ValidationResult> => {
+export const validateWord = async (
+  word: string,
+  wordLength: number
+): Promise<ValidationResult> => {
   try {
     const result = await fetch("/api/validate", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ guess: word }),
+      body: JSON.stringify({
+        guess: word,
+        length: wordLength,
+      }),
     });
 
-    const data = await result.json();
-    return { status: result.status, ok: result.ok, data };
+    const data: ValidateWordResponse = await result.json();
+
+    return {
+      status: result.status,
+      ok: result.ok,
+      data,
+    };
   } catch (error: unknown) {
     console.error("Error validating word:", error);
     return { status: 500, ok: false, data: null };

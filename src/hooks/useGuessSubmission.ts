@@ -164,7 +164,7 @@ export const useGuessSubmission = (
     }
 
     try {
-      const { status, data } = await validateWord(guess);
+      const { status, data } = await validateWord(guess, guess.length);
 
       if (status >= 500 || !data) {
         handleValidationError();

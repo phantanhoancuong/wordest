@@ -6,6 +6,7 @@ import { fetchWordFromApi } from "@/lib/api";
 import { countLetter } from "@/lib/utils";
 
 import { UseTargetWordReturn } from "@/types/useTargetWord.types";
+import { WordLength } from "@/lib/constants";
 
 /**
  * Hook to manage the game's target word.
@@ -30,10 +31,10 @@ export const useTargetWord = (): UseTargetWordReturn => {
   };
 
   /** Fetches a new target word from the API and updates state. */
-  const loadTargetWord = async (): Promise<string | null> => {
+  const loadTargetWord = async (length: WordLength): Promise<string | null> => {
     try {
       setError("");
-      const word = await fetchWordFromApi();
+      const word = await fetchWordFromApi(length);
       setTargetWord(word);
       return word;
     } catch (err: unknown) {

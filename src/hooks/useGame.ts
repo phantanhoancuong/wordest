@@ -1,8 +1,7 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 
 import {
   ATTEMPTS,
-  WORD_LENGTH,
   AnimationSpeedMultiplier,
   CellAnimation,
   CellStatus,
@@ -52,7 +51,8 @@ export const useGame = (): UseGameReturn => {
   const [validationError, setValidationError] = useState("");
   const { toastList, addToast, removeToast } = useToasts();
   const { keyStatuses, updateKeyStatuses, resetKeyStatuses } = useKeyStatuses();
-  const { volume, animationSpeed, isMuted, gameMode } = useSettingsContext();
+  const { volume, animationSpeed, isMuted, gameMode, wordLength } =
+    useSettingsContext();
 
   const animationSpeedMultiplier =
     AnimationSpeedMultiplier[animationSpeed.value];
@@ -63,10 +63,12 @@ export const useGame = (): UseGameReturn => {
   const dataAnswerGrid = useGameStore((s) => s.answerGrid);
   const setDataAnswerGrid = useGameStore((s) => s.setAnswerGrid);
   const resetDataAnswerGrid = useGameStore((s) => s.resetAnswerGrid);
+  const wordLengthStore = useGameStore((s) => s.wordLength);
+  const setWordLengthStore = useGameStore((s) => s.setWordLength);
 
   const gameGrid = useGridState(
     ATTEMPTS,
-    WORD_LENGTH,
+    wordLength.value,
     CellStatus.DEFAULT,
     CellAnimation.NONE,
     0,
@@ -77,7 +79,7 @@ export const useGame = (): UseGameReturn => {
 
   const answerGrid = useGridState(
     1,
-    WORD_LENGTH,
+    wordLength.value,
     CellStatus.HIDDEN,
     CellAnimation.NONE,
     0,
@@ -125,10 +127,9 @@ export const useGame = (): UseGameReturn => {
 
   /**
    * Initialize the answer grid according to the fetched target word.
-   *
-   * @param word - The target word.
+
    */
-  const populateAnswerGrid = (word: string) => {
+  const populateAnswerGrid = () => {
     const currentWord = useGameStore.getState().targetWord;
     const newRow = currentWord.split("").map((ch) => ({
       char: ch,
@@ -146,8 +147,14 @@ export const useGame = (): UseGameReturn => {
     // Mark client as hydrated to render
     setHasHydrated(true);
 
-    // If game mode changed, restart and fetch new word
+    if (wordLength.value !== wordLengthStore) {
+      setWordLengthStore(wordLength.value);
+      restartGame();
+      return;
+    }
+
     if (gameMode.value !== sessionGameMode) {
+      // If game mode changed, restart and fetch new word
       setSessionGameMode(gameMode.value);
       restartGame(); // restart handles target word fetch
       return;
@@ -168,7 +175,7 @@ export const useGame = (): UseGameReturn => {
       answerGridAnimationTracker.reset();
       toastList.forEach((t) => removeToast(t.id));
 
-      populateAnswerGrid(targetWord);
+      populateAnswerGrid();
       setAnswerGridId(useGameStore.getState().gameId);
     }
   }, []);
@@ -339,10 +346,13 @@ export const useGame = (): UseGameReturn => {
     toastList.forEach((t) => removeToast(t.id));
 
     resetTargetWord();
-    const word = await loadTargetWord();
+
+    const length = wordLength.value;
+    const word = await loadTargetWord(length);
+
     if (!word) return;
 
-    populateAnswerGrid(word);
+    populateAnswerGrid();
     setAnswerGridId(newGameId);
   };
 

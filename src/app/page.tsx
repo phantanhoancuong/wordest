@@ -21,13 +21,8 @@ import { renderEmptyGrid } from "@/lib/utils";
 export default function Home() {
   const { gameGrid, answerGrid, keyboard, game, toasts, input, render } =
     useGame();
-  const displayGameGrid = render.hasHydrated
-    ? gameGrid.renderGrid
-    : renderEmptyGrid(gameGrid.rowNum, gameGrid.colNum);
-  const displayAnswerGrid = render.hasHydrated
-    ? answerGrid.renderGrid
-    : renderEmptyGrid(answerGrid.rowNum, answerGrid.colNum);
 
+  if (!render.hasHydrated) return null;
   return (
     <div className={styles["app"]}>
       <header className={`${styles["app__banner"]} flex-center`}>
@@ -41,12 +36,8 @@ export default function Home() {
           <section className={`${styles["game-board"]} flex-center`}>
             <div className={styles["game-board__grid"]}>
               <Grid
-                grid={displayGameGrid}
-                onAnimationEnd={
-                  displayGameGrid === gameGrid.renderGrid
-                    ? gameGrid.handleAnimationEnd
-                    : undefined
-                }
+                grid={gameGrid.renderGrid}
+                onAnimationEnd={gameGrid.handleAnimationEnd}
                 layoutRows={gameGrid.rowNum}
                 layoutCols={gameGrid.colNum}
               />
@@ -54,12 +45,8 @@ export default function Home() {
 
             <div className={styles["game-board__controls"]}>
               <Grid
-                grid={displayAnswerGrid}
-                onAnimationEnd={
-                  displayAnswerGrid === answerGrid.renderGrid
-                    ? answerGrid.handleAnimationEnd
-                    : undefined
-                }
+                grid={answerGrid.renderGrid}
+                onAnimationEnd={answerGrid.handleAnimationEnd}
                 layoutRows={gameGrid.rowNum}
                 layoutCols={gameGrid.colNum}
               />

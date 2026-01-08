@@ -1,9 +1,6 @@
 /** Number of attempts a player has per game */
 export const ATTEMPTS = 6;
 
-/** Number of letters in each target word */
-export const WORD_LENGTH = 5;
-
 /** Maximum number of toasts displayed at once */
 export const MAX_TOASTS = 3;
 
@@ -95,12 +92,20 @@ export const animationTiming: AnimationTiming = {
   },
 };
 
+// Supported word lengths for the game.
+export enum WordLength {
+  FIVE = 5,
+  SIX = 6,
+  SEVEN = 7,
+}
+
 // Keys and default values used for persisted user settings.
 export const LocalStorageKeys = {
   ANIMATION_SPEED: "wordest:animationSpeed",
   VOLUME: "wordest:volume",
   IS_MUTED: "wordest:isMuted",
   GAME_MODE: "wordest:gameMode",
+  WORD_LENGTH: "wordest:wordLength",
 };
 
 export const DefaultSettings = {
@@ -108,6 +113,7 @@ export const DefaultSettings = {
   VOLUME: 2 / 3,
   IS_MUTED: false,
   GAME_MODE: GameMode.NORMAL,
+  WORD_LENGTH: WordLength.FIVE,
 };
 
 // Default volume applied when unmuting from a zero-volume state.

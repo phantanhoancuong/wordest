@@ -1,4 +1,4 @@
-import { WORD_LENGTH, CellAnimation, CellStatus } from "@/lib/constants";
+import { CellAnimation, CellStatus } from "@/lib/constants";
 
 import {
   CellAnimationType,
@@ -127,17 +127,18 @@ export const evaluateGuess = (
   targetWord: string,
   targetLetterCount: Record<string, number>
 ): Array<CellStatusType> => {
+  const wordLength = guess.length;
   const tempLetterCount = { ...targetLetterCount };
-  const statuses = Array(WORD_LENGTH).fill(CellStatus.ABSENT);
+  const statuses = Array(wordLength).fill(CellStatus.ABSENT);
 
-  for (let i = 0; i < WORD_LENGTH; i++) {
+  for (let i = 0; i < wordLength; i++) {
     if (guess[i] === targetWord[i]) {
       statuses[i] = CellStatus.CORRECT;
       tempLetterCount[guess[i]] -= 1;
     }
   }
 
-  for (let i = 0; i < WORD_LENGTH; i++) {
+  for (let i = 0; i < wordLength; i++) {
     if (statuses[i] === CellStatus.CORRECT) continue;
     if (tempLetterCount[guess[i]] > 0) {
       statuses[i] = CellStatus.PRESENT;
