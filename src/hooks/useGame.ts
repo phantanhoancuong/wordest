@@ -113,7 +113,6 @@ export const useGame = (): UseGameReturn => {
    * - A new target word is loaded.
    * - A new gameId is issued.
    */
-
   const gameGridAnimationTracker = useAnimationTracker(
     (finishedMap) => {
       gameGrid.flushAnimation(finishedMap);
@@ -127,7 +126,6 @@ export const useGame = (): UseGameReturn => {
 
   /**
    * Initialize the answer grid according to the fetched target word.
-
    */
   const populateAnswerGrid = () => {
     const currentWord = useGameStore.getState().targetWord;
@@ -174,6 +172,7 @@ export const useGame = (): UseGameReturn => {
       gameGridAnimationTracker.reset();
       answerGridAnimationTracker.reset();
       toastList.forEach((t) => removeToast(t.id));
+      useExpertModeConstraints.resetExpertConstraints();
 
       populateAnswerGrid();
       setAnswerGridId(useGameStore.getState().gameId);
@@ -346,6 +345,8 @@ export const useGame = (): UseGameReturn => {
     toastList.forEach((t) => removeToast(t.id));
 
     resetTargetWord();
+
+    useExpertModeConstraints.resetExpertConstraints();
 
     const length = wordLength.value;
     const word = await loadTargetWord(length);

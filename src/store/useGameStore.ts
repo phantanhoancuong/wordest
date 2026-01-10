@@ -68,6 +68,11 @@ type GameStore = {
 
   wordLength: WordLength | null;
   setWordLength: (newWordLength: WordLength) => void;
+
+  lockedPositions: Map<number, string> | null;
+  setLockedPositions: (newLockedPosition: Map<number, string>) => void;
+  minimumLetterCounts: Map<string, number> | null;
+  setMinimumLetterCounts: (newMinimumLetterCounts: Map<string, number>) => void;
 };
 
 export const useGameStore = create<GameStore>((set, get) => ({
@@ -140,4 +145,11 @@ export const useGameStore = create<GameStore>((set, get) => ({
 
   sessionGameMode: null,
   setSessionGameMode: (newGameMode) => set({ sessionGameMode: newGameMode }),
+
+  lockedPositions: new Map<number, string>(),
+  setLockedPositions: (newLockedPositions) =>
+    set({ lockedPositions: newLockedPositions }),
+  minimumLetterCounts: new Map<string, number>(),
+  setMinimumLetterCounts: (newMinimumLetterCounts) =>
+    set({ minimumLetterCounts: newMinimumLetterCounts }),
 }));

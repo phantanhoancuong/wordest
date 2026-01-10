@@ -56,7 +56,7 @@ export const useGuessSubmission = (
    */
   const handleInvalidGuess = (
     row: number,
-    message: string = "Not in word list."
+    message: string = "Not in word list"
   ): void => {
     setValidationError(message);
     addToast(message);

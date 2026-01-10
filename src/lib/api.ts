@@ -23,7 +23,7 @@ interface ValidationResult {
  * Converts the returned word to uppercase before returning.
  *
  * @async
- * @wordLength - The length of the guess.
+ * @param wordLength - The length of the guess.
  * @returns The target word in uppercase.
  * @throws {Error} If the HTTP request fails or the response is invalid.
  */

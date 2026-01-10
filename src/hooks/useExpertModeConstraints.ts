@@ -7,6 +7,8 @@ import { CellStatus } from "@/lib/constants";
 import { CellStatusType } from "@/types/cell";
 import { UseExpertModeConstraintsReturn } from "@/types/useExpertModeConstraints.types";
 
+import { useGameStore } from "@/store/useGameStore";
+
 /**
  * Hook to manage Expert Mode constraints and validation logic.
  *
@@ -19,8 +21,11 @@ import { UseExpertModeConstraintsReturn } from "@/types/useExpertModeConstraints
  *@param addToast - Function used to display validation error messages.
  */
 export const UseExpertModeConstraints = (): UseExpertModeConstraintsReturn => {
-  const lockedPositions = useRef<Map<number, string>>(new Map());
-  const minimumLetterCounts = useRef<Map<string, number>>(new Map());
+  const lockedPositions = useGameStore((s) => s.lockedPositions);
+  const setLockedPositions = useGameStore((s) => s.setLockedPositions);
+
+  const minimumLetterCounts = useGameStore((s) => s.minimumLetterCounts);
+  const setMinimumLetterCounts = useGameStore((s) => s.setMinimumLetterCounts);
 
   /**
    * Validates a guess against expert-mode constraints.
@@ -34,7 +39,7 @@ export const UseExpertModeConstraints = (): UseExpertModeConstraintsReturn => {
     guess: string
   ): { isValid: boolean; message: string } => {
     // Enforce locked (green) positions.
-    for (const [index, letter] of lockedPositions.current) {
+    for (const [index, letter] of lockedPositions) {
       if (guess[index] !== letter) {
         const message = `${letter} must be in cell ${index + 1}`;
         return { isValid: false, message };
@@ -43,9 +48,9 @@ export const UseExpertModeConstraints = (): UseExpertModeConstraintsReturn => {
 
     // Enforce minimum letter counts
     const guessCounts = new Map(Object.entries(countLetter(guess)));
-    for (const [letter, minCount] of minimumLetterCounts.current) {
+    for (const [letter, minCount] of minimumLetterCounts) {
       if ((guessCounts.get(letter) ?? 0) < minCount) {
-        const message = `You must use ${letter}`;
+        const message = `Must have at least ${minCount} ${letter}`;
         return { isValid: false, message };
       }
     }
@@ -54,7 +59,7 @@ export const UseExpertModeConstraints = (): UseExpertModeConstraintsReturn => {
 
   /**
    * Updates Expert Mode constraints based on the result of the submitted guess.
-   *
+   *a
    * Rules:
    * - CORRECT (green) letters lock the letter to its exact position.
    * - CORRECT AND PRESENT (green and yellow) letters contribute to minimum letter counts.
@@ -71,6 +76,8 @@ export const UseExpertModeConstraints = (): UseExpertModeConstraintsReturn => {
      * Used to merge with previously accumulated constraints.
      */
     const guessMinCounts = new Map<string, number>();
+    const nextLockedPositions = new Map(lockedPositions);
+    const nextGuessMinimumLetterCounts = new Map(minimumLetterCounts);
 
     for (let i = 0; i < statuses.length; i++) {
       const status = statuses[i];
@@ -78,21 +85,33 @@ export const UseExpertModeConstraints = (): UseExpertModeConstraintsReturn => {
 
       // Lock green letters to their
       if (status === CellStatus.CORRECT) {
-        lockedPositions.current.set(i, letter);
+        nextLockedPositions.set(i, letter);
       }
 
       // Count green and yellow letters toward minimum requirements.
       if (status === CellStatus.CORRECT || status === CellStatus.PRESENT) {
         guessMinCounts.set(letter, (guessMinCounts.get(letter) ?? 0) + 1);
       }
-
-      // Merge per-guess counts into global minimum counts.
-      for (const [letter, count] of guessMinCounts.entries()) {
-        const prev = minimumLetterCounts.current.get(letter) ?? 0;
-        minimumLetterCounts.current.set(letter, Math.max(prev, count));
-      }
     }
+
+    // Merge per-guess counts into global minimum counts.
+    for (const [letter, count] of guessMinCounts.entries()) {
+      const prev = nextGuessMinimumLetterCounts.get(letter) ?? 0;
+      nextGuessMinimumLetterCounts.set(letter, Math.max(prev, count));
+    }
+
+    setLockedPositions(nextLockedPositions);
+    setMinimumLetterCounts(nextGuessMinimumLetterCounts);
   };
 
-  return { checkValidExpertGuess, updateExpertConstraints };
+  const resetExpertConstraints = (): void => {
+    setLockedPositions(new Map<number, string>());
+    setMinimumLetterCounts(new Map<string, number>());
+  };
+
+  return {
+    checkValidExpertGuess,
+    updateExpertConstraints,
+    resetExpertConstraints,
+  };
 };

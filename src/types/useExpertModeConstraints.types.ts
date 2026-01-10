@@ -1,4 +1,4 @@
-import { CellStatusType } from "./cell";
+import { CellStatusType } from "@/types/cell";
 
 export interface UseExpertModeConstraintsReturn {
   checkValidExpertGuess: (guess: string) => {
@@ -6,4 +6,5 @@ export interface UseExpertModeConstraintsReturn {
     message: string;
   };
   updateExpertConstraints: (guess: string, statuses: CellStatusType[]) => void;
+  resetExpertConstraints: () => void;
 }
