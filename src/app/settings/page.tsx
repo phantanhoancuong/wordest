@@ -7,7 +7,12 @@ import Link from "next/link";
 import { useSettingsContext } from "@/app/contexts/SettingsContext";
 import { useSettingsUIStore } from "@/store/useSettingsUIStore";
 
-import { Banner, ButtonGroup, SettingsItem } from "@/components";
+import {
+  Banner,
+  ButtonGroup,
+  SettingsItem,
+  SettingsSection,
+} from "@/components";
 import { playVolumePreview } from "@/lib/audio";
 import { getVolumeIcon } from "@/lib/volumeIcons";
 
@@ -20,7 +25,6 @@ import {
 
 import arrowBackIcon from "@/assets/icons/arrow_back_24dp_000000_FILL0_wght400_GRAD0_opsz24.svg";
 import styles from "@/app/settings/page.module.css";
-import { useSettings } from "@/hooks/useSettings";
 
 /**
  * Settings page component.
@@ -109,133 +113,119 @@ export default function SettingsPage() {
           }
         />
       </header>
-
       <div className={styles["app__content"]}>
-        <div className={styles["settings-section"]}>
-          <button
-            className={styles["settings-section__title"]}
-            onClick={() => setIsGeneralOpen(!isGeneralOpen)}
-          >
-            General
-          </button>
-          {isGeneralOpen && (
-            <>
-              <div className={styles["setting__container"]}>
-                <SettingsItem
-                  name="Sound"
-                  description="Change the volume of sound effects."
-                  control={
-                    <>
-                      <Image
-                        alt="Volume icon"
-                        src={getVolumeIcon(isMuted.value ? 0 : draftVolume)}
-                        width={24}
-                        height={24}
-                        onClick={handleVolumeIconClick}
-                      />
-                      <input
-                        type="range"
-                        min="0"
-                        max="100"
-                        step="11"
-                        list="volume-ticks"
-                        value={draftVolume}
-                        onChange={(e) => {
-                          const value = Number(e.target.value);
-                          setDraftVolume(value);
+        <SettingsSection
+          title="General"
+          isOpen={isGeneralOpen}
+          setIsOpen={setIsGeneralOpen}
+        >
+          <div className={styles["setting__container"]}>
+            <SettingsItem
+              name="Sound"
+              description="Change the volume of sound effects."
+              control={
+                <>
+                  <Image
+                    alt="Volume icon"
+                    src={getVolumeIcon(isMuted.value ? 0 : draftVolume)}
+                    width={24}
+                    height={24}
+                    onClick={handleVolumeIconClick}
+                  />
+                  <input
+                    type="range"
+                    min="0"
+                    max="100"
+                    step="11"
+                    list="volume-ticks"
+                    value={draftVolume}
+                    onChange={(e) => {
+                      const value = Number(e.target.value);
+                      setDraftVolume(value);
 
-                          // Slider interaction always implies unmute intent
-                          if (isMuted.value) isMuted.setValue(false);
-                        }}
-                        onPointerUp={() => {
-                          const newVolume = draftVolume / 100;
+                      // Slider interaction always implies unmute intent
+                      if (isMuted.value) isMuted.setValue(false);
+                    }}
+                    onPointerUp={() => {
+                      const newVolume = draftVolume / 100;
 
-                          // Persist volume once on release
-                          volume.setValue(newVolume);
+                      // Persist volume once on release
+                      volume.setValue(newVolume);
 
-                          const shouldMute = newVolume === 0;
-                          isMuted.setValue(shouldMute);
+                      const shouldMute = newVolume === 0;
+                      isMuted.setValue(shouldMute);
 
-                          if (!shouldMute) {
-                            playVolumePreview(newVolume);
-                          }
-                        }}
-                      />
-                      <datalist id="volume-ticks">
-                        <option value="0" />
-                        <option value="33" />
-                        <option value="66" />
-                        <option value="100" />
-                      </datalist>
-                    </>
-                  }
+                      if (!shouldMute) {
+                        playVolumePreview(newVolume);
+                      }
+                    }}
+                  />
+                  <datalist id="volume-ticks">
+                    <option value="0" />
+                    <option value="33" />
+                    <option value="66" />
+                    <option value="100" />
+                  </datalist>
+                </>
+              }
+            />
+          </div>
+          <div className={styles["setting__container"]}>
+            <SettingsItem
+              name="Animation speed"
+              description="Change the speed of cell animations."
+              control={
+                <ButtonGroup
+                  options={animationSpeedOptions}
+                  selected={animationSpeed.value}
+                  onSelect={animationSpeed.setValue}
                 />
-              </div>
-              <div className={styles["setting__container"]}>
-                <SettingsItem
-                  name="Animation speed"
-                  description="Change the speed of cell animations."
-                  control={
-                    <ButtonGroup
-                      options={animationSpeedOptions}
-                      selected={animationSpeed.value}
-                      onSelect={animationSpeed.setValue}
-                    />
-                  }
+              }
+            />
+          </div>
+        </SettingsSection>
+        <SettingsSection
+          title="Gameplay"
+          isOpen={isGameplayOpen}
+          setIsOpen={setIsGameplayOpen}
+        >
+          <div className={styles["setting__container"]}>
+            <SettingsItem
+              name="Game mode"
+              description={
+                <>
+                  Normal mode is the classic WORDest experience.
+                  <br />
+                  Expert mode enforces hard constraints based on previous
+                  guesses: letters confirmed in the correct position must stay
+                  in that position, and any letter revealed as present must be
+                  used in future guesses at least as many times as it has been
+                  confirmed so far.
+                </>
+              }
+              control={
+                <ButtonGroup
+                  options={gameModeOptions}
+                  selected={gameMode.value}
+                  onSelect={gameMode.setValue}
                 />
-              </div>
-            </>
-          )}
-        </div>
-
-        <div className={styles["settings-section"]}>
-          <button
-            className={styles["settings-section__title"]}
-            onClick={() => setIsGameplayOpen(!isGameplayOpen)}
-          >
-            Gameplay
-          </button>
-          {isGameplayOpen && (
-            <>
-              <div className={styles["setting__container"]}>
-                <SettingsItem
-                  name="Game mode"
-                  description={
-                    <>
-                      Normal mode is the classic WORDest experience.
-                      <br />
-                      Expert mode enforces hard constraints based on previous
-                      guesses: letters confirmed in the correct position must
-                      stay in that position, and any letter revealed as present
-                      must be used in future guesses at least as many times as
-                      it has been confirmed so far.
-                    </>
-                  }
-                  control={
-                    <ButtonGroup
-                      options={gameModeOptions}
-                      selected={gameMode.value}
-                      onSelect={gameMode.setValue}
-                    />
-                  }
+              }
+            />
+          </div>
+          <div className={styles["setting__container"]}>
+            <SettingsItem
+              name="Word length"
+              description="The number of letters in each word."
+              control={
+                <ButtonGroup
+                  options={wordLengthOptions}
+                  selected={wordLength.value}
+                  onSelect={wordLength.setValue}
                 />
-              </div>
-              <div className={styles["setting__container"]}>
-                <SettingsItem
-                  name="Word length"
-                  description="The number of letters in each word."
-                  control={
-                    <ButtonGroup
-                      options={wordLengthOptions}
-                      selected={wordLength.value}
-                      onSelect={wordLength.setValue}
-                    />
-                  }
-                />
-              </div>
-            </>
-          )}
-        </div>
+              }
+            />
+          </div>
+        </SettingsSection>
       </div>
       <div className={styles["landscape-warning"]}>
         The game doesn't fit on your screen in this orientation.

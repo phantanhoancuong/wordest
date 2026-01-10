@@ -1,0 +1,20 @@
+.settings-section__header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem; /* space between arrow and title */
+
+  background: none;
+  border: none;
+  padding: 0;
+  margin: calc(var(--item-font-scale) * 0.1rem) 0;
+
+  font-size: calc(var(--item-font-scale) * 1.5rem);
+  font-weight: bold;
+  user-select: none;
+  cursor: pointer;
+}
+
+.icon-wrapper {
+  display: flex;
+  align-items: center;
+}
