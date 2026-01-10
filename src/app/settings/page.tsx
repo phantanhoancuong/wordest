@@ -104,106 +104,113 @@ export default function SettingsPage() {
       </header>
 
       <div className={styles["app__content"]}>
-        <div className={styles["setting__container"]}>
-          <SettingsItem
-            name="Sound"
-            description="Change the volume of sound effects."
-            control={
-              <>
-                <Image
-                  alt="Volume icon"
-                  src={getVolumeIcon(isMuted.value ? 0 : draftVolume)}
-                  width={24}
-                  height={24}
-                  onClick={handleVolumeIconClick}
+        <div className={styles["settings-section"]}>
+          <h1 className={styles["settings-section__title"]}>General</h1>
+
+          <div className={styles["setting__container"]}>
+            <SettingsItem
+              name="Sound"
+              description="Change the volume of sound effects."
+              control={
+                <>
+                  <Image
+                    alt="Volume icon"
+                    src={getVolumeIcon(isMuted.value ? 0 : draftVolume)}
+                    width={24}
+                    height={24}
+                    onClick={handleVolumeIconClick}
+                  />
+                  <input
+                    type="range"
+                    min="0"
+                    max="100"
+                    step="11"
+                    list="volume-ticks"
+                    value={draftVolume}
+                    onChange={(e) => {
+                      const value = Number(e.target.value);
+                      setDraftVolume(value);
+
+                      // Slider interaction always implies unmute intent
+                      if (isMuted.value) isMuted.setValue(false);
+                    }}
+                    onPointerUp={() => {
+                      const newVolume = draftVolume / 100;
+
+                      // Persist volume once on release
+                      volume.setValue(newVolume);
+
+                      const shouldMute = newVolume === 0;
+                      isMuted.setValue(shouldMute);
+
+                      if (!shouldMute) {
+                        playVolumePreview(newVolume);
+                      }
+                    }}
+                  />
+                  <datalist id="volume-ticks">
+                    <option value="0" />
+                    <option value="33" />
+                    <option value="66" />
+                    <option value="100" />
+                  </datalist>
+                </>
+              }
+            />
+          </div>
+          <div className={styles["setting__container"]}>
+            <SettingsItem
+              name="Animation speed"
+              description="Change the speed of cell animations."
+              control={
+                <ButtonGroup
+                  options={animationSpeedOptions}
+                  selected={animationSpeed.value}
+                  onSelect={animationSpeed.setValue}
                 />
-                <input
-                  type="range"
-                  min="0"
-                  max="100"
-                  step="11"
-                  list="volume-ticks"
-                  value={draftVolume}
-                  onChange={(e) => {
-                    const value = Number(e.target.value);
-                    setDraftVolume(value);
+              }
+            />
+          </div>
+        </div>
 
-                    // Slider interaction always implies unmute intent
-                    if (isMuted.value) isMuted.setValue(false);
-                  }}
-                  onPointerUp={() => {
-                    const newVolume = draftVolume / 100;
-
-                    // Persist volume once on release
-                    volume.setValue(newVolume);
-
-                    const shouldMute = newVolume === 0;
-                    isMuted.setValue(shouldMute);
-
-                    if (!shouldMute) {
-                      playVolumePreview(newVolume);
-                    }
-                  }}
+        <div className={styles["settings-section"]}>
+          <h1 className={styles["settings-section__title"]}>Gameplay</h1>
+          <div className={styles["setting__container"]}>
+            <SettingsItem
+              name="Game mode"
+              description={
+                <>
+                  Normal mode is the classic WORDest experience.
+                  <br />
+                  Expert mode enforces hard constraints based on previous
+                  guesses: letters confirmed in the correct position must stay
+                  in that position, and any letter revealed as present must be
+                  used in future guesses at least as many times as it has been
+                  confirmed so far.
+                </>
+              }
+              control={
+                <ButtonGroup
+                  options={gameModeOptions}
+                  selected={gameMode.value}
+                  onSelect={gameMode.setValue}
                 />
-                <datalist id="volume-ticks">
-                  <option value="0" />
-                  <option value="33" />
-                  <option value="66" />
-                  <option value="100" />
-                </datalist>
-              </>
-            }
-          />
-        </div>
-
-        <div className={styles["setting__container"]}>
-          <SettingsItem
-            name="Animation speed"
-            description="Change the speed of cell animations."
-            control={
-              <ButtonGroup
-                options={animationSpeedOptions}
-                selected={animationSpeed.value}
-                onSelect={animationSpeed.setValue}
-              />
-            }
-          />
-        </div>
-        <div className={styles["setting__container"]}>
-          <SettingsItem
-            name="Game mode"
-            description={
-              <>
-                Normal mode is the classic WORDest experience.
-                <br />
-                Expert mode enforces hard constraints based on previous guesses:
-                letters confirmed in the correct position must stay in that
-                position, and any letter revealed as present must be used in
-                future guesses at least as many times as it has been confirmed
-                so far.
-              </>
-            }
-            control={
-              <ButtonGroup
-                options={gameModeOptions}
-                selected={gameMode.value}
-                onSelect={gameMode.setValue}
-              />
-            }
-          />
-        </div>
-        <div className={styles["setting__container"]}>
-          <SettingsItem
-            name="Word length"
-            description="The number of letters in each word."
-            control={
-              <ButtonGroup
-                options={wordLengthOptions}
-                selected={wordLength.value}
-                onSelect={wordLength.setValue}
-              />
-            }
-          />
+              }
+            />
+          </div>
+          <div className={styles["setting__container"]}>
+            <SettingsItem
+              name="Word length"
+              description="The number of letters in each word."
+              control={
+                <ButtonGroup
+                  options={wordLengthOptions}
+                  selected={wordLength.value}
+                  onSelect={wordLength.setValue}
+                />
+              }
+            />
+          </div>
         </div>
       </div>
       <div className={styles["landscape-warning"]}>

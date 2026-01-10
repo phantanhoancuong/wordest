@@ -4,6 +4,7 @@
   flex-direction: column;
   overflow: hidden;
   padding-top: 3dvh;
+  --item-font-scale: 1;
 }
 
 .app__banner {
@@ -19,11 +20,23 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 3%;
+  gap: 4dvh;
+}
 
-  padding-top: 0;
-  padding-bottom: 5dvh;
-  gap: 5dvh;
+.settings-section {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: 2dvh;
+  gap: 2dvh;
+}
+
+.settings-section__title {
+  width: 80%;
+  margin: calc(var(--item-font-scale) * 0.1rem) 0;
+  font-size: calc(var(--item-font-scale) * 1.5rem);
+  font-weight: bold;
 }
 
 .setting__container {
@@ -52,13 +65,21 @@
 }
 
 @media (min-width: 600px) {
-  .setting__container {
+  .app {
+    --item-font-scale: 1.3;
+  }
+  .setting__container,
+  .settings-section__title {
     width: 80%;
   }
 }
 
 @media (min-width: 1024px) {
-  .setting__container {
+  .app {
+    --item-font-scale: 1.5;
+  }
+  .setting__container,
+  .settings-section__title {
     width: 80%;
   }
 }
