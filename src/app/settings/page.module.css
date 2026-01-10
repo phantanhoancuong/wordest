@@ -23,6 +23,7 @@
 
   padding-top: 0;
   padding-bottom: 5dvh;
+  gap: 5dvh;
 }
 
 .setting__container {

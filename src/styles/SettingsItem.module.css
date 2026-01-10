@@ -19,7 +19,7 @@
   display: flex;
   flex-direction: column;
   text-align: justify;
-  gap: calc(var(--item-font-scale) * 1.5rem);
+  gap: calc(var(--item-font-scale) * 0.5rem);
 }
 
 .settings-item__actions {
