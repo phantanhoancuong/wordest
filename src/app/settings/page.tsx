@@ -5,8 +5,14 @@ import Image from "next/image";
 import Link from "next/link";
 
 import { useSettingsContext } from "@/app/contexts/SettingsContext";
+import { useSettingsUIStore } from "@/store/useSettingsUIStore";
 
-import { Banner, ButtonGroup, SettingsItem } from "@/components";
+import {
+  Banner,
+  ButtonGroup,
+  SettingsItem,
+  SettingsSection,
+} from "@/components";
 import { playVolumePreview } from "@/lib/audio";
 import { getVolumeIcon } from "@/lib/volumeIcons";
 
@@ -32,6 +38,11 @@ import styles from "@/app/settings/page.module.css";
 export default function SettingsPage() {
   const { volume, animationSpeed, isMuted, gameMode, wordLength } =
     useSettingsContext();
+
+  const isGeneralOpen = useSettingsUIStore((s) => s.isGeneralOpen);
+  const isGameplayOpen = useSettingsUIStore((s) => s.isGameplayOpen);
+  const setIsGeneralOpen = useSettingsUIStore((s) => s.setIsGeneralOpen);
+  const setIsGameplayOpen = useSettingsUIStore((s) => s.setIsGameplayOpen);
 
   // Local UI state for the volume slider (0-100)
   // This is decoupled from persisted volume (0-1) to avoid unnecessary writes during dragging.
@@ -102,11 +113,12 @@ export default function SettingsPage() {
           }
         />
       </header>
-
       <div className={styles["app__content"]}>
-        <div className={styles["settings-section"]}>
-          <h1 className={styles["settings-section__title"]}>General</h1>
-
+        <SettingsSection
+          title="General"
+          isOpen={isGeneralOpen}
+          setIsOpen={setIsGeneralOpen}
+        >
           <div className={styles["setting__container"]}>
             <SettingsItem
               name="Sound"
@@ -171,10 +183,12 @@ export default function SettingsPage() {
               }
             />
           </div>
-        </div>
-
-        <div className={styles["settings-section"]}>
-          <h1 className={styles["settings-section__title"]}>Gameplay</h1>
+        </SettingsSection>
+        <SettingsSection
+          title="Gameplay"
+          isOpen={isGameplayOpen}
+          setIsOpen={setIsGameplayOpen}
+        >
           <div className={styles["setting__container"]}>
             <SettingsItem
               name="Game mode"
@@ -211,7 +225,7 @@ export default function SettingsPage() {
               }
             />
           </div>
-        </div>
+        </SettingsSection>
       </div>
       <div className={styles["landscape-warning"]}>
         The game doesn't fit on your screen in this orientation.

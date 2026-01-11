@@ -20,27 +20,7 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 4dvh;
-}
-
-.settings-section {
-  width: 100%;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  margin-top: 2dvh;
-  gap: 2dvh;
-}
-
-.settings-section__title {
-  width: 80%;
-  margin: calc(var(--item-font-scale) * 0.1rem) 0;
-  font-size: calc(var(--item-font-scale) * 1.5rem);
-  font-weight: bold;
-}
-
-.setting__container {
-  width: 80%;
+  gap: 3dvh;
 }
 
 .landscape-warning {

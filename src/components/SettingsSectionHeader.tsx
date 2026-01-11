@@ -1,0 +1,39 @@
+import Image from "next/image";
+
+import arrowIcon from "@/assets/icons/keyboard_arrow_right_24dp_000000_FILL0_wght400_GRAD0_opsz24.svg";
+
+import styles from "@/styles/SettingsSectionHeader.module.css";
+
+interface SettingsSectionHeaderProps {
+  title: string;
+  isOpen: boolean;
+  setIsOpen: (open: boolean) => void;
+}
+
+const SettingsSectionHeader = ({
+  title,
+  isOpen,
+  setIsOpen,
+}: SettingsSectionHeaderProps) => {
+  return (
+    <button
+      onClick={() => setIsOpen(!isOpen)}
+      className={styles["settings-section__header"]}
+      aria-expanded={isOpen}
+    >
+      <span
+        className={`${styles["icon-wrapper"]} ${isOpen ? styles.open : ""}`}
+      >
+        <Image
+          src={arrowIcon}
+          alt={isOpen ? "Collapse section" : "Expand section"}
+          width={24}
+          height={24}
+        />
+      </span>
+      <span className={styles["settings-section__title"]}>{title}</span>
+    </button>
+  );
+};
+
+export default SettingsSectionHeader;
