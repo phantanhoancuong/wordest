@@ -1,0 +1,16 @@
+.settings-section {
+  width: 80%;
+  display: flex;
+  flex-direction: column;
+
+  margin-top: 2dvh;
+  gap: 2dvh;
+}
+
+.settings-section__content {
+  display: flex;
+  flex-direction: column;
+  gap: 3dvh;
+  overflow: hidden;
+  transition: height 0.3s ease;
+}
