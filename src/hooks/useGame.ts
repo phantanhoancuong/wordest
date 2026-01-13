@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import {
   ATTEMPTS,
@@ -118,6 +118,7 @@ export const useGame = (): UseGameReturn => {
       gameGrid.flushAnimation(finishedMap);
     },
     () => {
+      isInputLocked.current = false;
       if (gameState.pendingState != null) {
         updateGameState();
       }
@@ -166,6 +167,7 @@ export const useGame = (): UseGameReturn => {
       // Reset state & UI (but does not increment the ID unlike restartGame)
       gameState.resetState();
       cursor.resetCursor();
+      isInputLocked.current = false;
       resetKeyStatuses();
       gameGrid.resetGrid();
       answerGrid.resetGrid();
@@ -183,10 +185,7 @@ export const useGame = (): UseGameReturn => {
     answerGrid.flushAnimation(finishedMap);
   });
 
-  const isInputLocked =
-    gameState.state !== GameState.PLAYING ||
-    gameGridAnimationTracker.getCount() > 0 ||
-    gameState.pendingState !== null;
+  const isInputLocked = useRef(false);
 
   /**
    * Handles the completion of a single cell's animation in the main game grid.
@@ -234,6 +233,8 @@ export const useGame = (): UseGameReturn => {
     if (nextState !== GameState.PLAYING) {
       revealAnswerGrid(nextState);
     }
+
+    isInputLocked.current = false;
   };
 
   /**
@@ -259,6 +260,7 @@ export const useGame = (): UseGameReturn => {
    * Handles Enter key press for guess submission.
    */
   const handleSubmit = (): void => {
+    isInputLocked.current = true;
     submitGuess();
   };
 
@@ -306,7 +308,12 @@ export const useGame = (): UseGameReturn => {
    * @param key - The pressed key (already capitalized).
    */
   const handleInput = (key: string): void => {
-    if (!targetWord || isInputLocked) return;
+    if (
+      !targetWord ||
+      isInputLocked.current ||
+      gameState.state !== GameState.PLAYING
+    )
+      return;
 
     const isBackspace = key === "Backspace";
     const isEnter = key === "Enter";
@@ -330,6 +337,7 @@ export const useGame = (): UseGameReturn => {
   const restartGame = async (): Promise<void> => {
     gameState.resetState();
     cursor.resetCursor();
+    isInputLocked.current = false;
 
     resetKeyStatuses();
 
