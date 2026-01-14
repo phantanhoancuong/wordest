@@ -8,9 +8,15 @@
 }
 
 .settings-section__content {
+  display: grid;
+  grid-template-rows: 0fr;
+  overflow: hidden;
+  transition: grid-template-rows 0.3s ease;
+}
+
+.settings-section__panel {
+  overflow: hidden;
   display: flex;
   flex-direction: column;
   gap: 3dvh;
-  overflow: hidden;
-  transition: height 0.3s ease;
 }
