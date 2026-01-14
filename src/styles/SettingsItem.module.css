@@ -1,34 +1,35 @@
 .settings-item {
   display: flex;
   flex-direction: column;
+  width: 100%;
   user-select: none;
-  --item-font-scale: 1;
+  --settings-control-min-height: calc(var(--item-font-scale) * 2.9rem);
 }
 
 .settings-item h3 {
-  margin: calc(var(--item-font-scale) * 0.1rem) 0;
+  margin: 0;
   font-size: calc(var(--item-font-scale) * 1rem);
-}
-
-.settings-item p {
-  margin: calc(var(--item-font-scale) * 0.1rem) 0;
-  font-size: calc(var(--item-font-scale) * 1rem);
+  margin-bottom: calc(var(--item-font-scale) * 0.25rem);
 }
 
 .settings-item__info {
-  display: flex;
-  flex-direction: column;
-  text-align: justify;
-  gap: calc(var(--item-font-scale) * 0.5rem);
+  display: grid;
+  grid-template-columns: 1fr;
+  row-gap: calc(var(--item-font-scale) * 0.75rem);
+  width: 100%;
+}
+
+.settings-item__description {
+  font-size: calc(var(--item-font-scale) * 1rem);
+  margin: 0;
 }
 
 .settings-item__actions {
   display: flex;
-  gap: 0.5rem;
-  align-self: flex-start;
-  align-items: center;
+  gap: calc(var(--item-font-scale) * 0.5rem);
   width: 100%;
-  font-size: calc(var(--item-font-scale) * 0.5rem);
+  min-height: var(--settings-control-min-height);
+  align-items: flex-start;
 }
 
 .settings-item__actions input {
@@ -45,21 +46,15 @@
   .settings-item {
     --item-font-scale: 1.3;
   }
-
-  .settings-item__description {
-    flex: 5 0 0;
-  }
-  .settings-item__actions {
-    flex: 3 0 0;
-  }
 }
 
 @media (min-width: 1024px) {
   .settings-item {
     --item-font-scale: 1.5;
   }
+
   .settings-item__info {
-    flex-direction: row;
-    justify-content: space-between;
+    grid-template-columns: 2fr 3fr;
+    column-gap: calc(var(--item-font-scale) * 5rem);
   }
 }

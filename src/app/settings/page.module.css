@@ -16,16 +16,24 @@
   flex: 1;
   min-height: 0;
   overflow-y: auto;
-
   display: flex;
   flex-direction: column;
   align-items: center;
+  align-self: center;
   gap: 3dvh;
+  padding-bottom: 8dvh;
+  scrollbar-gutter: stable;
 }
 
 .landscape-warning {
   display: none;
   text-align: center;
+}
+
+.volume-control {
+  display: flex;
+  width: 100%;
+  align-items: center;
 }
 
 @media (max-height: 600px) and (orientation: landscape) {
@@ -48,18 +56,10 @@
   .app {
     --item-font-scale: 1.3;
   }
-  .setting__container,
-  .settings-section__title {
-    width: 80%;
-  }
 }
 
 @media (min-width: 1024px) {
   .app {
     --item-font-scale: 1.5;
-  }
-  .setting__container,
-  .settings-section__title {
-    width: 80%;
   }
 }

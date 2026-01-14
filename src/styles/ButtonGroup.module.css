@@ -1,12 +1,13 @@
 .button-group {
   display: flex;
   width: 100%;
+  align-items: flex-start;
 }
 
 .button-group__button {
   flex: 1;
   font-size: calc(var(--item-font-scale) * 0.8rem);
-  height: calc(var(--item-font-scale) * 2.5rem);
+  height: calc(var(--item-font-scale) * 1.8rem);
   margin: calc(var(--item-font-scale) * 0.2rem);
   background-color: var(--cell-background-color-absent);
   color: var(--cell-text-color-absent);
@@ -17,4 +18,8 @@
   background-color: var(--cell-background-color-correct);
   color: var(--cell-text-color-correct);
   border: 1px solid var(--cell-border-color-correct);
+}
+
+.button-group__action {
+  width: 100%;
 }
