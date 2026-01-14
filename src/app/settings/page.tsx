@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Image from "next/image";
 import Link from "next/link";
 
 import { useSettingsContext } from "@/app/contexts/SettingsContext";
@@ -24,7 +23,7 @@ import {
   WordLength,
 } from "@/lib/constants";
 
-import arrowBackIcon from "@/assets/icons/arrow_back_24dp_000000_FILL0_wght400_GRAD0_opsz24.svg";
+import ArrowBackIcon from "@/assets/icons/arrow_back_24dp_000000_FILL0_wght400_GRAD0_opsz24.svg";
 import styles from "@/app/settings/page.module.css";
 
 /**
@@ -108,13 +107,15 @@ export default function SettingsPage() {
     { label: "Dark", value: Theme.DARK },
   ];
 
+  const VolumeIcon = getVolumeIcon(isMuted.value ? 0 : draftVolume);
+
   return (
     <div className={styles["app"]}>
       <header className={`${styles["app__banner"]} flex-center`}>
         <Banner
           right={
             <Link href="/">
-              <Image src={arrowBackIcon} alt="Go back to Game" fill priority />
+              <ArrowBackIcon aria-label="Go back to Game" />
             </Link>
           }
         />
@@ -131,11 +132,9 @@ export default function SettingsPage() {
               description="Change the volume of sound effects."
               control={
                 <>
-                  <Image
-                    alt="Volume icon"
-                    src={getVolumeIcon(isMuted.value ? 0 : draftVolume)}
-                    width={24}
-                    height={24}
+                  <VolumeIcon
+                    className={styles["volume-icon"]}
+                    aria-hidden="true"
                     onClick={handleVolumeIconClick}
                   />
                   <input

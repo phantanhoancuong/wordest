@@ -1,18 +1,72 @@
 :root {
   --key-font-size: 2rem;
+}
+
+:root {
+  --app-background-color: initial;
+  --app-text-color: initial;
+
+  --cell-background-color-default: initial;
+  --cell-background-color-absent: initial;
+  --cell-background-color-present: initial;
+  --cell-background-color-correct: initial;
+  --cell-background-color-wrong: initial;
+
+  --cell-border-color-default: initial;
+  --cell-border-color-absent: initial;
+  --cell-border-color-present: initial;
+  --cell-border-color-correct: initial;
+  --cell-border-color-wrong: initial;
+
+  --cell-text-color-default: initial;
+  --cell-text-color-absent: initial;
+  --cell-text-color-present: initial;
+  --cell-text-color-correct: initial;
+  --cell-text-color-wrong: initial;
+  --cell-text-color-hidden: initial;
+}
+
+:root[data-theme="light"] {
+  --app-background-color: white;
+  --app-text-color: black;
+
   --cell-background-color-default: transparent;
-  --cell-background-color-absent: rgba(166, 166, 166);
-  --cell-background-color-present: rgba(255, 222, 89);
-  --cell-background-color-correct: rgba(89, 162, 31);
+  --cell-background-color-absent: rgb(166 166 166);
+  --cell-background-color-present: rgb(255 222 89);
+  --cell-background-color-correct: rgb(89 162 31);
   --cell-background-color-wrong: red;
 
   --cell-border-color-default: #ccc;
-  --cell-border-color-absent: rgba(166, 166, 166);
-  --cell-border-color-present: rgba(255, 222, 89);
-  --cell-border-color-correct: rgba(89, 162, 31);
+  --cell-border-color-absent: rgb(166 166 166);
+  --cell-border-color-present: rgb(255 222 89);
+  --cell-border-color-correct: rgb(89 162 31);
   --cell-border-color-wrong: red;
 
   --cell-text-color-default: black;
+  --cell-text-color-absent: white;
+  --cell-text-color-present: white;
+  --cell-text-color-correct: white;
+  --cell-text-color-wrong: white;
+  --cell-text-color-hidden: transparent;
+}
+
+:root[data-theme="dark"] {
+  --app-background-color: black;
+  --app-text-color: white;
+
+  --cell-background-color-default: transparent;
+  --cell-background-color-absent: rgb(166 166 166);
+  --cell-background-color-present: rgb(255 222 89);
+  --cell-background-color-correct: rgb(89 162 31);
+  --cell-background-color-wrong: red;
+
+  --cell-border-color-default: #ccc;
+  --cell-border-color-absent: rgb(166 166 166);
+  --cell-border-color-present: rgb(255 222 89);
+  --cell-border-color-correct: rgb(89 162 31);
+  --cell-border-color-wrong: red;
+
+  --cell-text-color-default: white;
   --cell-text-color-absent: white;
   --cell-text-color-present: white;
   --cell-text-color-correct: white;
@@ -32,6 +86,11 @@ body {
   width: 100%;
   margin: 0;
   overflow: hidden;
+}
+
+body {
+  background-color: var(--app-background-color);
+  color: var(--app-text-color);
 }
 
 button {

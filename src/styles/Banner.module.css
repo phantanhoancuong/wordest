@@ -25,22 +25,26 @@
   padding-right: 10dvw;
 }
 
-.banner__logo {
-  position: relative;
+.logo__container {
   height: 100%;
   aspect-ratio: 3;
   cursor: pointer;
 }
 
-.banner__icon {
-  position: relative;
+.logo__container svg {
+  height: 100%;
+  width: 100%;
+}
+
+.icon__container {
   height: 60%;
   aspect-ratio: 1;
   cursor: pointer;
 }
 
-.img {
-  object-fit: contain;
+.icon__container svg {
+  height: 100%;
+  width: 100%;
 }
 
 @media (max-width: 600px) {
