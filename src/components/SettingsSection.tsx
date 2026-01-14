@@ -16,16 +16,17 @@ const SettingsSection = ({ title, isOpen, setIsOpen, children }) => {
    * we recalculate height and CSS transitions work smoothly.
    */
   useEffect(() => {
-    if (!contentRef.current) return;
+    const el = contentRef.current;
+    if (!el) return;
 
     const observer = new ResizeObserver(() => {
-      setHeight(isOpen ? contentRef.current!.scrollHeight : 0);
+      if (!contentRef.current) return;
+      setHeight(isOpen ? contentRef.current.scrollHeight : 0);
     });
 
-    observer.observe(contentRef.current);
-
+    observer.observe(el);
     return () => observer.disconnect();
-  }, [isOpen, children]);
+  }, [isOpen]);
 
   return (
     <section className={styles["settings-section"]}>
