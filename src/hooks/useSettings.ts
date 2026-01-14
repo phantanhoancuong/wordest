@@ -3,6 +3,7 @@ import {
   DefaultSettings,
   GameMode,
   LocalStorageKeys,
+  Theme,
   WordLength,
 } from "@/lib/constants";
 
@@ -37,6 +38,10 @@ export const useSettings = () => {
     LocalStorageKeys.WORD_LENGTH,
     DefaultSettings.WORD_LENGTH
   );
+  const [theme, setTheme] = useLocalStorage<Theme>(
+    LocalStorageKeys.THEME,
+    DefaultSettings.THEME
+  );
 
   return {
     animationSpeed: { value: animationSpeed, setValue: setAnimationSpeed },
@@ -44,5 +49,6 @@ export const useSettings = () => {
     isMuted: { value: isMuted, setValue: setIsMuted },
     gameMode: { value: gameMode, setValue: setGameMode },
     wordLength: { value: wordLength, setValue: setWordLength },
+    theme: { value: theme, setValue: setTheme },
   };
 };

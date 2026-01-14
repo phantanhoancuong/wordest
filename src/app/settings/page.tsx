@@ -17,9 +17,10 @@ import { playVolumePreview } from "@/lib/audio";
 import { getVolumeIcon } from "@/lib/volumeIcons";
 
 import {
+  DEFAULT_UNMUTE_VOLUME,
   AnimationSpeed,
   GameMode,
-  DEFAULT_UNMUTE_VOLUME,
+  Theme,
   WordLength,
 } from "@/lib/constants";
 
@@ -36,7 +37,7 @@ import styles from "@/app/settings/page.module.css";
  * Settings values are sourced from {@link useSettingsContext}.
  */
 export default function SettingsPage() {
-  const { volume, animationSpeed, isMuted, gameMode, wordLength } =
+  const { volume, animationSpeed, isMuted, gameMode, wordLength, theme } =
     useSettingsContext();
 
   const isGeneralOpen = useSettingsUIStore((s) => s.isGeneralOpen);
@@ -100,6 +101,11 @@ export default function SettingsPage() {
     { label: "5", value: WordLength.FIVE },
     { label: "6", value: WordLength.SIX },
     { label: "7", value: WordLength.SEVEN },
+  ];
+
+  const themeOptions = [
+    { label: "Light", value: Theme.LIGHT },
+    { label: "Dark", value: Theme.DARK },
   ];
 
   return (
@@ -179,6 +185,19 @@ export default function SettingsPage() {
                   options={animationSpeedOptions}
                   selected={animationSpeed.value}
                   onSelect={animationSpeed.setValue}
+                />
+              }
+            />
+          </div>
+          <div className={styles["setting__container"]}>
+            <SettingsItem
+              name="Theme"
+              description="Change the color theme of the game."
+              control={
+                <ButtonGroup
+                  options={themeOptions}
+                  selected={theme.value}
+                  onSelect={theme.setValue}
                 />
               }
             />
