@@ -40,6 +40,8 @@
 .volume-icon {
   width: 8%;
   height: 8%;
+  color: var(--app-text-color);
+  cursor: pointer;
 }
 
 @media (max-height: 600px) and (orientation: landscape) {

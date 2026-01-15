@@ -34,6 +34,7 @@
 .logo__container svg {
   height: 100%;
   width: 100%;
+  color: var(--app-text-color);
 }
 
 .icon__container {
@@ -45,6 +46,7 @@
 .icon__container svg {
   height: 100%;
   width: 100%;
+  color: var(--app-text-color);
 }
 
 @media (max-width: 600px) {
