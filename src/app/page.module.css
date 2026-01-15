@@ -7,7 +7,7 @@
   overflow: hidden;
 
   margin: 0 auto;
-  max-width: 1920px;
+  max-width: 1024px;
   --item-font-scale: 1;
 }
 
@@ -84,12 +84,12 @@
 
 @media (min-width: 600px) {
   .app {
-    --item-font-scale: 1.5;
+    --item-font-scale: 1.25;
   }
 }
 
 @media (min-width: 1024px) {
   .app {
-    --item-font-scale: 2;
+    --item-font-scale: 1.4;
   }
 }
