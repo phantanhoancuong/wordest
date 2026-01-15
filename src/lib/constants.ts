@@ -103,6 +103,7 @@ export enum WordLength {
 export enum Theme {
   LIGHT = "light",
   DARK = "dark",
+  SYSTEM = "system",
 }
 
 // Keys and default values used for persisted user settings.
@@ -121,7 +122,7 @@ export const DefaultSettings = {
   IS_MUTED: false,
   GAME_MODE: GameMode.NORMAL,
   WORD_LENGTH: WordLength.FIVE,
-  THEME: Theme.LIGHT,
+  THEME: Theme.SYSTEM,
 };
 
 // Default volume applied when unmuting from a zero-volume state.

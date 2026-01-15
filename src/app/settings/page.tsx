@@ -105,6 +105,7 @@ export default function SettingsPage() {
   const themeOptions = [
     { label: "Light", value: Theme.LIGHT },
     { label: "Dark", value: Theme.DARK },
+    { label: "System", value: Theme.SYSTEM },
   ];
 
   const VolumeIcon = getVolumeIcon(isMuted.value ? 0 : draftVolume);
