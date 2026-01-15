@@ -1,11 +1,14 @@
 .app {
   height: 100dvh;
-  min-width: 100%;
   display: flex;
   flex-direction: column;
   padding-top: 3dvh;
   overscroll-behavior: none;
   overflow: hidden;
+
+  margin: 0 auto;
+  max-width: 1920px;
+  --item-font-scale: 1;
 }
 
 .app__banner {
@@ -44,21 +47,19 @@
   container-type: size;
 }
 
-.game-board__grid {
-  display: grid;
-  gap: 0.5rem;
-}
-
 .game-board__controls {
-  margin-top: 1rem;
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
+  display: grid;
+  margin-top: calc(var(--item-font-scale) * 1rem);
+  grid-template-rows: 1fr 0.5fr;
+  gap: calc(var(--item-font-scale) * 0.5rem);
 }
 
 .game-board__button {
-  padding: 0.5rem 1rem;
-  font-size: 1rem;
+  font-size: calc(var(--item-font-scale) * 0.8rem);
+  height: calc(var(--item-font-scale) * 1.8rem);
+  background-color: var(--cell-background-color-absent);
+  color: var(--cell-text-color-absent);
+  border: 1px solid var(--cell-border-color-absent);
   cursor: pointer;
   font-weight: bold;
   user-select: none;
@@ -78,5 +79,17 @@
     height: 100dvh;
     font-size: 1rem;
     font-weight: bold;
+  }
+}
+
+@media (min-width: 600px) {
+  .app {
+    --item-font-scale: 1.5;
+  }
+}
+
+@media (min-width: 1024px) {
+  .app {
+    --item-font-scale: 2;
   }
 }

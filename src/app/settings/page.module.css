@@ -4,6 +4,9 @@
   flex-direction: column;
   overflow: hidden;
   padding-top: 3dvh;
+  max-width: 1920px;
+  margin: 0 auto;
+
   --item-font-scale: 1;
 }
 
