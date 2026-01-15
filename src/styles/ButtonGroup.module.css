@@ -12,6 +12,7 @@
   background-color: var(--cell-background-color-absent);
   color: var(--cell-text-color-absent);
   border: 1px solid var(--cell-border-color-absent);
+  cursor: pointer;
 }
 
 .button-group__button--active {

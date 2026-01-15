@@ -1,6 +1,7 @@
 import { SettingsProvider } from "@/app/contexts/SettingsContext";
 
 import "@/app/globals.css";
+import ThemeProvider from "@/components/ThemeProvider";
 
 export const metadata = {
   title: "WORDest",
@@ -20,7 +21,10 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en">
       <body>
-        <SettingsProvider>{children}</SettingsProvider>
+        <SettingsProvider>
+          <ThemeProvider />
+          {children}
+        </SettingsProvider>
       </body>
     </html>
   );

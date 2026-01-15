@@ -99,6 +99,12 @@ export enum WordLength {
   SEVEN = 7,
 }
 
+// Supported color themes for the game.
+export enum Theme {
+  LIGHT = "light",
+  DARK = "dark",
+}
+
 // Keys and default values used for persisted user settings.
 export const LocalStorageKeys = {
   ANIMATION_SPEED: "wordest:animationSpeed",
@@ -106,6 +112,7 @@ export const LocalStorageKeys = {
   IS_MUTED: "wordest:isMuted",
   GAME_MODE: "wordest:gameMode",
   WORD_LENGTH: "wordest:wordLength",
+  THEME: "wordest:theme",
 };
 
 export const DefaultSettings = {
@@ -114,6 +121,7 @@ export const DefaultSettings = {
   IS_MUTED: false,
   GAME_MODE: GameMode.NORMAL,
   WORD_LENGTH: WordLength.FIVE,
+  THEME: Theme.LIGHT,
 };
 
 // Default volume applied when unmuting from a zero-volume state.

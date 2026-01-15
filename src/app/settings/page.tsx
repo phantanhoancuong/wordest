@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Image from "next/image";
 import Link from "next/link";
 
 import { useSettingsContext } from "@/app/contexts/SettingsContext";
@@ -17,13 +16,14 @@ import { playVolumePreview } from "@/lib/audio";
 import { getVolumeIcon } from "@/lib/volumeIcons";
 
 import {
+  DEFAULT_UNMUTE_VOLUME,
   AnimationSpeed,
   GameMode,
-  DEFAULT_UNMUTE_VOLUME,
+  Theme,
   WordLength,
 } from "@/lib/constants";
 
-import arrowBackIcon from "@/assets/icons/arrow_back_24dp_000000_FILL0_wght400_GRAD0_opsz24.svg";
+import ArrowBackIcon from "@/assets/icons/arrow_back_24dp_000000_FILL0_wght400_GRAD0_opsz24.svg";
 import styles from "@/app/settings/page.module.css";
 
 /**
@@ -36,7 +36,7 @@ import styles from "@/app/settings/page.module.css";
  * Settings values are sourced from {@link useSettingsContext}.
  */
 export default function SettingsPage() {
-  const { volume, animationSpeed, isMuted, gameMode, wordLength } =
+  const { volume, animationSpeed, isMuted, gameMode, wordLength, theme } =
     useSettingsContext();
 
   const isGeneralOpen = useSettingsUIStore((s) => s.isGeneralOpen);
@@ -102,13 +102,20 @@ export default function SettingsPage() {
     { label: "7", value: WordLength.SEVEN },
   ];
 
+  const themeOptions = [
+    { label: "Light", value: Theme.LIGHT },
+    { label: "Dark", value: Theme.DARK },
+  ];
+
+  const VolumeIcon = getVolumeIcon(isMuted.value ? 0 : draftVolume);
+
   return (
     <div className={styles["app"]}>
       <header className={`${styles["app__banner"]} flex-center`}>
         <Banner
           right={
             <Link href="/">
-              <Image src={arrowBackIcon} alt="Go back to Game" fill priority />
+              <ArrowBackIcon aria-label="Go back to Game" />
             </Link>
           }
         />
@@ -124,12 +131,10 @@ export default function SettingsPage() {
               name="Sound"
               description="Change the volume of sound effects."
               control={
-                <>
-                  <Image
-                    alt="Volume icon"
-                    src={getVolumeIcon(isMuted.value ? 0 : draftVolume)}
-                    width={24}
-                    height={24}
+                <div className={styles["volume-control"]}>
+                  <VolumeIcon
+                    className={styles["volume-icon"]}
+                    aria-hidden="true"
                     onClick={handleVolumeIconClick}
                   />
                   <input
@@ -166,7 +171,7 @@ export default function SettingsPage() {
                     <option value="66" />
                     <option value="100" />
                   </datalist>
-                </>
+                </div>
               }
             />
           </div>
@@ -179,6 +184,19 @@ export default function SettingsPage() {
                   options={animationSpeedOptions}
                   selected={animationSpeed.value}
                   onSelect={animationSpeed.setValue}
+                />
+              }
+            />
+          </div>
+          <div className={styles["setting__container"]}>
+            <SettingsItem
+              name="Theme"
+              description="Change the color theme of the game."
+              control={
+                <ButtonGroup
+                  options={themeOptions}
+                  selected={theme.value}
+                  onSelect={theme.setValue}
                 />
               }
             />
