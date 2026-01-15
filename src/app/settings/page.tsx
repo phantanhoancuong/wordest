@@ -131,7 +131,7 @@ export default function SettingsPage() {
               name="Sound"
               description="Change the volume of sound effects."
               control={
-                <>
+                <div className={styles["volume-control"]}>
                   <VolumeIcon
                     className={styles["volume-icon"]}
                     aria-hidden="true"
@@ -171,7 +171,7 @@ export default function SettingsPage() {
                     <option value="66" />
                     <option value="100" />
                   </datalist>
-                </>
+                </div>
               }
             />
           </div>

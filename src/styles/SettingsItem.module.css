@@ -26,8 +26,6 @@
 
 .settings-item__actions {
   display: flex;
-  gap: calc(var(--item-font-scale) * 0.5rem);
-  width: 100%;
   min-height: var(--settings-control-min-height);
   align-items: flex-start;
 }

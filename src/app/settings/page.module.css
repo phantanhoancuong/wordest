@@ -33,7 +33,13 @@
 .volume-control {
   display: flex;
   width: 100%;
+  gap: 1dvw;
   align-items: center;
+}
+
+.volume-icon {
+  width: 8%;
+  height: 8%;
 }
 
 @media (max-height: 600px) and (orientation: landscape) {
@@ -56,10 +62,18 @@
   .app {
     --item-font-scale: 1.3;
   }
+  .volume-icon {
+    width: 7%;
+    height: 7%;
+  }
 }
 
 @media (min-width: 1024px) {
   .app {
     --item-font-scale: 1.5;
+  }
+  .volume-icon {
+    width: 6%;
+    height: 6%;
   }
 }
