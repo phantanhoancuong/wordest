@@ -27,22 +27,22 @@
 }
 
 :root[data-theme="light"] {
-  --app-background-color: white;
-  --app-text-color: black;
+  --app-background-color: #f7f7f8;
+  --app-text-color: #1a1a1a;
 
   --cell-background-color-default: transparent;
-  --cell-background-color-absent: rgb(166 166 166);
+  --cell-background-color-absent: #6b6b6b;
   --cell-background-color-present: rgb(255 222 89);
   --cell-background-color-correct: rgb(89 162 31);
-  --cell-background-color-wrong: red;
+  --cell-background-color-wrong: #c0392b;
 
   --cell-border-color-default: #ccc;
-  --cell-border-color-absent: rgb(166 166 166);
+  --cell-border-color-absent: #6b6b6b;
   --cell-border-color-present: rgb(255 222 89);
   --cell-border-color-correct: rgb(89 162 31);
-  --cell-border-color-wrong: red;
+  --cell-border-color-wrong: #c0392b;
 
-  --cell-text-color-default: black;
+  --cell-text-color-default: #1a1a1a;
   --cell-text-color-absent: white;
   --cell-text-color-present: white;
   --cell-text-color-correct: white;
@@ -51,20 +51,20 @@
 }
 
 :root[data-theme="dark"] {
-  --app-background-color: black;
-  --app-text-color: white;
+  --app-background-color: #121212;
+  --app-text-color: #e5e5e5;
 
   --cell-background-color-default: transparent;
-  --cell-background-color-absent: rgb(166 166 166);
+  --cell-background-color-absent: #6b6b6b;
   --cell-background-color-present: rgb(255 222 89);
   --cell-background-color-correct: rgb(89 162 31);
-  --cell-background-color-wrong: red;
+  --cell-background-color-wrong: #c0392b;
 
-  --cell-border-color-default: #ccc;
-  --cell-border-color-absent: rgb(166 166 166);
+  --cell-border-color-default: #444;
+  --cell-border-color-absent: #6b6b6b;
   --cell-border-color-present: rgb(255 222 89);
   --cell-border-color-correct: rgb(89 162 31);
-  --cell-border-color-wrong: red;
+  --cell-border-color-wrong: #c0392b;
 
   --cell-text-color-default: white;
   --cell-text-color-absent: white;
