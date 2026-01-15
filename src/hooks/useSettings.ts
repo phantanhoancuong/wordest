@@ -43,6 +43,15 @@ export const useSettings = () => {
     DefaultSettings.THEME
   );
 
+  const resetSettings = () => {
+    setAnimationSpeed(DefaultSettings.ANIMATION_SPEED);
+    setVolume(DefaultSettings.VOLUME);
+    setIsMuted(DefaultSettings.IS_MUTED);
+    setGameMode(DefaultSettings.GAME_MODE);
+    setWordLength(DefaultSettings.WORD_LENGTH);
+    setTheme(DefaultSettings.THEME);
+  };
+
   return {
     animationSpeed: { value: animationSpeed, setValue: setAnimationSpeed },
     volume: { value: volume, setValue: setVolume },
@@ -50,5 +59,6 @@ export const useSettings = () => {
     gameMode: { value: gameMode, setValue: setGameMode },
     wordLength: { value: wordLength, setValue: setWordLength },
     theme: { value: theme, setValue: setTheme },
+    resetSettings,
   };
 };

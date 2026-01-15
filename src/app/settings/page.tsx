@@ -7,6 +7,7 @@ import { useSettingsContext } from "@/app/contexts/SettingsContext";
 import { useSettingsUIStore } from "@/store/useSettingsUIStore";
 
 import {
+  ActionButton,
   Banner,
   ButtonGroup,
   SettingsItem,
@@ -36,13 +37,22 @@ import styles from "@/app/settings/page.module.css";
  * Settings values are sourced from {@link useSettingsContext}.
  */
 export default function SettingsPage() {
-  const { volume, animationSpeed, isMuted, gameMode, wordLength, theme } =
-    useSettingsContext();
+  const {
+    volume,
+    animationSpeed,
+    isMuted,
+    gameMode,
+    wordLength,
+    theme,
+    resetSettings,
+  } = useSettingsContext();
 
   const isGeneralOpen = useSettingsUIStore((s) => s.isGeneralOpen);
   const isGameplayOpen = useSettingsUIStore((s) => s.isGameplayOpen);
+  const isDangerZoneOpen = useSettingsUIStore((s) => s.isDangerZoneOpen);
   const setIsGeneralOpen = useSettingsUIStore((s) => s.setIsGeneralOpen);
   const setIsGameplayOpen = useSettingsUIStore((s) => s.setIsGameplayOpen);
+  const setIsDangerZoneOpen = useSettingsUIStore((s) => s.setIsDangerZoneOpen);
 
   // Local UI state for the volume slider (0-100)
   // This is decoupled from persisted volume (0-1) to avoid unnecessary writes during dragging.
@@ -245,7 +255,33 @@ export default function SettingsPage() {
             />
           </div>
         </SettingsSection>
+        <SettingsSection
+          title="Danger zone"
+          isOpen={isDangerZoneOpen}
+          setIsOpen={setIsDangerZoneOpen}
+        >
+          <div className={styles["setting__container"]}>
+            <SettingsItem
+              name="Reset settings"
+              description={
+                <>
+                  Resets settings to the default values.
+                  <br />
+                  You can't undo this action!
+                </>
+              }
+              control={
+                <ActionButton
+                  danger={true}
+                  label="resets settings"
+                  onClick={resetSettings}
+                />
+              }
+            />
+          </div>
+        </SettingsSection>
       </div>
+
       <div className={styles["landscape-warning"]}>
         The game doesn't fit on your screen in this orientation.
         <br />

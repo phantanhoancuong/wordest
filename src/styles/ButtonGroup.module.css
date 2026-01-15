@@ -21,6 +21,12 @@
   border: 1px solid var(--cell-border-color-correct);
 }
 
+.button-group__button--danger {
+  background-color: var(--cell-background-color-wrong);
+  color: var(--cell-text-color-wrong);
+  border: 1px solid var(--cell-border-color-wrong);
+}
+
 .button-group__action {
   width: 100%;
 }

@@ -34,6 +34,7 @@ interface SettingsContextType {
     value: Theme;
     setValue: (v: Theme) => void;
   };
+  resetSettings: () => void;
 }
 
 /**
