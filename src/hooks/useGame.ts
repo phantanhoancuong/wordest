@@ -367,7 +367,7 @@ export const useGame = (): UseGameReturn => {
   };
 
   const submitGuess = useGuessSubmission(
-    gameMode.value === GameMode.STRICT,
+    gameMode.value === GameMode.STRICT || gameMode.value === GameMode.HARDCORE,
     animationSpeedMultiplier,
     targetLetterCount,
     targetWord,
