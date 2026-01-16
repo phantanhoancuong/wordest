@@ -46,6 +46,10 @@ export const useSettings = () => {
     LocalStorageKeys.SHOW_REFERENCE_GRID,
     DefaultSettings.SHOW_REFERENCE_GRID
   );
+  const [showKeyStatuses, setShowKeyStatuses] = useLocalStorage<boolean>(
+    LocalStorageKeys.SHOW_KEY_STATUSES,
+    DefaultSettings.SHOW_KEY_STATUSES
+  );
 
   const resetSettings = () => {
     setAnimationSpeed(DefaultSettings.ANIMATION_SPEED);
@@ -55,6 +59,7 @@ export const useSettings = () => {
     setWordLength(DefaultSettings.WORD_LENGTH);
     setTheme(DefaultSettings.THEME);
     setShowReferenceGrid(DefaultSettings.SHOW_REFERENCE_GRID);
+    setShowKeyStatuses(DefaultSettings.SHOW_KEY_STATUSES);
   };
 
   return {
@@ -67,6 +72,10 @@ export const useSettings = () => {
     showReferenceGrid: {
       value: showReferenceGrid,
       setValue: setShowReferenceGrid,
+    },
+    showKeyStatuses: {
+      value: showKeyStatuses,
+      setValue: setShowKeyStatuses,
     },
     resetSettings,
   };

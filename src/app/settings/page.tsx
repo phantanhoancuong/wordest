@@ -45,6 +45,7 @@ export default function SettingsPage() {
     wordLength,
     theme,
     showReferenceGrid,
+    showKeyStatuses,
     resetSettings,
   } = useSettingsContext();
 
@@ -122,6 +123,11 @@ export default function SettingsPage() {
   ];
 
   const showReferenceGridOptions = [
+    { label: "Enabled", value: true },
+    { label: "Disabled", value: false },
+  ];
+
+  const showKeyStatusesOptions = [
     { label: "Enabled", value: true },
     { label: "Disabled", value: false },
   ];
@@ -276,6 +282,19 @@ export default function SettingsPage() {
                   options={showReferenceGridOptions}
                   selected={showReferenceGrid.value}
                   onSelect={showReferenceGrid.setValue}
+                />
+              }
+            />
+          </div>
+          <div className={styles["setting__container"]}>
+            <SettingsItem
+              name="Show keyboard letter statuses"
+              description="Display letter status feedback on the keyboard."
+              control={
+                <ButtonGroup
+                  options={showKeyStatusesOptions}
+                  selected={showKeyStatuses.value}
+                  onSelect={showKeyStatuses.setValue}
                 />
               }
             />

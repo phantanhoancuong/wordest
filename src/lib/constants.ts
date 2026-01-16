@@ -114,7 +114,8 @@ export const LocalStorageKeys = {
   GAME_MODE: "wordest:gameMode",
   WORD_LENGTH: "wordest:wordLength",
   THEME: "wordest:theme",
-  SHOW_REFERENCE_GRID: "wordest:referenceGrid",
+  SHOW_REFERENCE_GRID: "wordest:showReferenceGrid",
+  SHOW_KEY_STATUSES: "wordest:showKeyStatuses",
 };
 
 export const DefaultSettings = {
@@ -125,6 +126,7 @@ export const DefaultSettings = {
   WORD_LENGTH: WordLength.FIVE,
   THEME: Theme.SYSTEM,
   SHOW_REFERENCE_GRID: true,
+  SHOW_KEY_STATUSES: true,
 };
 
 // Default volume applied when unmuting from a zero-volume state.

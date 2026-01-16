@@ -38,6 +38,10 @@ interface SettingsContextType {
     value: boolean;
     setValue: (v: boolean) => void;
   };
+  showKeyStatuses: {
+    value: boolean;
+    setValue: (v: boolean) => void;
+  };
   resetSettings: () => void;
 }
 
