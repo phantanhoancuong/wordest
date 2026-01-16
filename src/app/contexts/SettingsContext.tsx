@@ -34,7 +34,7 @@ interface SettingsContextType {
     value: Theme;
     setValue: (v: Theme) => void;
   };
-  showAnswerGrid: {
+  showReferenceGrid: {
     value: boolean;
     setValue: (v: boolean) => void;
   };

@@ -15,7 +15,7 @@ type GameGridSection = {
 export interface UseGameReturn {
   gameGrid: GameGridSection;
 
-  answerGrid: GameGridSection;
+  referenceGrid: GameGridSection;
 
   keyboard: {
     statuses: UseKeyStatusesReturn["keyStatuses"];

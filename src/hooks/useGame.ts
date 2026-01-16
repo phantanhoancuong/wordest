@@ -60,9 +60,9 @@ export const useGame = (): UseGameReturn => {
   const dataGameGrid = useGameStore((s) => s.gameGrid);
   const setDataGameGrid = useGameStore((s) => s.setGameGrid);
   const resetDataGameGrid = useGameStore((s) => s.resetGameGrid);
-  const dataAnswerGrid = useGameStore((s) => s.answerGrid);
-  const setDataAnswerGrid = useGameStore((s) => s.setAnswerGrid);
-  const resetDataAnswerGrid = useGameStore((s) => s.resetAnswerGrid);
+  const dataReferenceGrid = useGameStore((s) => s.referenceGrid);
+  const setDataReferenceGrid = useGameStore((s) => s.setReferenceGrid);
+  const resetDataReferenceGrid = useGameStore((s) => s.resetReferenceGrid);
   const wordLengthStore = useGameStore((s) => s.wordLength);
   const setWordLengthStore = useGameStore((s) => s.setWordLength);
 
@@ -77,15 +77,15 @@ export const useGame = (): UseGameReturn => {
     resetDataGameGrid
   );
 
-  const answerGrid = useGridState(
+  const referenceGrid = useGridState(
     1,
     wordLength.value,
     CellStatus.HIDDEN,
     CellAnimation.NONE,
     0,
-    dataAnswerGrid,
-    setDataAnswerGrid,
-    resetDataAnswerGrid
+    dataReferenceGrid,
+    setDataReferenceGrid,
+    resetDataReferenceGrid
   );
 
   const useExpertModeConstraints = UseExpertModeConstraints();
@@ -100,19 +100,9 @@ export const useGame = (): UseGameReturn => {
 
   const gameId = useGameStore((s) => s.gameId);
   const incrementGameId = useGameStore((s) => s.incrementGameId);
-  const answerGridId = useGameStore((s) => s.answerGridId);
-  const setAnswerGridId = useGameStore((s) => s.setAnswerGridId);
+  const referenceGridId = useGameStore((s) => s.referenceGridId);
+  const setReferenceGridId = useGameStore((s) => s.setReferenceGridId);
 
-  /**
-   * Initializes the answer grid for the current game.
-   *
-   * The answer grid is populated once per gameId using the current target word.
-   * 'answerGridId' is used to prevent re-initialization when resuming or re-rendering the same game.
-   *
-   * This effect runs when:
-   * - A new target word is loaded.
-   * - A new gameId is issued.
-   */
   const gameGridAnimationTracker = useAnimationTracker(
     (finishedMap) => {
       gameGrid.flushAnimation(finishedMap);
@@ -126,9 +116,9 @@ export const useGame = (): UseGameReturn => {
   );
 
   /**
-   * Initialize the answer grid according to the fetched target word.
+   * Initialize the reference grid according to the fetched target word.
    */
-  const populateAnswerGrid = () => {
+  const populateReferenceGrid = () => {
     const currentWord = useGameStore.getState().targetWord;
     const newRow = currentWord.split("").map((ch) => ({
       char: ch,
@@ -136,7 +126,7 @@ export const useGame = (): UseGameReturn => {
       animation: CellAnimation.NONE,
       animationDelay: 0,
     }));
-    answerGrid.updateRow(0, newRow);
+    referenceGrid.updateRow(0, newRow);
   };
 
   const [hasHydrated, setHasHydrated] = useState(false);
@@ -163,26 +153,26 @@ export const useGame = (): UseGameReturn => {
     if (!targetWord) return;
 
     // If this is a new game, reset UI and populate grid
-    if (answerGridId !== gameId) {
+    if (referenceGridId !== gameId) {
       // Reset state & UI (but does not increment the ID unlike restartGame)
       gameState.resetState();
       cursor.resetCursor();
       isInputLocked.current = false;
       resetKeyStatuses();
       gameGrid.resetGrid();
-      answerGrid.resetGrid();
+      referenceGrid.resetGrid();
       gameGridAnimationTracker.reset();
-      answerGridAnimationTracker.reset();
+      referenceGridAnimationTracker.reset();
       toastList.forEach((t) => removeToast(t.id));
       useExpertModeConstraints.resetExpertConstraints();
 
-      populateAnswerGrid();
-      setAnswerGridId(useGameStore.getState().gameId);
+      populateReferenceGrid();
+      setReferenceGridId(useGameStore.getState().gameId);
     }
   }, []);
 
-  const answerGridAnimationTracker = useAnimationTracker((finishedMap) => {
-    answerGrid.flushAnimation(finishedMap);
+  const referenceGridAnimationTracker = useAnimationTracker((finishedMap) => {
+    referenceGrid.flushAnimation(finishedMap);
   });
 
   const isInputLocked = useRef(false);
@@ -205,25 +195,25 @@ export const useGame = (): UseGameReturn => {
   };
 
   /**
-   * Handles the completion of a single cell's animation in the answer grid.
+   * Handles the completion of a single cell's animation in the reference grid.
    *
-   * Marks the animation as finished in the answer grid. Row index is ignored.
+   * Marks the animation as finished in the reference grid. Row index is ignored.
    *
    * @param rowIndex - Always 0 (ignored).
    * @param colIndex - Index of the column on the animated cell.
    */
-  const handleAnswerGridAnimationEnd = (
+  const handleReferenceGridAnimationEnd = (
     rowIndex: number,
     colIndex: number
   ): void => {
     rowIndex = 0;
-    answerGridAnimationTracker.markEnd(rowIndex, colIndex);
+    referenceGridAnimationTracker.markEnd(rowIndex, colIndex);
   };
 
   /**
    * Applies the pending game state if one exists.
    *
-   * Called after animations finish. Commits the pending game state and, if the game has ended. triggers revealing the answer grid.
+   * Called after animations finish. Commits the pending game state and, if the game has ended. triggers revealing the reference grid.
    */
   const updateGameState = (): void => {
     const nextState = gameState.pendingState;
@@ -231,29 +221,29 @@ export const useGame = (): UseGameReturn => {
     if (!committed) return;
 
     if (nextState !== GameState.PLAYING) {
-      revealAnswerGrid(nextState);
+      revealReferenceGrid(nextState);
     }
 
     isInputLocked.current = false;
   };
 
   /**
-   * Reveals the target word on the answer grid.
+   * Reveals the target word on the reference grid.
    *
    * Animates each cell to indicate correctness depending on whether the game was won or lost.
    *
    * @param state - The final game state (WON or LOST).
    */
-  const revealAnswerGrid = (state: GameState): void => {
-    answerGridAnimationTracker.add(answerGrid.colNum);
-    const revealedRow = answerGrid.renderGridRef.current[0].map((cell) => ({
+  const revealReferenceGrid = (state: GameState): void => {
+    referenceGridAnimationTracker.add(referenceGrid.colNum);
+    const revealedRow = referenceGrid.renderGridRef.current[0].map((cell) => ({
       ...cell,
       status: state === GameState.WON ? CellStatus.CORRECT : CellStatus.WRONG,
       animation: CellAnimation.BOUNCE,
       animationDelay: 0,
       animationKey: (cell.animationKey ?? 0) + 1,
     }));
-    answerGrid.updateRow(0, revealedRow);
+    referenceGrid.updateRow(0, revealedRow);
   };
 
   /**
@@ -331,7 +321,7 @@ export const useGame = (): UseGameReturn => {
   /**
    * Resets the game to its initial state.
    *
-   * Clears the game grid, answer grid, keyboard statuses, animations, toasts,
+   * Clears the game grid, reference grid, keyboard statuses, animations, toasts,
    * and reloads a new target word.
    */
   const restartGame = async (): Promise<void> => {
@@ -342,13 +332,13 @@ export const useGame = (): UseGameReturn => {
     resetKeyStatuses();
 
     const newGameId = incrementGameId();
-    setAnswerGridId(null);
+    setReferenceGridId(null);
 
     gameGrid.resetGrid();
-    answerGrid.resetGrid();
+    referenceGrid.resetGrid();
 
     gameGridAnimationTracker.reset();
-    answerGridAnimationTracker.reset();
+    referenceGridAnimationTracker.reset();
 
     toastList.forEach((t) => removeToast(t.id));
 
@@ -361,8 +351,8 @@ export const useGame = (): UseGameReturn => {
 
     if (!word) return;
 
-    populateAnswerGrid();
-    setAnswerGridId(newGameId);
+    populateReferenceGrid();
+    setReferenceGridId(newGameId);
   };
 
   /**
@@ -381,12 +371,12 @@ export const useGame = (): UseGameReturn => {
     animationSpeedMultiplier,
     targetLetterCount,
     targetWord,
-    answerGrid,
+    referenceGrid,
     gameGrid,
     gameState,
     cursor,
     gameGridAnimationTracker,
-    answerGridAnimationTracker,
+    referenceGridAnimationTracker,
     useExpertModeConstraints,
     addToast,
     handleValidationError,
@@ -404,11 +394,11 @@ export const useGame = (): UseGameReturn => {
       handleAnimationEnd: handleGameGridAnimationEnd,
     },
 
-    answerGrid: {
-      renderGrid: answerGrid.renderGrid,
-      rowNum: answerGrid.rowNum,
-      colNum: answerGrid.colNum,
-      handleAnimationEnd: handleAnswerGridAnimationEnd,
+    referenceGrid: {
+      renderGrid: referenceGrid.renderGrid,
+      rowNum: referenceGrid.rowNum,
+      colNum: referenceGrid.colNum,
+      handleAnimationEnd: handleReferenceGridAnimationEnd,
     },
 
     keyboard: {

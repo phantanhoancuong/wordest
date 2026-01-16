@@ -11,7 +11,7 @@ import { useSettingsContext } from "./contexts/SettingsContext";
  *
  * This component renders:
  * - The **game grid** where players make guesses.
- * - The **answer grid** displaying the hidden target word.
+ * - The **reference grid** displaying the hidden target word.
  * - The **keyboard** for letter input.
  * - A **toast bar** for game feedback and messages.
  * - A **banner** (header) and a **landscape warning** for small screens.
@@ -19,10 +19,10 @@ import { useSettingsContext } from "./contexts/SettingsContext";
  * Uses the {@link useGame} hook to manage game state, user input, and UI updates.
  */
 export default function Home() {
-  const { gameGrid, answerGrid, keyboard, game, toasts, input, render } =
+  const { gameGrid, referenceGrid, keyboard, game, toasts, input, render } =
     useGame();
 
-  const { showAnswerGrid } = useSettingsContext();
+  const { showReferenceGrid } = useSettingsContext();
 
   if (!render.hasHydrated) return null;
   return (
@@ -47,10 +47,10 @@ export default function Home() {
               </div>
 
               <div className={styles["game-board__controls"]}>
-                {showAnswerGrid.value ? (
+                {showReferenceGrid.value ? (
                   <Grid
-                    grid={answerGrid.renderGrid}
-                    onAnimationEnd={answerGrid.handleAnimationEnd}
+                    grid={referenceGrid.renderGrid}
+                    onAnimationEnd={referenceGrid.handleAnimationEnd}
                     layoutRows={gameGrid.rowNum}
                     layoutCols={gameGrid.colNum}
                   />

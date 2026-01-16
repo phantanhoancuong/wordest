@@ -42,9 +42,9 @@ export const useSettings = () => {
     LocalStorageKeys.THEME,
     DefaultSettings.THEME
   );
-  const [showAnswerGrid, setShowAnswerGrid] = useLocalStorage<boolean>(
-    LocalStorageKeys.SHOW_ANSWER_GRID,
-    DefaultSettings.SHOW_ANSWER_GRID
+  const [showReferenceGrid, setShowReferenceGrid] = useLocalStorage<boolean>(
+    LocalStorageKeys.SHOW_REFERENCE_GRID,
+    DefaultSettings.SHOW_REFERENCE_GRID
   );
 
   const resetSettings = () => {
@@ -54,7 +54,7 @@ export const useSettings = () => {
     setGameMode(DefaultSettings.GAME_MODE);
     setWordLength(DefaultSettings.WORD_LENGTH);
     setTheme(DefaultSettings.THEME);
-    setShowAnswerGrid(DefaultSettings.SHOW_ANSWER_GRID);
+    setShowReferenceGrid(DefaultSettings.SHOW_REFERENCE_GRID);
   };
 
   return {
@@ -64,7 +64,10 @@ export const useSettings = () => {
     gameMode: { value: gameMode, setValue: setGameMode },
     wordLength: { value: wordLength, setValue: setWordLength },
     theme: { value: theme, setValue: setTheme },
-    showAnswerGrid: { value: showAnswerGrid, setValue: setShowAnswerGrid },
+    showReferenceGrid: {
+      value: showReferenceGrid,
+      setValue: setShowReferenceGrid,
+    },
     resetSettings,
   };
 };

@@ -44,7 +44,7 @@ export default function SettingsPage() {
     gameMode,
     wordLength,
     theme,
-    showAnswerGrid,
+    showReferenceGrid,
     resetSettings,
   } = useSettingsContext();
 
@@ -121,7 +121,7 @@ export default function SettingsPage() {
     { label: "System", value: Theme.SYSTEM },
   ];
 
-  const showAnswerGridOptions = [
+  const showReferenceGridOptions = [
     { label: "Enabled", value: true },
     { label: "Disabled", value: false },
   ];
@@ -148,7 +148,7 @@ export default function SettingsPage() {
           <div className={styles["setting__container"]}>
             <SettingsItem
               name="Sound"
-              description="Change the volume of sound effects."
+              description="Adjust the volume of game sound effects."
               control={
                 <div className={styles["volume-control"]}>
                   <VolumeIcon
@@ -197,7 +197,7 @@ export default function SettingsPage() {
           <div className={styles["setting__container"]}>
             <SettingsItem
               name="Animation speed"
-              description="Change the speed of cell animations."
+              description="Control how fast game animations play."
               control={
                 <ButtonGroup
                   options={animationSpeedOptions}
@@ -210,7 +210,7 @@ export default function SettingsPage() {
           <div className={styles["setting__container"]}>
             <SettingsItem
               name="Theme"
-              description="Change the color theme of the game."
+              description="Choose the visual theme for the game."
               control={
                 <ButtonGroup
                   options={themeOptions}
@@ -231,13 +231,12 @@ export default function SettingsPage() {
               name="Game mode"
               description={
                 <>
-                  Normal mode is the classic WORDest experience.
+                  <strong>Normal</strong> is the classic WORDest experience.
                   <br />
-                  Expert mode enforces hard constraints based on previous
-                  guesses: letters confirmed in the correct position must stay
-                  in that position, and any letter revealed as present must be
-                  used in future guesses at least as many times as it has been
-                  confirmed so far.
+                  <strong>Expert</strong> enforces strict rules based on
+                  previous guesses: letters confirmed in the correct position
+                  must remain there, and any revealed letter must be reused at
+                  least as many times as it has been confirmed.
                 </>
               }
               control={
@@ -252,7 +251,7 @@ export default function SettingsPage() {
           <div className={styles["setting__container"]}>
             <SettingsItem
               name="Word length"
-              description="The number of letters in each word."
+              description="Set how many letters each word contains."
               control={
                 <ButtonGroup
                   options={wordLengthOptions}
@@ -270,20 +269,20 @@ export default function SettingsPage() {
         >
           <div className={styles["setting__container"]}>
             <SettingsItem
-              name="Show the answer grid"
-              description="Shows the answer grid below the game grid which contains all the correct letter-position pairs that you've guessed."
+              name="Show reference grid"
+              description="Display a reference grid showing all confirmed correct letter positions."
               control={
                 <ButtonGroup
-                  options={showAnswerGridOptions}
-                  selected={showAnswerGrid.value}
-                  onSelect={showAnswerGrid.setValue}
+                  options={showReferenceGridOptions}
+                  selected={showReferenceGrid.value}
+                  onSelect={showReferenceGrid.setValue}
                 />
               }
             />
           </div>
         </SettingsSection>
         <SettingsSection
-          title="Danger zone"
+          title="Danger Zone"
           isOpen={isDangerZoneOpen}
           setIsOpen={setIsDangerZoneOpen}
         >
@@ -292,9 +291,9 @@ export default function SettingsPage() {
               name="Reset settings"
               description={
                 <>
-                  Resets settings to the default values.
+                  Restore all settings to their default values.
                   <br />
-                  You can't undo this action!
+                  This action cannot be undone.
                 </>
               }
               control={

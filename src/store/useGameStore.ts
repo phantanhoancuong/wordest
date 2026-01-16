@@ -31,11 +31,11 @@ type GameStore = {
 
   // Persistent grid data.
   // These store the raw cell data so the game can be resumed when navigating away and back.
-  answerGrid: DataCell[][];
+  referenceGrid: DataCell[][];
   gameGrid: DataCell[][];
-  setAnswerGrid: (grid: DataCell[][]) => void;
+  setReferenceGrid: (grid: DataCell[][]) => void;
   setGameGrid: (grid: DataCell[][]) => void;
-  resetAnswerGrid: () => void;
+  resetReferenceGrid: () => void;
   resetGameGrid: () => void;
 
   // Target word for the player to guess.
@@ -48,9 +48,9 @@ type GameStore = {
   gameId: number;
   incrementGameId: () => number;
 
-  // Tracks whether the answer grid has been initialized for the current gameId.
-  answerGridId: number | null;
-  setAnswerGridId: (id: number) => void;
+  // Tracks whether the reference grid has been initialized for the current gameId.
+  referenceGridId: number | null;
+  setReferenceGridId: (id: number) => void;
 
   // Keyboard key status map.
   // Stores the strongest status per letter (correct > present > absent)
@@ -99,10 +99,10 @@ export const useGameStore = create<GameStore>((set, get) => ({
 
   // Grids
   gameGrid: initEmptyDataGrid(ATTEMPTS, WordLength.FIVE),
-  answerGrid: initEmptyDataGrid(1, WordLength.FIVE),
+  referenceGrid: initEmptyDataGrid(1, WordLength.FIVE),
 
   setGameGrid: (grid) => set({ gameGrid: grid }),
-  setAnswerGrid: (grid) => set({ answerGrid: grid }),
+  setReferenceGrid: (grid) => set({ referenceGrid: grid }),
 
   resetGameGrid: () =>
     set({
@@ -113,9 +113,9 @@ export const useGameStore = create<GameStore>((set, get) => ({
       ),
     }),
 
-  resetAnswerGrid: () =>
+  resetReferenceGrid: () =>
     set({
-      answerGrid: initEmptyDataGrid(1, WordLength.FIVE, CellStatus.HIDDEN),
+      referenceGrid: initEmptyDataGrid(1, WordLength.FIVE, CellStatus.HIDDEN),
     }),
 
   // Target word
@@ -129,8 +129,8 @@ export const useGameStore = create<GameStore>((set, get) => ({
     return get().gameId;
   },
 
-  answerGridId: null,
-  setAnswerGridId: (id) => set({ answerGridId: id }),
+  referenceGridId: null,
+  setReferenceGridId: (id) => set({ referenceGridId: id }),
 
   // Keyboard
   keyStatuses: {},

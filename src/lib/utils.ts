@@ -154,7 +154,7 @@ export const evaluateGuess = (
  *
  * @param rows - Number of rows in the grid.
  * @param cols - Number of columns in the grid.
- * @param hidden - If true, cells use HIDDEN status (for answer grid), otherwise DEFAULT.
+ * @param hidden - If true, cells use HIDDEN status (for reference grid), otherwise DEFAULT.
  * @returns 2D array of RenderCell objects.
  */
 export const renderEmptyGrid = (

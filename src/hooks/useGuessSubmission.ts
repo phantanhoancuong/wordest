@@ -33,12 +33,12 @@ export const useGuessSubmission = (
   animationSpeedMultiplier: number,
   targetLetterCount: React.RefObject<Record<string, number>>,
   targetWord: string,
-  answerGrid: UseGridStateReturn,
+  referenceGrid: UseGridStateReturn,
   gameGrid: UseGridStateReturn,
   gameState: UseGameStateReturn,
   cursor: UseCursorControllerReturn,
   gameGridAnimationTracker: UseAnimationTrackerReturn,
-  answerGridAnimationTracker: UseAnimationTrackerReturn,
+  referenceGridAnimationTracker: UseAnimationTrackerReturn,
   useExpertModeConstraints: UseExpertModeConstraintsReturn,
   addToast: (message: string) => void,
   handleValidationError: () => void,
@@ -72,7 +72,7 @@ export const useGuessSubmission = (
    * - Updates Expert mode constraints by:
    *   - Locking confirmed correct letters to their positions.
    *   - Tracking the minimum required count of revealed letters.
-   * - Reveals newly confirmed correct letters in the answer grid.
+   * - Reveals newly confirmed correct letters in the reference grid.
    * - Applies flip/bounce animations to the guess row.
    * - Updates keyboard key statuses based on the evaluation.
    * - Queues game state transitions (win/lose) when applicable.
@@ -91,17 +91,17 @@ export const useGuessSubmission = (
       useExpertModeConstraints.updateExpertConstraints(guess, statuses);
     }
 
-    const prevAnswerRow = answerGrid.renderGridRef.current[0];
-    const answerRow = [...prevAnswerRow];
+    const prevReferenceRow = referenceGrid.renderGridRef.current[0];
+    const preferenceRow = [...prevReferenceRow];
     let changedCount = 0;
 
-    for (let i = 0; i < answerRow.length; i++) {
-      const prevCell = prevAnswerRow[i];
+    for (let i = 0; i < preferenceRow.length; i++) {
+      const prevCell = prevReferenceRow[i];
 
       if (prevCell.status === CellStatus.CORRECT) continue;
 
       if (statuses[i] === CellStatus.CORRECT) {
-        answerRow[i] = {
+        preferenceRow[i] = {
           ...prevCell,
           status: CellStatus.CORRECT,
           animation: CellAnimation.BOUNCE,
@@ -113,8 +113,8 @@ export const useGuessSubmission = (
     }
 
     if (changedCount > 0) {
-      answerGridAnimationTracker.add(changedCount);
-      answerGrid.updateRow(0, answerRow);
+      referenceGridAnimationTracker.add(changedCount);
+      referenceGrid.updateRow(0, preferenceRow);
     }
 
     gameGridAnimationTracker.add(gameGrid.colNum);
