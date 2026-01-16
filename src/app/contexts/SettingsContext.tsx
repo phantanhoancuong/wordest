@@ -34,6 +34,10 @@ interface SettingsContextType {
     value: Theme;
     setValue: (v: Theme) => void;
   };
+  showAnswerGrid: {
+    value: boolean;
+    setValue: (v: boolean) => void;
+  };
   resetSettings: () => void;
 }
 

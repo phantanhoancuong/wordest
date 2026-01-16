@@ -44,15 +44,18 @@ export default function SettingsPage() {
     gameMode,
     wordLength,
     theme,
+    showAnswerGrid,
     resetSettings,
   } = useSettingsContext();
 
   const isGeneralOpen = useSettingsUIStore((s) => s.isGeneralOpen);
   const isGameplayOpen = useSettingsUIStore((s) => s.isGameplayOpen);
   const isDangerZoneOpen = useSettingsUIStore((s) => s.isDangerZoneOpen);
+  const isAccessOpen = useSettingsUIStore((s) => s.isAccessOpen);
   const setIsGeneralOpen = useSettingsUIStore((s) => s.setIsGeneralOpen);
   const setIsGameplayOpen = useSettingsUIStore((s) => s.setIsGameplayOpen);
   const setIsDangerZoneOpen = useSettingsUIStore((s) => s.setIsDangerZoneOpen);
+  const setIsAccessOpen = useSettingsUIStore((s) => s.setIsAccessOpen);
 
   // Local UI state for the volume slider (0-100)
   // This is decoupled from persisted volume (0-1) to avoid unnecessary writes during dragging.
@@ -116,6 +119,11 @@ export default function SettingsPage() {
     { label: "Light", value: Theme.LIGHT },
     { label: "Dark", value: Theme.DARK },
     { label: "System", value: Theme.SYSTEM },
+  ];
+
+  const showAnswerGridOptions = [
+    { label: "Enabled", value: true },
+    { label: "Disabled", value: false },
   ];
 
   const VolumeIcon = getVolumeIcon(isMuted.value ? 0 : draftVolume);
@@ -250,6 +258,25 @@ export default function SettingsPage() {
                   options={wordLengthOptions}
                   selected={wordLength.value}
                   onSelect={wordLength.setValue}
+                />
+              }
+            />
+          </div>
+        </SettingsSection>
+        <SettingsSection
+          title="Accessibility"
+          isOpen={isAccessOpen}
+          setIsOpen={setIsAccessOpen}
+        >
+          <div className={styles["setting__container"]}>
+            <SettingsItem
+              name="Show the answer grid"
+              description="Shows the answer grid below the game grid which contains all the correct letter-position pairs that you've guessed."
+              control={
+                <ButtonGroup
+                  options={showAnswerGridOptions}
+                  selected={showAnswerGrid.value}
+                  onSelect={showAnswerGrid.setValue}
                 />
               }
             />

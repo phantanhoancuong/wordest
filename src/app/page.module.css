@@ -47,6 +47,13 @@
   container-type: size;
 }
 
+.game-board__stack {
+  width: fit-content;
+}
+.game-board__controls {
+  width: 100%;
+}
+
 .game-board__controls {
   display: grid;
   margin-top: calc(var(--item-font-scale) * 1rem);

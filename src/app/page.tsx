@@ -4,7 +4,7 @@ import { Grid, Keyboard, ToastBar, Banner } from "@/components";
 import styles from "@/app/page.module.css";
 
 import { useGame } from "@/hooks/useGame";
-import { renderEmptyGrid } from "@/lib/utils";
+import { useSettingsContext } from "./contexts/SettingsContext";
 
 /**
  * Main game page component.
@@ -22,6 +22,8 @@ export default function Home() {
   const { gameGrid, answerGrid, keyboard, game, toasts, input, render } =
     useGame();
 
+  const { showAnswerGrid } = useSettingsContext();
+
   if (!render.hasHydrated) return null;
   return (
     <div className={styles["app"]}>
@@ -34,28 +36,32 @@ export default function Home() {
           <p className={styles["game__error"]}>{game.wordFetchError}</p>
         ) : (
           <section className={`${styles["game-board"]} flex-center`}>
-            <div className={styles["game-board__grid"]}>
-              <Grid
-                grid={gameGrid.renderGrid}
-                onAnimationEnd={gameGrid.handleAnimationEnd}
-                layoutRows={gameGrid.rowNum}
-                layoutCols={gameGrid.colNum}
-              />
-            </div>
+            <div className={styles["game-board__stack"]}>
+              <div className={styles["game-board__grid"]}>
+                <Grid
+                  grid={gameGrid.renderGrid}
+                  onAnimationEnd={gameGrid.handleAnimationEnd}
+                  layoutRows={gameGrid.rowNum}
+                  layoutCols={gameGrid.colNum}
+                />
+              </div>
 
-            <div className={styles["game-board__controls"]}>
-              <Grid
-                grid={answerGrid.renderGrid}
-                onAnimationEnd={answerGrid.handleAnimationEnd}
-                layoutRows={gameGrid.rowNum}
-                layoutCols={gameGrid.colNum}
-              />
-              <button
-                className={styles["game-board__button"]}
-                onClick={game.restartGame}
-              >
-                Restart
-              </button>
+              <div className={styles["game-board__controls"]}>
+                {showAnswerGrid.value ? (
+                  <Grid
+                    grid={answerGrid.renderGrid}
+                    onAnimationEnd={answerGrid.handleAnimationEnd}
+                    layoutRows={gameGrid.rowNum}
+                    layoutCols={gameGrid.colNum}
+                  />
+                ) : null}
+                <button
+                  className={styles["game-board__button"]}
+                  onClick={game.restartGame}
+                >
+                  Restart
+                </button>
+              </div>
             </div>
 
             <ToastBar toasts={toasts.list} removeToast={toasts.removeToast} />

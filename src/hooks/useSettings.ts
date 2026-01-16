@@ -42,6 +42,10 @@ export const useSettings = () => {
     LocalStorageKeys.THEME,
     DefaultSettings.THEME
   );
+  const [showAnswerGrid, setShowAnswerGrid] = useLocalStorage<boolean>(
+    LocalStorageKeys.SHOW_ANSWER_GRID,
+    DefaultSettings.SHOW_ANSWER_GRID
+  );
 
   const resetSettings = () => {
     setAnimationSpeed(DefaultSettings.ANIMATION_SPEED);
@@ -50,6 +54,7 @@ export const useSettings = () => {
     setGameMode(DefaultSettings.GAME_MODE);
     setWordLength(DefaultSettings.WORD_LENGTH);
     setTheme(DefaultSettings.THEME);
+    setShowAnswerGrid(DefaultSettings.SHOW_ANSWER_GRID);
   };
 
   return {
@@ -59,6 +64,7 @@ export const useSettings = () => {
     gameMode: { value: gameMode, setValue: setGameMode },
     wordLength: { value: wordLength, setValue: setWordLength },
     theme: { value: theme, setValue: setTheme },
+    showAnswerGrid: { value: showAnswerGrid, setValue: setShowAnswerGrid },
     resetSettings,
   };
 };

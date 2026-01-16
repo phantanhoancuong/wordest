@@ -114,6 +114,7 @@ export const LocalStorageKeys = {
   GAME_MODE: "wordest:gameMode",
   WORD_LENGTH: "wordest:wordLength",
   THEME: "wordest:theme",
+  SHOW_ANSWER_GRID: "wordest:answerGrid",
 };
 
 export const DefaultSettings = {
@@ -123,6 +124,7 @@ export const DefaultSettings = {
   GAME_MODE: GameMode.NORMAL,
   WORD_LENGTH: WordLength.FIVE,
   THEME: Theme.SYSTEM,
+  SHOW_ANSWER_GRID: true,
 };
 
 // Default volume applied when unmuting from a zero-volume state.
