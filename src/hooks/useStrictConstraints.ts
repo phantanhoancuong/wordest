@@ -1,16 +1,14 @@
-import { useRef } from "react";
-
 import { countLetter } from "@/lib/utils";
 
 import { CellStatus } from "@/lib/constants";
 
 import { CellStatusType } from "@/types/cell";
-import { UseExpertModeConstraintsReturn } from "@/types/useExpertModeConstraints.types";
+import { UseStrictConstraintsReturn } from "@/types/useStrictConstraints.types";
 
 import { useGameStore } from "@/store/useGameStore";
 
 /**
- * Hook to manage Expert Mode constraints and validation logic.
+ * Hook to manage Strict constraints and validation logic.
  *
  * This hook tracks accumulated constraints derived from previous guesses:
  * - Locked positions (green letters that must stay in the same position).
@@ -20,7 +18,7 @@ import { useGameStore } from "@/store/useGameStore";
  *
  *@param addToast - Function used to display validation error messages.
  */
-export const UseExpertModeConstraints = (): UseExpertModeConstraintsReturn => {
+export const UseStrictConstraints = (): UseStrictConstraintsReturn => {
   const lockedPositions = useGameStore((s) => s.lockedPositions);
   const setLockedPositions = useGameStore((s) => s.setLockedPositions);
 
@@ -28,14 +26,14 @@ export const UseExpertModeConstraints = (): UseExpertModeConstraintsReturn => {
   const setMinimumLetterCounts = useGameStore((s) => s.setMinimumLetterCounts);
 
   /**
-   * Validates a guess against expert-mode constraints.
+   * Validates a guess against Strict constraints.
    *
    * @param guess - The guess string to validate.
    * @returns An object with `isValid` and `message`:
-   *  - isValid: true if the guess satisfies all expert-mode constraints.
+   *  - isValid: true if the guess satisfies all Strict constraints.
    *  - message: explanation if invalid, empty string if valid.
    */
-  const checkValidExpertGuess = (
+  const checkValidStrictGuess = (
     guess: string
   ): { isValid: boolean; message: string } => {
     // Enforce locked (green) positions.
@@ -58,7 +56,7 @@ export const UseExpertModeConstraints = (): UseExpertModeConstraintsReturn => {
   };
 
   /**
-   * Updates Expert Mode constraints based on the result of the submitted guess.
+   * Updates Strict constraints based on the result of the submitted guess.
    *a
    * Rules:
    * - CORRECT (green) letters lock the letter to its exact position.
@@ -67,7 +65,7 @@ export const UseExpertModeConstraints = (): UseExpertModeConstraintsReturn => {
    * @param guess - The submitted guess string.
    * @param statuses - Cell evoluation results corresponding to the guess.
    */
-  const updateExpertConstraints = (
+  const updateStrictConstraints = (
     guess: string,
     statuses: CellStatusType[]
   ): void => {
@@ -104,14 +102,14 @@ export const UseExpertModeConstraints = (): UseExpertModeConstraintsReturn => {
     setMinimumLetterCounts(nextGuessMinimumLetterCounts);
   };
 
-  const resetExpertConstraints = (): void => {
+  const resetStrictConstraints = (): void => {
     setLockedPositions(new Map<number, string>());
     setMinimumLetterCounts(new Map<string, number>());
   };
 
   return {
-    checkValidExpertGuess,
-    updateExpertConstraints,
-    resetExpertConstraints,
+    checkValidStrictGuess,
+    updateStrictConstraints,
+    resetStrictConstraints,
   };
 };

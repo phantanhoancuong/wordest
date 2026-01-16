@@ -107,7 +107,7 @@ export default function SettingsPage() {
 
   const gameModeOptions = [
     { label: "Normal", value: GameMode.NORMAL },
-    { label: "Expert", value: GameMode.EXPERT },
+    { label: "Strict", value: GameMode.STRICT },
   ];
 
   const wordLengthOptions = [
@@ -239,7 +239,7 @@ export default function SettingsPage() {
                 <>
                   <strong>Normal</strong> is the classic WORDest experience.
                   <br />
-                  <strong>Expert</strong> enforces strict rules based on
+                  <strong>Strict</strong> enforces stricter rules based on
                   previous guesses: letters confirmed in the correct position
                   must remain there, and any revealed letter must be reused at
                   least as many times as it has been confirmed.

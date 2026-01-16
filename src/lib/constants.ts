@@ -46,7 +46,8 @@ export enum GameState {
  */
 export enum GameMode {
   NORMAL = "normal",
-  EXPERT = "expert",
+  STRICT = "strict",
+  HARDCORE = "hardcore",
 }
 
 /**

@@ -11,7 +11,7 @@ import {
 
 import { useAnimationTracker } from "@/hooks/useAnimationTracker";
 import { useCursorController } from "@/hooks/useCursorController";
-import { UseExpertModeConstraints } from "@/hooks/useExpertModeConstraints";
+import { UseStrictConstraints } from "@/hooks/useStrictConstraints";
 import { useGameState } from "@/hooks/useGameState";
 import { useGridState } from "@/hooks/useGridState";
 import { useGuessSubmission } from "@/hooks/useGuessSubmission";
@@ -88,7 +88,7 @@ export const useGame = (): UseGameReturn => {
     resetDataReferenceGrid
   );
 
-  const useExpertModeConstraints = UseExpertModeConstraints();
+  const useStrictConstraints = UseStrictConstraints();
 
   const playKeySound = useSoundPlayer(
     ["/sounds/key_01.mp3", "/sounds/key_02.mp3"],
@@ -164,7 +164,7 @@ export const useGame = (): UseGameReturn => {
       gameGridAnimationTracker.reset();
       referenceGridAnimationTracker.reset();
       toastList.forEach((t) => removeToast(t.id));
-      useExpertModeConstraints.resetExpertConstraints();
+      useStrictConstraints.resetStrictConstraints();
 
       populateReferenceGrid();
       setReferenceGridId(useGameStore.getState().gameId);
@@ -344,7 +344,7 @@ export const useGame = (): UseGameReturn => {
 
     resetTargetWord();
 
-    useExpertModeConstraints.resetExpertConstraints();
+    useStrictConstraints.resetStrictConstraints();
 
     const length = wordLength.value;
     const word = await loadTargetWord(length);
@@ -367,7 +367,7 @@ export const useGame = (): UseGameReturn => {
   };
 
   const submitGuess = useGuessSubmission(
-    gameMode.value === GameMode.EXPERT,
+    gameMode.value === GameMode.STRICT,
     animationSpeedMultiplier,
     targetLetterCount,
     targetWord,
@@ -377,7 +377,7 @@ export const useGame = (): UseGameReturn => {
     cursor,
     gameGridAnimationTracker,
     referenceGridAnimationTracker,
-    useExpertModeConstraints,
+    useStrictConstraints,
     addToast,
     handleValidationError,
     setValidationError,
