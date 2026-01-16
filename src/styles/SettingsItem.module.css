@@ -33,6 +33,7 @@
 .settings-item__actions input {
   flex: 1;
   accent-color: var(--cell-background-color-correct);
+  cursor: pointer;
 }
 
 .settings-item__actions img {
