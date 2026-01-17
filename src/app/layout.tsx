@@ -1,7 +1,8 @@
 import { SettingsProvider } from "@/app/contexts/SettingsContext";
 
-import "@/styles/globals.css";
 import ThemeProvider from "@/components/ThemeProvider";
+
+import "@/styles/globals.css";
 
 export const metadata = {
   title: "WORDest",
