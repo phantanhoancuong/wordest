@@ -26,6 +26,13 @@ import { playVolumePreview } from "@/lib/audio";
 import { getVolumeIcon } from "@/lib/volumeIcons";
 
 import ArrowBackIcon from "@/assets/icons/arrow_back_24dp_000000_FILL0_wght400_GRAD0_opsz24.svg";
+import EyeIcon from "@/assets/icons/visibility_24dp_000000_FILL0_wght400_GRAD0_opsz24.svg";
+import PaletteIcon from "@/assets/icons/palette_24dp_000000_FILL0_wght400_GRAD0_opsz24.svg";
+import ResetSettingsIcon from "@/assets/icons/reset_settings_24dp_000000_FILL0_wght400_GRAD0_opsz24.svg";
+import RulerIcon from "@/assets/icons/straighten_24dp_000000_FILL0_wght400_GRAD0_opsz24.svg";
+import SpeedometerIcon from "@/assets/icons/speed_24dp_000000_FILL0_wght400_GRAD0_opsz24.svg";
+import StarIcon from "@/assets/icons/star_24dp_000000_FILL0_wght400_GRAD0_opsz24.svg";
+import VolumeUpIcon from "@/assets/icons/volume_up_24dp_000000_FILL0_wght400_GRAD0_opsz24.svg";
 import styles from "@/app/settings/page.module.css";
 
 /**
@@ -100,16 +107,16 @@ export default function SettingsPage() {
   };
 
   const animationSpeedOptions = [
-    { label: "Slow", value: AnimationSpeed.SLOW },
-    { label: "Normal", value: AnimationSpeed.NORMAL },
-    { label: "Fast", value: AnimationSpeed.FAST },
-    { label: "Instant", value: AnimationSpeed.INSTANT },
+    { label: "slow", value: AnimationSpeed.SLOW },
+    { label: "normal", value: AnimationSpeed.NORMAL },
+    { label: "fast", value: AnimationSpeed.FAST },
+    { label: "instant", value: AnimationSpeed.INSTANT },
   ];
 
   const gameModeOptions = [
-    { label: "Normal", value: GameMode.NORMAL },
-    { label: "Strict", value: GameMode.STRICT },
-    { label: "Hardcore", value: GameMode.HARDCORE },
+    { label: "normal", value: GameMode.NORMAL },
+    { label: "strict", value: GameMode.STRICT },
+    { label: "hardcore", value: GameMode.HARDCORE },
   ];
 
   const wordLengthOptions = [
@@ -119,19 +126,19 @@ export default function SettingsPage() {
   ];
 
   const themeOptions = [
-    { label: "Light", value: Theme.LIGHT },
-    { label: "Dark", value: Theme.DARK },
-    { label: "System", value: Theme.SYSTEM },
+    { label: "light", value: Theme.LIGHT },
+    { label: "dark", value: Theme.DARK },
+    { label: "system", value: Theme.SYSTEM },
   ];
 
   const showReferenceGridOptions = [
-    { label: "Enabled", value: true },
-    { label: "Disabled", value: false },
+    { label: "on", value: true },
+    { label: "off", value: false },
   ];
 
   const showKeyStatusesOptions = [
-    { label: "Enabled", value: true },
-    { label: "Disabled", value: false },
+    { label: "on", value: true },
+    { label: "off", value: false },
   ];
 
   const VolumeIcon = getVolumeIcon(isMuted.value ? 0 : draftVolume);
@@ -149,13 +156,18 @@ export default function SettingsPage() {
       </header>
       <div className={styles["app__content"]}>
         <SettingsSection
-          title="General"
+          title="general"
           isOpen={isGeneralOpen}
           setIsOpen={setIsGeneralOpen}
         >
           <div className={styles["setting__container"]}>
             <SettingsItem
-              name="Sound"
+              header={
+                <>
+                  <VolumeUpIcon />
+                  <span>volume</span>
+                </>
+              }
               description="Adjust the volume of game sound effects."
               control={
                 <div className={styles["volume-control"]}>
@@ -204,7 +216,11 @@ export default function SettingsPage() {
           </div>
           <div className={styles["setting__container"]}>
             <SettingsItem
-              name="Animation speed"
+              header={
+                <>
+                  <SpeedometerIcon /> <span>animation speed</span>
+                </>
+              }
               description="Control how fast game animations play."
               control={
                 <ButtonGroup
@@ -217,7 +233,12 @@ export default function SettingsPage() {
           </div>
           <div className={styles["setting__container"]}>
             <SettingsItem
-              name="Theme"
+              header={
+                <>
+                  <PaletteIcon />
+                  <span>theme</span>
+                </>
+              }
               description="Choose the visual theme for the game."
               control={
                 <ButtonGroup
@@ -230,13 +251,18 @@ export default function SettingsPage() {
           </div>
         </SettingsSection>
         <SettingsSection
-          title="Gameplay"
+          title="gameplay"
           isOpen={isGameplayOpen}
           setIsOpen={setIsGameplayOpen}
         >
           <div className={styles["setting__container"]}>
             <SettingsItem
-              name="Game mode"
+              header={
+                <>
+                  <StarIcon />
+                  <span>game mode</span>
+                </>
+              }
               description={
                 <>
                   <strong>Normal</strong> is the classic WORDest experience.
@@ -264,7 +290,12 @@ export default function SettingsPage() {
           </div>
           <div className={styles["setting__container"]}>
             <SettingsItem
-              name="Word length"
+              header={
+                <>
+                  <RulerIcon />
+                  <span>word length</span>
+                </>
+              }
               description="Set how many letters each word contains."
               control={
                 <ButtonGroup
@@ -277,13 +308,18 @@ export default function SettingsPage() {
           </div>
         </SettingsSection>
         <SettingsSection
-          title="Accessibility"
+          title="accessibility"
           isOpen={isAccessOpen}
           setIsOpen={setIsAccessOpen}
         >
           <div className={styles["setting__container"]}>
             <SettingsItem
-              name="Show reference grid"
+              header={
+                <>
+                  <EyeIcon />
+                  <span>show reference grid</span>
+                </>
+              }
               description="Display a reference grid showing all confirmed correct letter positions."
               control={
                 <ButtonGroup
@@ -296,7 +332,12 @@ export default function SettingsPage() {
           </div>
           <div className={styles["setting__container"]}>
             <SettingsItem
-              name="Show keyboard letter statuses"
+              header={
+                <>
+                  <EyeIcon />
+                  <span>show keyboard letter statuses</span>
+                </>
+              }
               description="Display letter status feedback on the keyboard."
               control={
                 <ButtonGroup
@@ -309,13 +350,18 @@ export default function SettingsPage() {
           </div>
         </SettingsSection>
         <SettingsSection
-          title="Danger Zone"
+          title="danger zone"
           isOpen={isDangerZoneOpen}
           setIsOpen={setIsDangerZoneOpen}
         >
           <div className={styles["setting__container"]}>
             <SettingsItem
-              name="Reset settings"
+              header={
+                <>
+                  <ResetSettingsIcon />
+                  <span>reset settings</span>
+                </>
+              }
               description={
                 <>
                   Restore all settings to their default values.

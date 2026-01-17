@@ -1,17 +1,14 @@
 :root[data-theme="dark"] {
-  --app-background-color: #121212;
-  --app-text-color: #e5e5e5;
-
   --cell-background-color-default: transparent;
   --cell-background-color-absent: #6b6b6b;
-  --cell-background-color-present: rgb(255 222 89);
-  --cell-background-color-correct: rgb(89 162 31);
+  --cell-background-color-present: #ffde59;
+  --cell-background-color-correct: #59a21f;
   --cell-background-color-wrong: #c0392b;
 
-  --cell-border-color-default: #444;
+  --cell-border-color-default: #444444;
   --cell-border-color-absent: #6b6b6b;
-  --cell-border-color-present: rgb(255 222 89);
-  --cell-border-color-correct: rgb(89 162 31);
+  --cell-border-color-present: #ffde59;
+  --cell-border-color-correct: #59a21f;
   --cell-border-color-wrong: #c0392b;
 
   --cell-text-color-default: white;
@@ -20,4 +17,11 @@
   --cell-text-color-correct: white;
   --cell-text-color-wrong: white;
   --cell-text-color-hidden: transparent;
+
+  --app-background-color: #212121;
+  --app-text-color: #e5e5e5;
+  --app-text-header-color: #6b6b6b;
+
+  --button-background-color-inactive: #1a1a1a;
+  --button-background-color-active: #59a21f;
 }

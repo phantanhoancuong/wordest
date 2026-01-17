@@ -64,7 +64,7 @@ export default function Home() {
                   className={styles["game-board__button"]}
                   onClick={game.restartGame}
                 >
-                  Restart
+                  restart
                 </button>
               </div>
             </div>

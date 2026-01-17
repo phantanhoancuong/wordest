@@ -13,7 +13,7 @@
   user-select: none;
   cursor: pointer;
 
-  color: var(--app-text-color);
+  color: var(--app-text-header-color);
 }
 
 .icon-wrapper {
