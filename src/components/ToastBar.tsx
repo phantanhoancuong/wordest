@@ -1,6 +1,8 @@
-import styles from "../styles/ToastBar.module.css";
-import Toast from "./Toast";
 import { UseGameReturn } from "@/types/useGame.types";
+
+import Toast from "@/components/Toast";
+
+import styles from "@/styles/components/ToastBar.module.css";
 
 interface ToastBarProps {
   toasts: UseGameReturn["toasts"]["list"];

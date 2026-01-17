@@ -1,11 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 
 import { animationTiming, CellStatus, CellAnimation } from "@/lib/constants";
-
-import { renderGridToDataGrid } from "@/lib/utils";
-
-import { useLatest } from "@/hooks/useLatest";
-
 import {
   DataCell,
   RenderCell,
@@ -13,8 +8,14 @@ import {
   CellStatusType,
 } from "@/types/cell";
 import { UseGridStateReturn } from "@/types/useGridState.types";
-import { initEmptyRenderGrid, dataGridToRenderGrid } from "@/lib/utils";
-import { CellAnimationType } from "@/types/cell";
+
+import { useLatest } from "@/hooks/useLatest";
+
+import {
+  dataGridToRenderGrid,
+  initEmptyRenderGrid,
+  renderGridToDataGrid,
+} from "@/lib/utils";
 
 /**
  * Manages a 2D grid of cells representing player's guesses.

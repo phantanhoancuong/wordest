@@ -7,7 +7,7 @@ import {
   WordLength,
 } from "@/lib/constants";
 
-import { useLocalStorage } from "./useLocalStorage";
+import { useLocalStorage } from "@/hooks/useLocalStorage";
 
 /**
  * Hook to manage user-configurable game settings.

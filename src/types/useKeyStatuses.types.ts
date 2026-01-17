@@ -1,4 +1,4 @@
-import { CellStatusType } from "./cell";
+import { CellStatusType } from "@/types/cell";
 
 export interface UseKeyStatusesReturn {
   keyStatuses: Partial<Record<string, CellStatusType>>;

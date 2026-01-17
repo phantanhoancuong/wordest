@@ -1,11 +1,12 @@
 "use client";
 
-import { Grid, Keyboard, ToastBar, Banner } from "@/components";
-import { useGame } from "@/hooks/useGame";
+import { useSettingsContext } from "@/app/contexts/SettingsContext";
 
 import { GameMode } from "@/lib/constants";
 
-import { useSettingsContext } from "./contexts/SettingsContext";
+import { useGame } from "@/hooks/useGame";
+
+import { Grid, Keyboard, ToastBar, Banner } from "@/components";
 
 import styles from "@/app/page.module.css";
 

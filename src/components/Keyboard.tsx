@@ -1,9 +1,9 @@
-import { GameMode } from "@/lib/constants";
 import { useSettingsContext } from "@/app/contexts/SettingsContext";
 
+import { GameMode } from "@/lib/constants";
 import { UseGameReturn } from "@/types/useGame.types";
 
-import styles from "@/styles/Keyboard.module.css";
+import styles from "@/styles/components/Keyboard.module.css";
 
 interface KeyboardProps {
   keyStatuses: UseGameReturn["keyboard"]["statuses"];

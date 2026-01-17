@@ -7,22 +7,23 @@ import { useSettingsContext } from "@/app/contexts/SettingsContext";
 import { useSettingsUIStore } from "@/store/useSettingsUIStore";
 
 import {
-  ActionButton,
-  Banner,
-  ButtonGroup,
-  SettingsItem,
-  SettingsSection,
-} from "@/components";
-import { playVolumePreview } from "@/lib/audio";
-import { getVolumeIcon } from "@/lib/volumeIcons";
-
-import {
   DEFAULT_UNMUTE_VOLUME,
   AnimationSpeed,
   GameMode,
   Theme,
   WordLength,
 } from "@/lib/constants";
+
+import {
+  ActionButton,
+  Banner,
+  ButtonGroup,
+  SettingsItem,
+  SettingsSection,
+} from "@/components";
+
+import { playVolumePreview } from "@/lib/audio";
+import { getVolumeIcon } from "@/lib/volumeIcons";
 
 import ArrowBackIcon from "@/assets/icons/arrow_back_24dp_000000_FILL0_wght400_GRAD0_opsz24.svg";
 import styles from "@/app/settings/page.module.css";

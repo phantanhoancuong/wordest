@@ -1,11 +1,10 @@
 import { memo } from "react";
 
 import { animationTiming, CellAnimation } from "@/lib/constants";
-
 import { RenderCell } from "@/types/cell";
 import { UseGameReturn } from "@/types/useGame.types";
 
-import styles from "@/styles/Cell.module.css";
+import styles from "@/styles/components/Cell.module.css";
 
 /**
  * Props for the {@link Cell} component.

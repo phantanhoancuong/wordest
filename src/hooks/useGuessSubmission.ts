@@ -4,16 +4,15 @@ import {
   CellStatus,
   GameState,
 } from "@/lib/constants";
-
-import { validateWord } from "@/lib/api";
-import { evaluateGuess } from "@/lib/utils";
-
 import { CellStatusType } from "@/types/cell";
 import { UseAnimationTrackerReturn } from "@/types/useAnimationTracker.types";
 import { UseCursorControllerReturn } from "@/types/useCursorController.types";
 import { UseStrictConstraintsReturn } from "@/types/useStrictConstraints.types";
 import { UseGameStateReturn } from "@/types/useGameState.types";
 import { UseGridStateReturn } from "@/types/useGridState.types";
+
+import { validateWord } from "@/lib/api";
+import { evaluateGuess } from "@/lib/utils";
 
 /**
  * Hook responsible for handling guess submission logic.

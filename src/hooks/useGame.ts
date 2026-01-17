@@ -1,5 +1,8 @@
 import { useEffect, useRef, useState } from "react";
 
+import { useSettingsContext } from "@/app/contexts/SettingsContext";
+import { useGameStore } from "@/store/useGameStore";
+
 import {
   ATTEMPTS,
   AnimationSpeedMultiplier,
@@ -8,6 +11,7 @@ import {
   GameState,
   GameMode,
 } from "@/lib/constants";
+import { UseGameReturn } from "@/types/useGame.types";
 
 import { useAnimationTracker } from "@/hooks/useAnimationTracker";
 import { useCursorController } from "@/hooks/useCursorController";
@@ -20,11 +24,6 @@ import { useKeyStatuses } from "@/hooks/useKeyStatuses";
 import { useSoundPlayer } from "@/hooks/useSoundPlayer";
 import { useTargetWord } from "@/hooks/useTargetWord";
 import { useToasts } from "@/hooks/useToasts";
-
-import { UseGameReturn } from "@/types/useGame.types";
-
-import { useSettingsContext } from "@/app/contexts/SettingsContext";
-import { useGameStore } from "@/store/useGameStore";
 
 /** Matches a single uppercase character, used to validate keyboard letter input. */
 const LETTER_REGEX = /^[A-Z]$/;

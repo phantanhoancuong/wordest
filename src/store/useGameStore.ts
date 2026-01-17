@@ -1,7 +1,5 @@
 import { create } from "zustand";
 
-import { initEmptyDataGrid } from "@/lib/utils";
-
 import {
   ATTEMPTS,
   CellStatus,
@@ -9,8 +7,9 @@ import {
   GameMode,
   WordLength,
 } from "@/lib/constants";
-
 import { CellStatusType, DataCell } from "@/types/cell";
+
+import { initEmptyDataGrid } from "@/lib/utils";
 
 /**
  * Global game store.

@@ -2,11 +2,11 @@ import { useEffect, useRef, useState } from "react";
 
 import { useGameStore } from "@/store/useGameStore";
 
+import { WordLength } from "@/lib/constants";
+import { UseTargetWordReturn } from "@/types/useTargetWord.types";
+
 import { fetchWordFromApi } from "@/lib/api";
 import { countLetter } from "@/lib/utils";
-
-import { UseTargetWordReturn } from "@/types/useTargetWord.types";
-import { WordLength } from "@/lib/constants";
 
 /**
  * Hook to manage the game's target word.

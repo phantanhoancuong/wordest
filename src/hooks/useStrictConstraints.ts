@@ -1,11 +1,10 @@
-import { countLetter } from "@/lib/utils";
-
 import { CellStatus } from "@/lib/constants";
-
 import { CellStatusType } from "@/types/cell";
 import { UseStrictConstraintsReturn } from "@/types/useStrictConstraints.types";
 
 import { useGameStore } from "@/store/useGameStore";
+
+import { countLetter } from "@/lib/utils";
 
 /**
  * Hook to manage Strict constraints and validation logic.

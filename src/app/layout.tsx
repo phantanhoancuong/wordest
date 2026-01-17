@@ -1,6 +1,6 @@
 import { SettingsProvider } from "@/app/contexts/SettingsContext";
 
-import "@/app/globals.css";
+import "@/styles/globals.css";
 import ThemeProvider from "@/components/ThemeProvider";
 
 export const metadata = {
