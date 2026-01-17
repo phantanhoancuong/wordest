@@ -89,6 +89,23 @@
   }
 }
 
+@media (max-height: 560px), (max-width: 340px) {
+  .app__banner,
+  .app__content,
+  .app__keyboard {
+    display: none;
+  }
+
+  .landscape-warning {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100dvh;
+    font-size: 1rem;
+    font-weight: bold;
+  }
+}
+
 @media (min-width: 600px) {
   .app {
     --item-font-scale: 1.25;

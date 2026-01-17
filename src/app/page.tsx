@@ -79,9 +79,9 @@ export default function Home() {
       </footer>
 
       <div className={styles["landscape-warning"]}>
-        The game doesn't fit on your screen in this orientation.
+        The game does not fit on your screen.
         <br />
-        Please rotate your device.
+        Please rotate your device or use a larger display.
       </div>
     </div>
   );
