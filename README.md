@@ -43,6 +43,15 @@ When Expert Mode is enabled, guesses must follow additional constraints:
 - Letters confirmed in the correct position must be reused in that same position.
 - Letters known to be present must continue to appear at least the same number of times.
 
+### Hardcore Mode
+
+Hardcore Mode is intended for experienced players who want to rely purely on memory and deducation, with minimal assistance from the UI.
+
+Hardcore Mode buils on Strict Mode and enforces all of its rules, with additional restrictions:
+
+- The reference grid is disabled.
+- Keyboard letter status feedback is disabled.
+
 Switching modes automatically restarts the game to avoid rule conflicts.
 
 ---
