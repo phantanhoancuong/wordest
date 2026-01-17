@@ -6,9 +6,20 @@
   --settings-control-min-height: calc(var(--item-font-scale) * 2.9rem);
 }
 
+.settings-item__header {
+  display: flex;
+  align-items: center;
+  gap: calc(var(--item-font-scale) * 0.5rem);
+}
+
+.settings-item__header svg {
+  font-size: calc(var(--item-font-scale) * 1.3rem);
+}
+
 .settings-item h3 {
   margin: 0;
-  font-size: calc(var(--item-font-scale) * 1rem);
+  font-size: calc(var(--item-font-scale) * 0.7rem);
+  color: var(--app-text-header-color);
   margin-bottom: calc(var(--item-font-scale) * 0.25rem);
 }
 
@@ -20,7 +31,7 @@
 }
 
 .settings-item__description {
-  font-size: calc(var(--item-font-scale) * 1rem);
+  font-size: calc(var(--item-font-scale) * 0.9rem);
   margin: 0;
 }
 
@@ -33,6 +44,7 @@
 .settings-item__actions input {
   flex: 1;
   accent-color: var(--cell-background-color-correct);
+  cursor: pointer;
 }
 
 .settings-item__actions img {

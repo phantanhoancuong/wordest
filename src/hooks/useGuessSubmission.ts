@@ -4,16 +4,15 @@ import {
   CellStatus,
   GameState,
 } from "@/lib/constants";
-
-import { validateWord } from "@/lib/api";
-import { evaluateGuess } from "@/lib/utils";
-
 import { CellStatusType } from "@/types/cell";
 import { UseAnimationTrackerReturn } from "@/types/useAnimationTracker.types";
 import { UseCursorControllerReturn } from "@/types/useCursorController.types";
-import { UseExpertModeConstraintsReturn } from "@/types/useExpertModeConstraints.types";
+import { UseStrictConstraintsReturn } from "@/types/useStrictConstraints.types";
 import { UseGameStateReturn } from "@/types/useGameState.types";
 import { UseGridStateReturn } from "@/types/useGridState.types";
+
+import { validateWord } from "@/lib/api";
+import { evaluateGuess } from "@/lib/utils";
 
 /**
  * Hook responsible for handling guess submission logic.
@@ -29,7 +28,7 @@ import { UseGridStateReturn } from "@/types/useGridState.types";
  * when the user presses Enter.
  */
 export const useGuessSubmission = (
-  isExpertMode: boolean,
+  isStrict: boolean,
   animationSpeedMultiplier: number,
   targetLetterCount: React.RefObject<Record<string, number>>,
   targetWord: string,
@@ -39,7 +38,7 @@ export const useGuessSubmission = (
   cursor: UseCursorControllerReturn,
   gameGridAnimationTracker: UseAnimationTrackerReturn,
   referenceGridAnimationTracker: UseAnimationTrackerReturn,
-  useExpertModeConstraints: UseExpertModeConstraintsReturn,
+  useStrictConstraints: UseStrictConstraintsReturn,
   addToast: (message: string) => void,
   handleValidationError: () => void,
   setValidationError: React.Dispatch<React.SetStateAction<string>>,
@@ -69,7 +68,7 @@ export const useGuessSubmission = (
    * Handles a valid guess.
    *
    * - Evaluates the guess against the target word to produce cell statuses.
-   * - Updates Expert mode constraints by:
+   * - Updates Strict constraints by:
    *   - Locking confirmed correct letters to their positions.
    *   - Tracking the minimum required count of revealed letters.
    * - Reveals newly confirmed correct letters in the reference grid.
@@ -87,8 +86,8 @@ export const useGuessSubmission = (
       targetLetterCount.current
     );
 
-    if (isExpertMode) {
-      useExpertModeConstraints.updateExpertConstraints(guess, statuses);
+    if (isStrict) {
+      useStrictConstraints.updateStrictConstraints(guess, statuses);
     }
 
     const prevReferenceRow = referenceGrid.renderGridRef.current[0];
@@ -139,7 +138,7 @@ export const useGuessSubmission = (
   /**
    * Submits the current guess and evaluate step-by-step:
    * 1. Is the guess complete (fill all columns).
-   * 2. Does the guess fulfill all expert mode constraints (if expert mode is enabled).
+   * 2. Does the guess fulfill all Strict constraints (if Strict or Hardcore mode is enabled).
    * 3. Does the guessed word exist in the dictionary of allowed words.
    *
    * If invalid at any step, calls 'handleInvalidGuess()' with an appropriate message.
@@ -154,9 +153,9 @@ export const useGuessSubmission = (
       .map((cell) => cell.char)
       .join("");
 
-    if (isExpertMode) {
+    if (isStrict) {
       const { isValid, message } =
-        useExpertModeConstraints.checkValidExpertGuess(guess);
+        useStrictConstraints.checkValidStrictGuess(guess);
       if (!isValid) {
         handleInvalidGuess(cursor.row.current, message);
         return;

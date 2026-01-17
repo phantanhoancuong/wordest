@@ -1,9 +1,9 @@
-import { CellStatus } from "@/lib/constants";
 import { useSettingsContext } from "@/app/contexts/SettingsContext";
 
+import { GameMode } from "@/lib/constants";
 import { UseGameReturn } from "@/types/useGame.types";
 
-import styles from "@/styles/Keyboard.module.css";
+import styles from "@/styles/components/Keyboard.module.css";
 
 interface KeyboardProps {
   keyStatuses: UseGameReturn["keyboard"]["statuses"];
@@ -11,7 +11,7 @@ interface KeyboardProps {
 }
 
 const Keyboard = ({ keyStatuses, onKeyClick }: KeyboardProps) => {
-  const { showKeyStatuses } = useSettingsContext();
+  const { gameMode, showKeyStatuses } = useSettingsContext();
   const keyboardLayout = [
     {
       keys: [
@@ -84,9 +84,10 @@ const Keyboard = ({ keyStatuses, onKeyClick }: KeyboardProps) => {
           style={{ "--columns": row.columns } as React.CSSProperties}
         >
           {row.keys.map((key) => {
-            const status = showKeyStatuses.value
-              ? keyStatuses[key.label] || "default"
-              : "default";
+            const status =
+              showKeyStatuses.value && gameMode.value !== GameMode.HARDCORE
+                ? keyStatuses[key.label] || "default"
+                : "default";
             return (
               <button
                 key={key.label}

@@ -1,10 +1,14 @@
 "use client";
 
-import { Grid, Keyboard, ToastBar, Banner } from "@/components";
-import styles from "@/app/page.module.css";
+import { useSettingsContext } from "@/app/contexts/SettingsContext";
+
+import { GameMode } from "@/lib/constants";
 
 import { useGame } from "@/hooks/useGame";
-import { useSettingsContext } from "./contexts/SettingsContext";
+
+import { Grid, Keyboard, ToastBar, Banner } from "@/components";
+
+import styles from "@/app/page.module.css";
 
 /**
  * Main game page component.
@@ -22,7 +26,7 @@ export default function Home() {
   const { gameGrid, referenceGrid, keyboard, game, toasts, input, render } =
     useGame();
 
-  const { showReferenceGrid } = useSettingsContext();
+  const { gameMode, showReferenceGrid } = useSettingsContext();
 
   if (!render.hasHydrated) return null;
   return (
@@ -47,7 +51,8 @@ export default function Home() {
               </div>
 
               <div className={styles["game-board__controls"]}>
-                {showReferenceGrid.value ? (
+                {showReferenceGrid.value &&
+                gameMode.value !== GameMode.HARDCORE ? (
                   <Grid
                     grid={referenceGrid.renderGrid}
                     onAnimationEnd={referenceGrid.handleAnimationEnd}
@@ -59,7 +64,7 @@ export default function Home() {
                   className={styles["game-board__button"]}
                   onClick={game.restartGame}
                 >
-                  Restart
+                  restart
                 </button>
               </div>
             </div>

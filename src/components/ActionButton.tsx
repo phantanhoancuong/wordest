@@ -1,9 +1,10 @@
 "use client";
 
 import { useSettingsContext } from "@/app/contexts/SettingsContext";
+
 import { useSoundPlayer } from "@/hooks/useSoundPlayer";
 
-import styles from "@/styles/ButtonGroup.module.css";
+import styles from "@/styles/components/ButtonGroup.module.css";
 
 interface ActionButtonProps {
   label: string;

@@ -1,0 +1,59 @@
+@import "./themes/dark.css";
+@import "./themes/light.css";
+
+:root {
+  --key-font-size: 2rem;
+}
+
+:root {
+  --app-background-color: initial;
+  --app-text-color: initial;
+
+  --cell-background-color-default: initial;
+  --cell-background-color-absent: initial;
+  --cell-background-color-present: initial;
+  --cell-background-color-correct: initial;
+  --cell-background-color-wrong: initial;
+
+  --cell-border-color-default: initial;
+  --cell-border-color-absent: initial;
+  --cell-border-color-present: initial;
+  --cell-border-color-correct: initial;
+  --cell-border-color-wrong: initial;
+
+  --cell-text-color-default: initial;
+  --cell-text-color-absent: initial;
+  --cell-text-color-present: initial;
+  --cell-text-color-correct: initial;
+  --cell-text-color-wrong: initial;
+  --cell-text-color-hidden: initial;
+}
+
+body {
+  font-family: monospace;
+  touch-action: manipulation;
+  overscroll-behavior: none;
+}
+
+html,
+body {
+  height: 100%;
+  width: 100%;
+  margin: 0;
+  overflow: hidden;
+}
+
+body {
+  background-color: var(--app-background-color);
+  color: var(--app-text-color);
+}
+
+button {
+  font: inherit;
+}
+
+.flex-center {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}

@@ -1,5 +1,6 @@
-import { UseAnimationTrackerReturn } from "@/types/useAnimationTracker.types";
 import { useRef } from "react";
+
+import { UseAnimationTrackerReturn } from "@/types/useAnimationTracker.types";
 
 /**
  * Tracks active cell animations across multiple rows.

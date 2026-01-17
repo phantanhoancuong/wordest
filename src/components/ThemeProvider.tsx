@@ -2,9 +2,9 @@
 
 import { useEffect } from "react";
 
-import { Theme } from "@/lib/constants";
-
 import { useSettingsContext } from "@/app/contexts/SettingsContext";
+
+import { Theme } from "@/lib/constants";
 
 /**
  * Client-only component responsible for resolving and applying the application's active color theme.
