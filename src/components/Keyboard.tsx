@@ -57,8 +57,8 @@ const Keyboard = ({ keyStatuses, onKeyClick }: KeyboardProps) => {
 
   const maxRowUnit = Math.max(
     ...keyboardLayout.map((row) =>
-      row.keys.reduce((sum, key) => sum + (key.unit ?? 1), 0)
-    )
+      row.keys.reduce((sum, key) => sum + (key.unit ?? 1), 0),
+    ),
   );
 
   const rows = keyboardLayout.map((row) => {
