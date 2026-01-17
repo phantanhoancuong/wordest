@@ -4,23 +4,29 @@
   width: 100%;
   user-select: none;
   --settings-control-min-height: calc(var(--item-font-scale) * 2.9rem);
+  gap: calc(var(--item-font-scale) * 0.35rem);
 }
 
 .settings-item__header {
   display: flex;
-  align-items: center;
-  gap: calc(var(--item-font-scale) * 0.5rem);
+  align-items: end;
+  gap: 0.5em;
+  font-size: calc(var(--item-font-scale) * 0.8rem);
+  line-height: 1;
+  gap: calc(var(--item-font-scale) * 0.35rem);
 }
 
-.settings-item__header svg {
-  font-size: calc(var(--item-font-scale) * 1.3rem);
-}
-
-.settings-item h3 {
-  margin: 0;
-  font-size: calc(var(--item-font-scale) * 0.7rem);
+.settings-item__icon {
+  width: 1em;
+  height: 1em;
+  flex-shrink: 0;
+  font-size: 1.3em;
   color: var(--app-text-header-color);
-  margin-bottom: calc(var(--item-font-scale) * 0.25rem);
+}
+
+.settings-item__name {
+  margin: 0;
+  color: var(--app-text-header-color);
 }
 
 .settings-item__info {

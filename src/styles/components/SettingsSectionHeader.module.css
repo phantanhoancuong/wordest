@@ -20,6 +20,7 @@
   display: flex;
   align-items: center;
   transition: transform 0.3s ease;
+  font-size: calc(var(--item-font-scale) * 2rem);
 }
 
 .icon {

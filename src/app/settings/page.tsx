@@ -162,12 +162,8 @@ export default function SettingsPage() {
         >
           <div className={styles["setting__container"]}>
             <SettingsItem
-              header={
-                <>
-                  <VolumeUpIcon />
-                  <span>volume</span>
-                </>
-              }
+              Icon={VolumeUpIcon}
+              name="volume"
               description="Adjust the volume of game sound effects."
               control={
                 <div className={styles["volume-control"]}>
@@ -216,11 +212,8 @@ export default function SettingsPage() {
           </div>
           <div className={styles["setting__container"]}>
             <SettingsItem
-              header={
-                <>
-                  <SpeedometerIcon /> <span>animation speed</span>
-                </>
-              }
+              Icon={SpeedometerIcon}
+              name="animation speed"
               description="Control how fast game animations play."
               control={
                 <ButtonGroup
@@ -233,12 +226,8 @@ export default function SettingsPage() {
           </div>
           <div className={styles["setting__container"]}>
             <SettingsItem
-              header={
-                <>
-                  <PaletteIcon />
-                  <span>theme</span>
-                </>
-              }
+              Icon={PaletteIcon}
+              name="theme"
               description="Choose the visual theme for the game."
               control={
                 <ButtonGroup
@@ -257,12 +246,8 @@ export default function SettingsPage() {
         >
           <div className={styles["setting__container"]}>
             <SettingsItem
-              header={
-                <>
-                  <StarIcon />
-                  <span>game mode</span>
-                </>
-              }
+              Icon={StarIcon}
+              name="game mode"
               description={
                 <>
                   <strong>Normal</strong> is the classic WORDest experience.
@@ -290,12 +275,8 @@ export default function SettingsPage() {
           </div>
           <div className={styles["setting__container"]}>
             <SettingsItem
-              header={
-                <>
-                  <RulerIcon />
-                  <span>word length</span>
-                </>
-              }
+              Icon={RulerIcon}
+              name="word length"
               description="Set how many letters each word contains."
               control={
                 <ButtonGroup
@@ -314,12 +295,8 @@ export default function SettingsPage() {
         >
           <div className={styles["setting__container"]}>
             <SettingsItem
-              header={
-                <>
-                  <EyeIcon />
-                  <span>show reference grid</span>
-                </>
-              }
+              Icon={EyeIcon}
+              name="show reference grid"
               description="Display a reference grid showing all confirmed correct letter positions."
               control={
                 <ButtonGroup
@@ -332,12 +309,8 @@ export default function SettingsPage() {
           </div>
           <div className={styles["setting__container"]}>
             <SettingsItem
-              header={
-                <>
-                  <EyeIcon />
-                  <span>show keyboard letter statuses</span>
-                </>
-              }
+              Icon={EyeIcon}
+              name="show keyboard letter statuses"
               description="Display letter status feedback on the keyboard."
               control={
                 <ButtonGroup
@@ -356,12 +329,8 @@ export default function SettingsPage() {
         >
           <div className={styles["setting__container"]}>
             <SettingsItem
-              header={
-                <>
-                  <ResetSettingsIcon />
-                  <span>reset settings</span>
-                </>
-              }
+              Icon={ResetSettingsIcon}
+              name="reset settings"
               description={
                 <>
                   Restore all settings to their default values.
