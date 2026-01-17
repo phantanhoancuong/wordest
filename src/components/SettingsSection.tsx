@@ -1,6 +1,6 @@
 import SettingsSectionHeader from "@/components/SettingsSectionHeader";
 
-import styles from "@/styles/SettingsSection.module.css";
+import styles from "@/styles/components/SettingsSection.module.css";
 
 const SettingsSection = ({ title, isOpen, setIsOpen, children }) => {
   return (

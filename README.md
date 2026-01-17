@@ -34,11 +34,11 @@ WORDest currently offers two game modes to suit different play styles.
 Normal Mode follows standard Wordle rules and is intended for relaxed, casual play.  
 You are free to experiment with guesses as long as they are valid words.
 
-### Expert Mode
+### Strict Mode
 
-Expert Mode is designed for players who want stricter rules and more deliberate decision-making.
+Strict Mode is designed for players who want stricter rules and more deliberate decision-making.
 
-When Expert Mode is enabled, guesses must follow additional constraints:
+When Strict Mode is enabled, guesses must follow additional constraints:
 
 - Letters confirmed in the correct position must be reused in that same position.
 - Letters known to be present must continue to appear at least the same number of times.

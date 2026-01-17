@@ -1,7 +1,8 @@
 import { useSettingsContext } from "@/app/contexts/SettingsContext";
+
 import { useSoundPlayer } from "@/hooks/useSoundPlayer";
 
-import styles from "@/styles/ButtonGroup.module.css";
+import styles from "@/styles/components/ButtonGroup.module.css";
 
 /**
  * Represents a single slectable button option in a ButtonGroup
@@ -33,7 +34,7 @@ const ButtonGroup = <T,>({
   const { volume, isMuted } = useSettingsContext();
   const playKeySound = useSoundPlayer(
     ["/sounds/key_01.mp3", "/sounds/key_02.mp3"],
-    isMuted.value ? 0 : volume.value
+    isMuted.value ? 0 : volume.value,
   );
 
   return (

@@ -1,9 +1,10 @@
-import Cell from "@/components/Cell";
-
 import { RenderCell } from "@/types/cell";
 import { UseGameReturn } from "@/types/useGame.types";
 
-import styles from "@/styles/Grid.module.css";
+import Cell from "@/components/Cell";
+
+import styles from "@/styles/components/Grid.module.css";
+
 /**
  * Props for the {@link Grid} component.
  */

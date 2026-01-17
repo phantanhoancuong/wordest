@@ -1,4 +1,4 @@
-import { Toast } from "./toast";
+import { Toast } from "@/types/toast";
 
 export interface UseToastsReturn {
   toastList: Array<Toast>;

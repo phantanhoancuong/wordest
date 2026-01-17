@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
-import styles from "../styles/Toast.module.css";
-import { Toast as ToastType } from "../types/toast";
-import { UseGameReturn } from "@/types/useGame.types";
+
+import { Toast as ToastType } from "@/types/toast";
+
+import styles from "@/styles/components/Toast.module.css";
 
 interface ToastProps {
   message: ToastType["message"];

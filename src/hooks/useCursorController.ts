@@ -2,9 +2,9 @@ import { useRef } from "react";
 
 import { useGameStore } from "@/store/useGameStore";
 
-import { useLatest } from "@/hooks/useLatest";
-
 import { UseCursorControllerReturn } from "@/types/useCursorController.types";
+
+import { useLatest } from "@/hooks/useLatest";
 
 /**
  * Hook to manage cursor state.

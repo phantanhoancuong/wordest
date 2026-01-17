@@ -1,7 +1,6 @@
 import { RefObject } from "react";
 
 import { CellStatus } from "@/lib/constants";
-
 import { RenderCell, PartialRenderCell } from "@/types/cell";
 
 export interface UseGridStateReturn {

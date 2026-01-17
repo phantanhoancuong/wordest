@@ -2,29 +2,32 @@
   display: flex;
   width: 100%;
   align-items: flex-start;
+  gap: min(calc(var(--item-font-scale) * 0.5rem), 1rem);
 }
 
 .button-group__button {
   flex: 1;
   font-size: calc(var(--item-font-scale) * 0.8rem);
   height: calc(var(--item-font-scale) * 1.8rem);
-  margin: calc(var(--item-font-scale) * 0.2rem);
-  background-color: var(--cell-background-color-absent);
+  margin-top: calc(var(--item-font-scale) * 0.2rem);
+  border-radius: calc(var(--item-font-scale) * 0.3rem);
+  background-color: var(--button-background-color-inactive);
   color: var(--cell-text-color-absent);
-  border: 1px solid var(--cell-border-color-absent);
+  border: 0px;
   cursor: pointer;
 }
 
 .button-group__button--active {
-  background-color: var(--cell-background-color-correct);
+  background-color: var(--button-background-color-active);
   color: var(--cell-text-color-correct);
-  border: 1px solid var(--cell-border-color-correct);
+  cursor: default;
+  pointer-events: none;
 }
 
 .button-group__button--danger {
   background-color: var(--cell-background-color-wrong);
   color: var(--cell-text-color-wrong);
-  border: 1px solid var(--cell-border-color-wrong);
+  border: 0px;
 }
 
 .button-group__action {

@@ -1,9 +1,10 @@
 import Link from "next/link";
 
-import styles from "@/styles/Banner.module.css";
-
-import SettingsIcon from "@/assets/icons/settings_24dp_000000_FILL0_wght400_GRAD0_opsz24.svg";
 import Logo from "@/assets/icons/logo.svg";
+import SettingsIcon from "@/assets/icons/settings_24dp_000000_FILL0_wght400_GRAD0_opsz24.svg";
+
+import styles from "@/styles/components/Banner.module.css";
+
 interface BannerProps {
   left?: React.ReactNode | React.ReactNode[];
   right?: React.ReactNode | React.ReactNode[];

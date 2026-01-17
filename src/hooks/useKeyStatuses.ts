@@ -1,11 +1,8 @@
-import { useState } from "react";
-
-import { useGameStore } from "@/store/useGameStore";
-
 import { CellStatus } from "@/lib/constants";
-
 import { CellStatusType } from "@/types/cell";
 import { UseKeyStatusesReturn } from "@/types/useKeyStatuses.types";
+
+import { useGameStore } from "@/store/useGameStore";
 
 /**
  * Hook to manage the visual status of keyboard keys.
