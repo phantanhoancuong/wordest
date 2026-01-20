@@ -4,7 +4,7 @@ import { useSettingsContext } from "@/app/contexts/SettingsContext";
 
 import { useSoundPlayer } from "@/hooks/useSoundPlayer";
 
-import styles from "@/styles/components/ButtonGroup.module.css";
+import styles from "@/styles/components/ActionButton.module.css";
 
 interface ActionButtonProps {
   label: string;
@@ -20,7 +20,9 @@ interface ActionButtonProps {
  *
  * This component is intended for one-off actions, not for state selection.
  *
- * @param param0
+ * @param label - Text on the button
+ * @param onClick - Function to call when button is clicked.
+ * @param danger - Boolean whether or not to style the button as a destructive button.
  * @returns
  */
 const ActionButton = ({
@@ -31,17 +33,17 @@ const ActionButton = ({
   const { volume, isMuted } = useSettingsContext();
   const playKeySound = useSoundPlayer(
     ["/sounds/key_01.mp3", "/sounds/key_02.mp3"],
-    isMuted.value ? 0 : volume.value
+    isMuted.value ? 0 : volume.value,
   );
 
   return (
-    <div className={styles["button-group"]}>
+    <div className={styles["action-button__container"]}>
       <button
         className={[
           // Base styling shared with BUttonGroup buttons.
-          styles["button-group__button"],
+          styles["action-button__button"],
           // Optional danger styling for destructive actions.
-          danger && styles["button-group__button--danger"],
+          danger && styles["action-button__button--danger"],
         ]
           .filter(Boolean)
           .join(" ")}

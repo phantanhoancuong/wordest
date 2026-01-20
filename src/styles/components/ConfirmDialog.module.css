@@ -1,0 +1,62 @@
+.confirm-dialog__overlay {
+  position: fixed;
+  width: 100dvw;
+  height: 100dvh;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: opacity 100ms ease;
+}
+
+.confirm-dialog--open {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.confirm-dialog--closed {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.confirm-dialog__panel {
+  width: min(80dvw, 420px);
+  max-height: min(80dvh, 640px);
+
+  padding: 1.2rem;
+  padding-left: 1.5rem;
+  padding-right: 1.5rem;
+  border-radius: 0.5rem;
+
+  background-color: var(--app-background-color);
+  color: var(--app-text-color);
+
+  overflow: auto;
+  user-select: none;
+}
+
+.confirm-dialog__title {
+  color: var(--app-text-header-color);
+  padding-bottom: calc(var(--item-font-scale) * 0.3rem);
+  font-size: calc(var(--item-font-scale) * 1.2rem);
+}
+
+.confirm-dialog__message {
+  font-size: calc(var(--item-font-scale) * 0.8rem);
+  line-height: calc(var(--item-font-scale) * 1.2rem);
+}
+
+.confirm-dialog__button {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  font-size: calc(var(--item-font-scale) * 0.8rem);
+  height: calc(var(--item-font-scale) * 1.8rem);
+  border-radius: calc(var(--item-font-scale) * 0.3rem);
+  background-color: var(--cell-background-color-wrong);
+  color: var(--cell-text-color-wrong);
+  border: 0px;
+  cursor: pointer;
+  border-radius: 0.5rem;
+}

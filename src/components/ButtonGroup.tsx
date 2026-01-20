@@ -1,5 +1,7 @@
 import { useSettingsContext } from "@/app/contexts/SettingsContext";
 
+import { SettingsButtonVariant } from "@/lib/constants";
+
 import { useSoundPlayer } from "@/hooks/useSoundPlayer";
 
 import styles from "@/styles/components/ButtonGroup.module.css";
@@ -10,6 +12,7 @@ import styles from "@/styles/components/ButtonGroup.module.css";
 interface ButtonOption<T> {
   label: string;
   value: T;
+  variant?: SettingsButtonVariant;
 }
 
 /**
@@ -41,16 +44,24 @@ const ButtonGroup = <T,>({
     <div className={styles["button-group"]}>
       {options.map((option) => {
         const isActive = option.value === selected;
+        const activeVariant = option.variant ?? SettingsButtonVariant.DEFAULT;
 
         return (
           <button
             key={String(option.value)}
-            className={`${styles["button-group__button"]} ${
-              isActive ? styles["button-group__button--active"] : ""
-            }`}
+            className={[
+              styles["button-group__button"],
+              isActive && styles["button-group__button--active"],
+              isActive &&
+                styles[`button-group__button--active-${activeVariant}`],
+            ]
+              .filter(Boolean)
+              .join(" ")}
             onClick={() => {
-              onSelect(option.value);
-              playKeySound();
+              if (!isActive) {
+                onSelect(option.value);
+                playKeySound();
+              }
             }}
           >
             {option.label}

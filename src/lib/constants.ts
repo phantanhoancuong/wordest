@@ -132,3 +132,8 @@ export const DefaultSettings = {
 
 // Default volume applied when unmuting from a zero-volume state.
 export const DEFAULT_UNMUTE_VOLUME = 1 / 3;
+
+export enum SettingsButtonVariant {
+  DEFAULT = "default",
+  DANGER = "danger",
+}

@@ -22,6 +22,18 @@
   --app-text-color: #1a1a1a;
   --app-text-header-color: #4a8a16;
 
-  --button-background-color-inactive: #6b6b6b;
+  --button-background-color-inactive: #1a1a1a;
   --button-background-color-active: #59a21f;
+
+  --settings-button-background-inactive-color: #6b6b6b;
+  --settings-button-text-inactive-color: white;
+  --settings-button-background-active-default-color: #59a21f;
+  --settings-button-text-active-default-color: white;
+  --settings-button-background-active-danger-color: #c0392b;
+  --settings-button-text-active-danger-color: white;
+
+  --action-button-background-default-color: #1a1a1a;
+  --action-button-text-default-color: #e5e5e5;
+  --action-button-background-danger-color: #c0392b;
+  --action-button-text-danger-color: white;
 }

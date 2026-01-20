@@ -1,0 +1,23 @@
+.action-button__container {
+  display: flex;
+  width: 100%;
+  align-items: flex-start;
+  gap: min(calc(var(--item-font-scale) * 0.5rem), 1rem);
+}
+
+.action-button__button {
+  flex: 1;
+  font-size: calc(var(--item-font-scale) * 0.8rem);
+  height: calc(var(--item-font-scale) * 1.8rem);
+  margin-top: calc(var(--item-font-scale) * 0.2rem);
+  border-radius: calc(var(--item-font-scale) * 0.3rem);
+  background-color: var(--action-button-background-default-color);
+  color: var(--action-button-text-default-color);
+  border: 0px;
+  cursor: pointer;
+}
+
+.action-button__button--danger {
+  background-color: var(--action-button-background-danger-color);
+  color: var(--action-button-text-danger-color);
+}

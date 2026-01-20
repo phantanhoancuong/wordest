@@ -11,8 +11,8 @@
   height: calc(var(--item-font-scale) * 1.8rem);
   margin-top: calc(var(--item-font-scale) * 0.2rem);
   border-radius: calc(var(--item-font-scale) * 0.3rem);
-  background-color: var(--button-background-color-inactive);
-  color: var(--cell-text-color-absent);
+  background-color: var(--settings-button-background-inactive-color);
+  color: var(--settings-button-text-inactive-color);
   border: 0px;
   cursor: pointer;
 }
@@ -24,10 +24,14 @@
   pointer-events: none;
 }
 
-.button-group__button--danger {
-  background-color: var(--cell-background-color-wrong);
-  color: var(--cell-text-color-wrong);
-  border: 0px;
+.button-group__button--active-danger {
+  background-color: var(--settings-button-background-active-danger-color);
+  color: var(--settings-button-text-active-danger-color);
+}
+
+.button-group__button--active-default {
+  background-color: var(--settings-button-background-active-default-color);
+  color: var(--settings-button-text-active-default-color);
 }
 
 .button-group__action {

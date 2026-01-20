@@ -10,6 +10,7 @@ import {
   DEFAULT_UNMUTE_VOLUME,
   AnimationSpeed,
   GameMode,
+  SettingsButtonVariant,
   Theme,
   WordLength,
 } from "@/lib/constants";
@@ -34,6 +35,7 @@ import SpeedometerIcon from "@/assets/icons/speed_24dp_000000_FILL0_wght400_GRAD
 import StarIcon from "@/assets/icons/star_24dp_000000_FILL0_wght400_GRAD0_opsz24.svg";
 import VolumeUpIcon from "@/assets/icons/volume_up_24dp_000000_FILL0_wght400_GRAD0_opsz24.svg";
 import styles from "@/app/settings/page.module.css";
+import ConfirmDialog from "@/components/ConfirmDialog";
 
 /**
  * Settings page component.
@@ -82,6 +84,10 @@ export default function SettingsPage() {
     setHasHydrated(true);
   }, [volume.value]);
 
+  const [openDialog, setOpenDialog] = useState<null | "reset" | "hardcore">(
+    null,
+  );
+
   if (!hasHydrated) return null;
 
   const handleVolumeIconClick = () => {
@@ -116,7 +122,11 @@ export default function SettingsPage() {
   const gameModeOptions = [
     { label: "normal", value: GameMode.NORMAL },
     { label: "strict", value: GameMode.STRICT },
-    { label: "hardcore", value: GameMode.HARDCORE },
+    {
+      label: "hardcore",
+      value: GameMode.HARDCORE,
+      variant: SettingsButtonVariant.DANGER,
+    },
   ];
 
   const wordLengthOptions = [
@@ -268,7 +278,13 @@ export default function SettingsPage() {
                 <ButtonGroup
                   options={gameModeOptions}
                   selected={gameMode.value}
-                  onSelect={gameMode.setValue}
+                  onSelect={(value) => {
+                    if (value === GameMode.HARDCORE) {
+                      setOpenDialog("hardcore");
+                    } else {
+                      gameMode.setValue(value);
+                    }
+                  }}
                 />
               }
             />
@@ -342,7 +358,9 @@ export default function SettingsPage() {
                 <ActionButton
                   danger={true}
                   label="resets settings"
-                  onClick={resetSettings}
+                  onClick={() => {
+                    setOpenDialog("reset");
+                  }}
                 />
               }
             />
@@ -355,6 +373,28 @@ export default function SettingsPage() {
         <br />
         Please rotate your device or use a larger display.
       </div>
+      <ConfirmDialog
+        isOpen={openDialog === "reset"}
+        title="Reset settings"
+        message="Are you sure you want to reset all your settings?"
+        confirmLabel="reset"
+        onConfirm={() => {
+          setOpenDialog(null);
+          resetSettings();
+        }}
+        onCancel={() => setOpenDialog(null)}
+      />
+      <ConfirmDialog
+        isOpen={openDialog === "hardcore"}
+        title="Turn on hardcore"
+        message="Hardcore has stricter rules and disables all guiding systems, are you sure you want to turn it on?"
+        confirmLabel="turn on hardcore"
+        onConfirm={() => {
+          setOpenDialog(null);
+          gameMode.setValue(GameMode.HARDCORE);
+        }}
+        onCancel={() => setOpenDialog(null)}
+      />
     </div>
   );
 }
