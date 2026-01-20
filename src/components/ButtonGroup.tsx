@@ -13,6 +13,7 @@ interface ButtonOption<T> {
   label: string;
   value: T;
   variant?: SettingsButtonVariant;
+  disabled?: boolean;
 }
 
 /**
@@ -44,11 +45,13 @@ const ButtonGroup = <T,>({
     <div className={styles["button-group"]}>
       {options.map((option) => {
         const isActive = option.value === selected;
+        const isDisabled = option.disabled;
         const activeVariant = option.variant ?? SettingsButtonVariant.DEFAULT;
 
         return (
           <button
             key={String(option.value)}
+            disabled={isDisabled}
             className={[
               styles["button-group__button"],
               isActive && styles["button-group__button--active"],
@@ -58,10 +61,9 @@ const ButtonGroup = <T,>({
               .filter(Boolean)
               .join(" ")}
             onClick={() => {
-              if (!isActive) {
-                onSelect(option.value);
-                playKeySound();
-              }
+              if (isActive || isDisabled) return;
+              onSelect(option.value);
+              playKeySound();
             }}
           >
             {option.label}

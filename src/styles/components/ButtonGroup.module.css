@@ -21,7 +21,6 @@
   background-color: var(--button-background-color-active);
   color: var(--cell-text-color-correct);
   cursor: default;
-  pointer-events: none;
 }
 
 .button-group__button--active-danger {
@@ -36,4 +35,15 @@
 
 .button-group__action {
   width: 100%;
+}
+
+.button-group__button:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.button-group__button--active:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  pointer-events: auto;
 }

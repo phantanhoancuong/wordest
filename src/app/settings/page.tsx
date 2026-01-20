@@ -141,14 +141,16 @@ export default function SettingsPage() {
     { label: "system", value: Theme.SYSTEM },
   ];
 
+  const isHardcore = gameMode.value === GameMode.HARDCORE;
+
   const showReferenceGridOptions = [
-    { label: "on", value: true },
-    { label: "off", value: false },
+    { label: "on", value: true, disabled: isHardcore },
+    { label: "off", value: false, disabled: isHardcore },
   ];
 
   const showKeyStatusesOptions = [
-    { label: "on", value: true },
-    { label: "off", value: false },
+    { label: "on", value: true, disabled: isHardcore },
+    { label: "off", value: false, disabled: isHardcore },
   ];
 
   const VolumeIcon = getVolumeIcon(isMuted.value ? 0 : draftVolume);
