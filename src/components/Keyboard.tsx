@@ -1,9 +1,8 @@
-import { useSettingsContext } from "@/app/contexts/SettingsContext";
-import { GameMode } from "@/lib/constants";
 import { UseGameReturn } from "@/types/useGame.types";
 import styles from "@/styles/components/Keyboard.module.css";
 
 interface KeyboardProps {
+  renderKeyStatuses?: boolean;
   keyStatuses: UseGameReturn["keyboard"]["statuses"];
   onKeyClick: UseGameReturn["input"]["handle"];
 }
@@ -51,9 +50,11 @@ const keyboardLayout = [
   },
 ];
 
-const Keyboard = ({ keyStatuses, onKeyClick }: KeyboardProps) => {
-  const { gameMode, showKeyStatuses } = useSettingsContext();
-
+const Keyboard = ({
+  renderKeyStatuses = true,
+  keyStatuses,
+  onKeyClick,
+}: KeyboardProps) => {
   const maxRowUnit = Math.max(
     ...keyboardLayout.map((row) =>
       row.keys.reduce((sum, key) => sum + (key.unit ?? 1), 0),
@@ -67,9 +68,6 @@ const Keyboard = ({ keyStatuses, onKeyClick }: KeyboardProps) => {
       .join(" "),
   }));
 
-  const showStatus =
-    showKeyStatuses.value && gameMode.value !== GameMode.HARDCORE;
-
   return (
     <div className={styles.keyboard}>
       {rows.map((row, rowIndex) => (
@@ -79,7 +77,7 @@ const Keyboard = ({ keyStatuses, onKeyClick }: KeyboardProps) => {
           style={{ "--columns": row.columns } as React.CSSProperties}
         >
           {row.keys.map((key) => {
-            const status = showStatus
+            const status = renderKeyStatuses
               ? keyStatuses[key.label] || "default"
               : "default";
 

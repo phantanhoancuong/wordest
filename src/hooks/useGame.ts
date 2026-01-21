@@ -73,7 +73,7 @@ export const useGame = (): UseGameReturn => {
     0,
     dataGameGrid,
     setDataGameGrid,
-    resetDataGameGrid
+    resetDataGameGrid,
   );
 
   const referenceGrid = useGridState(
@@ -84,14 +84,14 @@ export const useGame = (): UseGameReturn => {
     0,
     dataReferenceGrid,
     setDataReferenceGrid,
-    resetDataReferenceGrid
+    resetDataReferenceGrid,
   );
 
   const useStrictConstraints = UseStrictConstraints();
 
   const playKeySound = useSoundPlayer(
     ["/sounds/key_01.mp3", "/sounds/key_02.mp3"],
-    isMuted.value ? 0 : volume.value
+    isMuted.value ? 0 : volume.value,
   );
 
   const sessionGameMode = useGameStore((s) => s.sessionGameMode);
@@ -111,7 +111,7 @@ export const useGame = (): UseGameReturn => {
       if (gameState.pendingState != null) {
         updateGameState();
       }
-    }
+    },
   );
 
   /**
@@ -186,7 +186,7 @@ export const useGame = (): UseGameReturn => {
    */
   const handleGameGridAnimationEnd = (
     rowIndex: number,
-    colIndex: number
+    colIndex: number,
   ): void => {
     gameGridAnimationTracker.markEnd(rowIndex, colIndex);
     if (gameGridAnimationTracker.getCount() === 0)
@@ -203,7 +203,7 @@ export const useGame = (): UseGameReturn => {
    */
   const handleReferenceGridAnimationEnd = (
     rowIndex: number,
-    colIndex: number
+    colIndex: number,
   ): void => {
     rowIndex = 0;
     referenceGridAnimationTracker.markEnd(rowIndex, colIndex);
@@ -380,7 +380,7 @@ export const useGame = (): UseGameReturn => {
     addToast,
     handleValidationError,
     setValidationError,
-    updateKeyStatuses
+    updateKeyStatuses,
   );
 
   useKeyboardInput(handleInput);

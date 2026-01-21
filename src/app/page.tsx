@@ -26,7 +26,11 @@ export default function Home() {
   const { gameGrid, referenceGrid, keyboard, game, toasts, input, render } =
     useGame();
 
-  const { gameMode, showReferenceGrid } = useSettingsContext();
+  const { gameMode, showReferenceGrid, showKeyStatuses } = useSettingsContext();
+  const renderReferenceGrid =
+    gameMode.value !== GameMode.HARDCORE && showReferenceGrid.value;
+  const renderKeyStatuses =
+    gameMode.value !== GameMode.HARDCORE && showKeyStatuses.value;
 
   if (!render.hasHydrated) return null;
   return (
@@ -51,8 +55,7 @@ export default function Home() {
               </div>
 
               <div className={styles["game-board__controls"]}>
-                {showReferenceGrid.value &&
-                gameMode.value !== GameMode.HARDCORE ? (
+                {renderReferenceGrid ? (
                   <Grid
                     grid={referenceGrid.renderGrid}
                     onAnimationEnd={referenceGrid.handleAnimationEnd}
@@ -75,7 +78,11 @@ export default function Home() {
       </main>
 
       <footer className={styles["app__keyboard"]}>
-        <Keyboard keyStatuses={keyboard.statuses} onKeyClick={input.handle} />
+        <Keyboard
+          renderKeyStatuses={renderKeyStatuses}
+          keyStatuses={keyboard.statuses}
+          onKeyClick={input.handle}
+        />
       </footer>
 
       <div className={styles["landscape-warning"]}>
