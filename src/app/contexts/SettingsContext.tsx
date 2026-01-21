@@ -42,6 +42,10 @@ interface SettingsContextType {
     value: boolean;
     setValue: (v: boolean) => void;
   };
+  colorAccess: {
+    value: boolean;
+    setValue: (v: boolean) => void;
+  };
   resetSettings: () => void;
 }
 
@@ -49,7 +53,7 @@ interface SettingsContextType {
  * React context for global game settings.
  */
 const SettingsContext = createContext<SettingsContextType | undefined>(
-  undefined
+  undefined,
 );
 
 /**
@@ -65,7 +69,7 @@ export const useSettingsContext = (): SettingsContextType => {
 
   if (!context) {
     throw new Error(
-      "useSettingsContext must be used within a SettingsProvider."
+      "useSettingsContext must be used within a SettingsProvider.",
     );
   }
 
