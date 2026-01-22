@@ -117,6 +117,7 @@ export const LocalStorageKeys = {
   THEME: "wordest:theme",
   SHOW_REFERENCE_GRID: "wordest:showReferenceGrid",
   SHOW_KEY_STATUSES: "wordest:showKeyStatuses",
+  COLOR_ACCESS: "wordest:colorAccess",
 };
 
 export const DefaultSettings = {
@@ -128,6 +129,7 @@ export const DefaultSettings = {
   THEME: Theme.SYSTEM,
   SHOW_REFERENCE_GRID: true,
   SHOW_KEY_STATUSES: true,
+  COLOR_ACCESS: false,
 };
 
 // Default volume applied when unmuting from a zero-volume state.

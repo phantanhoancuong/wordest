@@ -20,35 +20,39 @@ import { useLocalStorage } from "@/hooks/useLocalStorage";
 export const useSettings = () => {
   const [animationSpeed, setAnimationSpeed] = useLocalStorage<AnimationSpeed>(
     LocalStorageKeys.ANIMATION_SPEED,
-    DefaultSettings.ANIMATION_SPEED
+    DefaultSettings.ANIMATION_SPEED,
   );
   const [volume, setVolume] = useLocalStorage<number>(
     LocalStorageKeys.VOLUME,
-    DefaultSettings.VOLUME
+    DefaultSettings.VOLUME,
   );
   const [isMuted, setIsMuted] = useLocalStorage<boolean>(
     LocalStorageKeys.IS_MUTED,
-    DefaultSettings.IS_MUTED
+    DefaultSettings.IS_MUTED,
   );
   const [gameMode, setGameMode] = useLocalStorage<GameMode>(
     LocalStorageKeys.GAME_MODE,
-    DefaultSettings.GAME_MODE
+    DefaultSettings.GAME_MODE,
   );
   const [wordLength, setWordLength] = useLocalStorage<WordLength>(
     LocalStorageKeys.WORD_LENGTH,
-    DefaultSettings.WORD_LENGTH
+    DefaultSettings.WORD_LENGTH,
   );
   const [theme, setTheme] = useLocalStorage<Theme>(
     LocalStorageKeys.THEME,
-    DefaultSettings.THEME
+    DefaultSettings.THEME,
   );
   const [showReferenceGrid, setShowReferenceGrid] = useLocalStorage<boolean>(
     LocalStorageKeys.SHOW_REFERENCE_GRID,
-    DefaultSettings.SHOW_REFERENCE_GRID
+    DefaultSettings.SHOW_REFERENCE_GRID,
   );
   const [showKeyStatuses, setShowKeyStatuses] = useLocalStorage<boolean>(
     LocalStorageKeys.SHOW_KEY_STATUSES,
-    DefaultSettings.SHOW_KEY_STATUSES
+    DefaultSettings.SHOW_KEY_STATUSES,
+  );
+  const [colorAccess, setColorAccess] = useLocalStorage<boolean>(
+    LocalStorageKeys.COLOR_ACCESS,
+    DefaultSettings.COLOR_ACCESS,
   );
 
   const resetSettings = () => {
@@ -60,6 +64,7 @@ export const useSettings = () => {
     setTheme(DefaultSettings.THEME);
     setShowReferenceGrid(DefaultSettings.SHOW_REFERENCE_GRID);
     setShowKeyStatuses(DefaultSettings.SHOW_KEY_STATUSES);
+    setColorAccess(DefaultSettings.COLOR_ACCESS);
   };
 
   return {
@@ -77,6 +82,7 @@ export const useSettings = () => {
       value: showKeyStatuses,
       setValue: setShowKeyStatuses,
     },
+    colorAccess: { value: colorAccess, setValue: setColorAccess },
     resetSettings,
   };
 };

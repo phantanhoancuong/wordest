@@ -1,0 +1,19 @@
+:root[data-color-access="on"] {
+  --cell-background-color-present: #2563eb;
+  --cell-background-color-correct: #a3e635;
+  --cell-background-color-wrong: #f97316;
+
+  --cell-border-color-default: #374151;
+  --cell-border-color-present: #2563eb;
+  --cell-border-color-correct: #a3e635;
+  --cell-border-color-wrong: #f97316;
+
+  --cell-text-color-absent: white;
+  --cell-text-color-present: white;
+  --cell-text-color-correct: #1f2937;
+  --cell-text-color-wrong: white;
+
+  --button-background-color-active: #a3e635;
+  --settings-button-background-active-danger-color: #f97316;
+  --action-button-background-danger-color: #f97316;
+}

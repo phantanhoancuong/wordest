@@ -12,7 +12,7 @@ import { Theme } from "@/lib/constants";
  * - React to live OS / browser theme changes while the app is running.
  */
 const ThemeProvider = () => {
-  const { theme } = useSettingsContext();
+  const { theme, colorAccess } = useSettingsContext();
 
   useEffect(() => {
     const root = document.documentElement;
@@ -28,15 +28,14 @@ const ThemeProvider = () => {
 
       // Expose via a data attribute.
       root.dataset.theme = resolvedTheme;
+      root.dataset.colorAccess = colorAccess.value ? "on" : "off";
     };
-
     applyTheme();
 
     // Listens for OS / browser theme changes when in "system" mode.
     media.addEventListener("change", applyTheme);
-
     return () => media.removeEventListener("change", applyTheme);
-  }, [theme.value]);
+  }, [theme.value, colorAccess.value]);
 
   // Does not render UI.
   return null;

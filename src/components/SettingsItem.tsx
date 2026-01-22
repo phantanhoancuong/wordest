@@ -23,7 +23,9 @@ const SettingsItem = ({
         <h3 className={styles["settings-item__name"]}>{name}</h3>
       </div>
       <div className={styles["settings-item__info"]}>
-        <p className={styles["settings-item__description"]}>{description}</p>
+        <div className={styles["settings-item__description"]}>
+          {description}
+        </div>
         <div className={styles["settings-item__actions"]}>{control}</div>
       </div>
     </div>

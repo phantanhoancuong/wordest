@@ -1,32 +1,50 @@
 @import "./themes/dark.css";
 @import "./themes/light.css";
 
+@import "./themes/color-access.css";
+
 :root {
   --key-font-size: 2rem;
 }
 
 :root {
-  --app-background-color: initial;
-  --app-text-color: initial;
+  --cell-background-color-default: transparent;
+  --cell-background-color-absent: #6b6b6b;
+  --cell-background-color-present: #ffde59;
+  --cell-background-color-correct: #59a21f;
+  --cell-background-color-wrong: #c0392b;
 
-  --cell-background-color-default: initial;
-  --cell-background-color-absent: initial;
-  --cell-background-color-present: initial;
-  --cell-background-color-correct: initial;
-  --cell-background-color-wrong: initial;
+  --cell-border-color-default: #cccccc;
+  --cell-border-color-absent: #6b6b6b;
+  --cell-border-color-present: #ffde59;
+  --cell-border-color-correct: #59a21f;
+  --cell-border-color-wrong: #c0392b;
 
-  --cell-border-color-default: initial;
-  --cell-border-color-absent: initial;
-  --cell-border-color-present: initial;
-  --cell-border-color-correct: initial;
-  --cell-border-color-wrong: initial;
+  --cell-text-color-default: #1a1a1a;
+  --cell-text-color-absent: white;
+  --cell-text-color-present: white;
+  --cell-text-color-correct: white;
+  --cell-text-color-wrong: white;
+  --cell-text-color-hidden: transparent;
 
-  --cell-text-color-default: initial;
-  --cell-text-color-absent: initial;
-  --cell-text-color-present: initial;
-  --cell-text-color-correct: initial;
-  --cell-text-color-wrong: initial;
-  --cell-text-color-hidden: initial;
+  --app-background-color: #f7f7f8;
+  --app-text-color: #1a1a1a;
+  --app-text-header-color: #4a8a16;
+
+  --button-background-color-inactive: #1a1a1a;
+  --button-background-color-active: #59a21f;
+
+  --settings-button-background-inactive-color: #6b6b6b;
+  --settings-button-text-inactive-color: white;
+  --settings-button-background-active-default-color: #59a21f;
+  --settings-button-text-active-default-color: white;
+  --settings-button-background-active-danger-color: #c0392b;
+  --settings-button-text-active-danger-color: white;
+
+  --action-button-background-default-color: #1a1a1a;
+  --action-button-text-default-color: #e5e5e5;
+  --action-button-background-danger-color: #c0392b;
+  --action-button-text-danger-color: white;
 }
 
 body {

@@ -19,6 +19,7 @@ import {
   ActionButton,
   Banner,
   ButtonGroup,
+  PreviewGrid,
   SettingsItem,
   SettingsSection,
 } from "@/components";
@@ -27,6 +28,7 @@ import { playVolumePreview } from "@/lib/audio";
 import { getVolumeIcon } from "@/lib/volumeIcons";
 
 import ArrowBackIcon from "@/assets/icons/arrow_back_24dp_000000_FILL0_wght400_GRAD0_opsz24.svg";
+import ContrastIcon from "@/assets/icons/contrast_24dp_000000_FILL0_wght400_GRAD0_opsz24.svg";
 import EyeIcon from "@/assets/icons/visibility_24dp_000000_FILL0_wght400_GRAD0_opsz24.svg";
 import PaletteIcon from "@/assets/icons/palette_24dp_000000_FILL0_wght400_GRAD0_opsz24.svg";
 import ResetSettingsIcon from "@/assets/icons/reset_settings_24dp_000000_FILL0_wght400_GRAD0_opsz24.svg";
@@ -56,6 +58,7 @@ export default function SettingsPage() {
     theme,
     showReferenceGrid,
     showKeyStatuses,
+    colorAccess,
     resetSettings,
   } = useSettingsContext();
 
@@ -139,6 +142,11 @@ export default function SettingsPage() {
     { label: "light", value: Theme.LIGHT },
     { label: "dark", value: Theme.DARK },
     { label: "system", value: Theme.SYSTEM },
+  ];
+
+  const colorAccessOptions = [
+    { label: "off", value: false },
+    { label: "on", value: true },
   ];
 
   const isHardcore = gameMode.value === GameMode.HARDCORE;
@@ -293,26 +301,6 @@ export default function SettingsPage() {
           </div>
           <div className={styles["setting__container"]}>
             <SettingsItem
-              Icon={RulerIcon}
-              name="word length"
-              description="Set how many letters each word contains."
-              control={
-                <ButtonGroup
-                  options={wordLengthOptions}
-                  selected={wordLength.value}
-                  onSelect={wordLength.setValue}
-                />
-              }
-            />
-          </div>
-        </SettingsSection>
-        <SettingsSection
-          title="accessibility"
-          isOpen={isAccessOpen}
-          setIsOpen={setIsAccessOpen}
-        >
-          <div className={styles["setting__container"]}>
-            <SettingsItem
               Icon={EyeIcon}
               name="show reference grid"
               description="Display a reference grid showing all confirmed correct letter positions."
@@ -335,6 +323,47 @@ export default function SettingsPage() {
                   options={showKeyStatusesOptions}
                   selected={showKeyStatuses.value}
                   onSelect={showKeyStatuses.setValue}
+                />
+              }
+            />
+          </div>
+          <div className={styles["setting__container"]}>
+            <SettingsItem
+              Icon={RulerIcon}
+              name="word length"
+              description="Set how many letters each word contains."
+              control={
+                <ButtonGroup
+                  options={wordLengthOptions}
+                  selected={wordLength.value}
+                  onSelect={wordLength.setValue}
+                />
+              }
+            />
+          </div>
+        </SettingsSection>
+        <SettingsSection
+          title="accessibility"
+          isOpen={isAccessOpen}
+          setIsOpen={setIsAccessOpen}
+        >
+          <div className={styles["setting__container"]}>
+            <SettingsItem
+              Icon={ContrastIcon}
+              name="Accessible color palette"
+              description={
+                <>
+                  Use an alternative color palette designed to improve color
+                  distinction across the interface for some players with
+                  specific color-vision deficiencies.
+                  <PreviewGrid />
+                </>
+              }
+              control={
+                <ButtonGroup
+                  options={colorAccessOptions}
+                  selected={colorAccess.value}
+                  onSelect={colorAccess.setValue}
                 />
               }
             />
