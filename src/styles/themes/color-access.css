@@ -14,6 +14,8 @@
   --cell-text-color-wrong: white;
 
   --button-background-color-active: #a3e635;
+  --settings-button-background-active-default-color: #a3e635;
+  --settings-button-text-active-default-color: #1f2937;
   --settings-button-background-active-danger-color: #f97316;
   --action-button-background-danger-color: #f97316;
 }
