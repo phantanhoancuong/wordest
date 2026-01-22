@@ -1,7 +1,7 @@
 .preview-grid {
   width: 100%;
   display: grid;
-  grid-template-columns: repeat(5, 14%);
+  grid-template-columns: repeat(5, 18%);
   text-align: center;
 
   column-gap: 2.5%;
@@ -17,67 +17,52 @@
 }
 
 .preview-grid__legend {
-  font-size: 80%;
+  font-size: calc(var(--item-font-scale) * 0.7rem);
 }
 
-.preview-grid__cell--correct {
+.preview-grid__cell--correct,
+.preview-grid__legend--correct {
   background-color: var(--cell-background-color-correct);
   color: var(--cell-text-color-correct);
   border: 1px solid var(--cell-border-color-correct);
 }
 
-.preview-grid__cell--present {
+.preview-grid__cell--present,
+.preview-grid__legend--present {
   background-color: var(--cell-background-color-present);
   color: var(--cell-text-color-present);
   border: 1px solid var(--cell-border-color-present);
 }
 
-.preview-grid__cell--absent {
+.preview-grid__cell--absent,
+.preview-grid__legend--absent {
   background-color: var(--cell-background-color-absent);
   color: var(--cell-text-color-absent);
   border: 1px solid var(--cell-border-color-absent);
 }
 
-.preview-grid__cell--default {
+.preview-grid__cell--default,
+.preview-grid__legend--default {
   background-color: var(--cell-background-color-default);
   color: var(--cell-text-color-default);
   border: 1px solid var(--cell-border-color-default);
 }
 
-.preview-grid__cell--wrong {
+.preview-grid__cell--wrong,
+.preview-grid__legend--wrong {
   background-color: var(--cell-background-color-wrong);
   color: var(--cell-text-color-wrong);
   border: 1px solid var(--cell-border-color-wrong);
 }
 
-.preview-grid__legend--correct {
-  color: var(--cell-background-color-correct);
-}
-
-.preview-grid__legend--present {
-  color: var(--cell-background-color-present);
-}
-
-.preview-grid__legend--absent {
-  color: var(--cell-background-color-absent);
-}
-
-.preview-grid__legend--default {
-  color: var(--cell-text-color-default);
-}
-
-.preview-grid__legend--wrong {
-  color: var(--cell-text-color-wrong);
-}
-
 @media (min-width: 600px) {
   .preview-grid {
-    --item-font-scale: 1.25;
+    --item-font-scale: 1.1;
   }
 }
 
 @media (min-width: 1024px) {
   .preview-grid {
-    --item-font-scale: 1.4;
+    --item-font-scale: 1.25;
   }
 }
