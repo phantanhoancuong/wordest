@@ -10,7 +10,8 @@
   box-sizing: border-box;
   will-change: transform, background-color, border-color, color;
   transform-origin: center;
-  transition: background-color var(--color-duration) ease var(--delay),
+  transition:
+    background-color var(--color-duration) ease var(--delay),
     color var(--color-duration) ease var(--delay),
     border-color var(--color-duration) ease var(--delay);
 }

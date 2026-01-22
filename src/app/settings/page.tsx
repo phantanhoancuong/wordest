@@ -19,6 +19,7 @@ import {
   ActionButton,
   Banner,
   ButtonGroup,
+  PreviewGrid,
   SettingsItem,
   SettingsSection,
 } from "@/components";
@@ -350,7 +351,14 @@ export default function SettingsPage() {
             <SettingsItem
               Icon={ContrastIcon}
               name="Accessible color palette"
-              description="Use an alternative color palette designed to improve color distinction across the interface for players with color-vision deficiencies."
+              description={
+                <>
+                  Use an alternative color palette designed to improve color
+                  distinction across the interface for some players with
+                  specific color-vision deficiencies.
+                  <PreviewGrid />
+                </>
+              }
               control={
                 <ButtonGroup
                   options={colorAccessOptions}
