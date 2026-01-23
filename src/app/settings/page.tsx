@@ -270,18 +270,20 @@ export default function SettingsPage() {
               name="game mode"
               description={
                 <>
-                  <strong>Normal</strong> is the classic WORDest experience.
-                  <br />
-                  <br />
-                  <strong>Strict</strong> enforces stricter rules based on
-                  previous guesses: letters confirmed in the correct position
-                  must remain there, and any revealed letter must be reused at
-                  least as many times as it has been confirmed.
-                  <br />
-                  <br />
-                  <strong>Hardcore</strong> applies the same rule as Strict but
-                  the reference grid and key statuses for the on-screen keyboard
-                  are disabled.
+                  <p>
+                    <b>Normal</b> is the classic WORDest experience.
+                  </p>
+                  <p>
+                    <b>Strict</b> enforces stricter rules based on previous
+                    guesses: letters confirmed in the correct position must
+                    remain there, and any revealed letter must be reused at
+                    least as many times as it has been confirmed.
+                  </p>
+                  <p>
+                    <b>Hardcore</b> applies the same rule as Strict but the
+                    reference grid and key statuses for the on-screen keyboard
+                    are disabled.
+                  </p>
                 </>
               }
               control={
