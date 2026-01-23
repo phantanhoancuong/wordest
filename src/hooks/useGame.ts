@@ -9,7 +9,7 @@ import {
   CellAnimation,
   CellStatus,
   GameState,
-  GameMode,
+  Ruleset,
 } from "@/lib/constants";
 import { UseGameReturn } from "@/types/useGame.types";
 
@@ -50,7 +50,7 @@ export const useGame = (): UseGameReturn => {
   const [validationError, setValidationError] = useState("");
   const { toastList, addToast, removeToast } = useToasts();
   const { keyStatuses, updateKeyStatuses, resetKeyStatuses } = useKeyStatuses();
-  const { volume, animationSpeed, isMuted, gameMode, wordLength } =
+  const { volume, animationSpeed, isMuted, ruleset, wordLength } =
     useSettingsContext();
 
   const animationSpeedMultiplier =
@@ -94,8 +94,8 @@ export const useGame = (): UseGameReturn => {
     isMuted.value ? 0 : volume.value,
   );
 
-  const sessionGameMode = useGameStore((s) => s.sessionGameMode);
-  const setSessionGameMode = useGameStore((s) => s.setSessionGameMode);
+  const sessionRuleset = useGameStore((s) => s.sessionRuleset);
+  const setSessionRuleset = useGameStore((s) => s.setSessionRuleset);
 
   const gameId = useGameStore((s) => s.gameId);
   const incrementGameId = useGameStore((s) => s.incrementGameId);
@@ -141,9 +141,9 @@ export const useGame = (): UseGameReturn => {
       return;
     }
 
-    if (gameMode.value !== sessionGameMode) {
-      // If game mode changed, restart and fetch new word
-      setSessionGameMode(gameMode.value);
+    if (ruleset.value !== sessionRuleset) {
+      // If the ruleset changed, restart and fetch new word
+      setSessionRuleset(ruleset.value);
       restartGame(); // restart handles target word fetch
       return;
     }
@@ -366,7 +366,7 @@ export const useGame = (): UseGameReturn => {
   };
 
   const submitGuess = useGuessSubmission(
-    gameMode.value === GameMode.STRICT || gameMode.value === GameMode.HARDCORE,
+    ruleset.value === Ruleset.STRICT || ruleset.value === Ruleset.HARDCORE,
     animationSpeedMultiplier,
     targetLetterCount,
     targetWord,

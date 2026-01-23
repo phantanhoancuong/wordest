@@ -3,14 +3,12 @@
 
   width: 100%;
   max-width: 1024px;
-  margin-bottom: 3dvh;
+
   align-self: center;
 
   display: grid;
   gap: calc(var(--font-size-scale) * 0.2rem);
   grid-auto-rows: max-content;
-
-  padding-bottom: max(2dvh, env(safe-area-inset-bottom));
 }
 
 .keyboard__row {

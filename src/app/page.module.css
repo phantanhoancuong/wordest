@@ -2,10 +2,10 @@
   height: 100dvh;
   display: flex;
   flex-direction: column;
-  padding-top: 3dvh;
+  padding-top: 1dvh;
   overscroll-behavior: none;
   overflow: hidden;
-
+  max-width: 1920px;
   margin: 0 auto;
 
   --item-font-scale: 1;
@@ -16,14 +16,15 @@
 }
 
 .app__content {
-  flex: 0 0 65%;
+  flex: 0 0 68%;
 }
 
 .app__keyboard {
-  flex: 0 0 25%;
+  flex: 0 0 22%;
   display: flex;
   flex-direction: column;
   justify-content: flex-end;
+  padding-bottom: 1dvh;
 }
 
 .landscape-warning {
@@ -37,19 +38,37 @@
   font-size: 3rem;
 }
 
-.game-board {
+.game-board__container {
   height: 100%;
+}
+
+.game-board__date {
+  height: 10%;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  align-items: center;
+  font-size: calc(var(--item-font-scale) * 1.5rem);
+  color: var(--app-text-color);
+  user-select: none;
+  margin-bottom: calc(var(--item-font-scale) * 1.5rem);
+}
+
+.game-board {
+  height: 90%;
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
 
+  justify-content: flex-start;
   container-type: size;
 }
 
 .game-board__stack {
   width: fit-content;
+  margin-top: 0px;
 }
+
 .game-board__controls {
   width: 100%;
 }

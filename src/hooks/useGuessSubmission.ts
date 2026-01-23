@@ -42,7 +42,7 @@ export const useGuessSubmission = (
   addToast: (message: string) => void,
   handleValidationError: () => void,
   setValidationError: React.Dispatch<React.SetStateAction<string>>,
-  updateKeyStatuses: (guess: string, statuses: CellStatusType[]) => void
+  updateKeyStatuses: (guess: string, statuses: CellStatusType[]) => void,
 ): (() => void) => {
   /**
    * Handles an invalid guess (not in dictionary).
@@ -55,7 +55,7 @@ export const useGuessSubmission = (
    */
   const handleInvalidGuess = (
     row: number,
-    message: string = "Not in word list"
+    message: string = "Not in word list",
   ): void => {
     setValidationError(message);
     addToast(message);
@@ -83,7 +83,7 @@ export const useGuessSubmission = (
     const statuses = evaluateGuess(
       guess,
       targetWord,
-      targetLetterCount.current
+      targetLetterCount.current,
     );
 
     if (isStrict) {
@@ -138,7 +138,7 @@ export const useGuessSubmission = (
   /**
    * Submits the current guess and evaluate step-by-step:
    * 1. Is the guess complete (fill all columns).
-   * 2. Does the guess fulfill all Strict constraints (if Strict or Hardcore mode is enabled).
+   * 2. Does the guess fulfill all Strict constraints (if Strict or Hardcore ruleset are enabled).
    * 3. Does the guessed word exist in the dictionary of allowed words.
    *
    * If invalid at any step, calls 'handleInvalidGuess()' with an appropriate message.

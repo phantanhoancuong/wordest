@@ -9,7 +9,7 @@ import { useSettingsUIStore } from "@/store/useSettingsUIStore";
 import {
   DEFAULT_UNMUTE_VOLUME,
   AnimationSpeed,
-  GameMode,
+  Ruleset,
   SettingsButtonVariant,
   Theme,
   WordLength,
@@ -53,7 +53,7 @@ export default function SettingsPage() {
     volume,
     animationSpeed,
     isMuted,
-    gameMode,
+    ruleset,
     wordLength,
     theme,
     showReferenceGrid,
@@ -122,12 +122,12 @@ export default function SettingsPage() {
     { label: "instant", value: AnimationSpeed.INSTANT },
   ];
 
-  const gameModeOptions = [
-    { label: "normal", value: GameMode.NORMAL },
-    { label: "strict", value: GameMode.STRICT },
+  const rulesetOptions = [
+    { label: "normal", value: Ruleset.NORMAL },
+    { label: "strict", value: Ruleset.STRICT },
     {
       label: "hardcore",
-      value: GameMode.HARDCORE,
+      value: Ruleset.HARDCORE,
       variant: SettingsButtonVariant.DANGER,
     },
   ];
@@ -149,7 +149,7 @@ export default function SettingsPage() {
     { label: "on", value: true },
   ];
 
-  const isHardcore = gameMode.value === GameMode.HARDCORE;
+  const isHardcore = ruleset.value === Ruleset.HARDCORE;
 
   const showReferenceGridOptions = [
     { label: "on", value: true, disabled: isHardcore },
@@ -267,34 +267,33 @@ export default function SettingsPage() {
           <div className={styles["setting__container"]}>
             <SettingsItem
               Icon={StarIcon}
-              name="game mode"
+              name="ruleset"
               description={
                 <>
                   <p>
                     <b>Normal</b> is the classic WORDest experience.
                   </p>
                   <p>
-                    <b>Strict</b> enforces stricter rules based on previous
-                    guesses: letters confirmed in the correct position must
-                    remain there, and any revealed letter must be reused at
-                    least as many times as it has been confirmed.
+                    <b>Strict</b> adds constraints based on earlier guesses:
+                    confirmed letters must stay fixed, and revealed letters must
+                    be reused in future guesses.
                   </p>
                   <p>
-                    <b>Hardcore</b> applies the same rule as Strict but the
-                    reference grid and key statuses for the on-screen keyboard
-                    are disabled.
+                    <b>Hardcore</b> keeps Strict constraints while disabling all
+                    visual aids, including the reference grid and keyboard
+                    feedback.
                   </p>
                 </>
               }
               control={
                 <ButtonGroup
-                  options={gameModeOptions}
-                  selected={gameMode.value}
+                  options={rulesetOptions}
+                  selected={ruleset.value}
                   onSelect={(value) => {
-                    if (value === GameMode.HARDCORE) {
+                    if (value === Ruleset.HARDCORE) {
                       setOpenDialog("hardcore");
                     } else {
-                      gameMode.setValue(value);
+                      ruleset.setValue(value);
                     }
                   }}
                 />
@@ -390,7 +389,7 @@ export default function SettingsPage() {
               control={
                 <ActionButton
                   danger={true}
-                  label="resets settings"
+                  label="reset settings"
                   onClick={() => {
                     setOpenDialog("reset");
                   }}
@@ -419,12 +418,12 @@ export default function SettingsPage() {
       />
       <ConfirmDialog
         isOpen={openDialog === "hardcore"}
-        title="Turn on hardcore"
-        message="Hardcore has stricter rules and disables all guiding systems, are you sure you want to turn it on?"
+        title="Enable Hardcore ruleset"
+        message="Hardcore has stricter rules and disables all visual aids. Are you sure you want to turn it on?"
         confirmLabel="turn on hardcore"
         onConfirm={() => {
           setOpenDialog(null);
-          gameMode.setValue(GameMode.HARDCORE);
+          ruleset.setValue(Ruleset.HARDCORE);
         }}
         onCancel={() => setOpenDialog(null)}
       />

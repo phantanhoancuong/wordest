@@ -2,7 +2,7 @@
 
 import { createContext, useContext } from "react";
 
-import { AnimationSpeed, GameMode, Theme, WordLength } from "@/lib/constants";
+import { AnimationSpeed, Ruleset, Theme, WordLength } from "@/lib/constants";
 
 import { useSettings } from "@/hooks/useSettings";
 
@@ -22,9 +22,9 @@ interface SettingsContextType {
     value: boolean;
     setValue: (v: boolean) => void;
   };
-  gameMode: {
-    value: GameMode;
-    setValue: (v: GameMode) => void;
+  ruleset: {
+    value: Ruleset;
+    setValue: (v: Ruleset) => void;
   };
   wordLength: {
     value: WordLength;

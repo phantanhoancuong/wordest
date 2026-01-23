@@ -42,9 +42,9 @@ export enum GameState {
 }
 
 /**
- * Used to determine the game mode (difficulty level) of the game.
+ * Used to determine the game's ruleset (difficulty level) of the game.
  */
-export enum GameMode {
+export enum Ruleset {
   NORMAL = "normal",
   STRICT = "strict",
   HARDCORE = "hardcore",
@@ -112,7 +112,7 @@ export const LocalStorageKeys = {
   ANIMATION_SPEED: "wordest:animationSpeed",
   VOLUME: "wordest:volume",
   IS_MUTED: "wordest:isMuted",
-  GAME_MODE: "wordest:gameMode",
+  RULESET: "wordest:ruleset",
   WORD_LENGTH: "wordest:wordLength",
   THEME: "wordest:theme",
   SHOW_REFERENCE_GRID: "wordest:showReferenceGrid",
@@ -124,7 +124,7 @@ export const DefaultSettings = {
   ANIMATION_SPEED: AnimationSpeed.NORMAL,
   VOLUME: 2 / 3,
   IS_MUTED: false,
-  GAME_MODE: GameMode.NORMAL,
+  RULESET: Ruleset.NORMAL,
   WORD_LENGTH: WordLength.FIVE,
   THEME: Theme.SYSTEM,
   SHOW_REFERENCE_GRID: true,

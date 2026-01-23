@@ -1,8 +1,8 @@
 import {
   AnimationSpeed,
   DefaultSettings,
-  GameMode,
   LocalStorageKeys,
+  Ruleset,
   Theme,
   WordLength,
 } from "@/lib/constants";
@@ -30,9 +30,9 @@ export const useSettings = () => {
     LocalStorageKeys.IS_MUTED,
     DefaultSettings.IS_MUTED,
   );
-  const [gameMode, setGameMode] = useLocalStorage<GameMode>(
-    LocalStorageKeys.GAME_MODE,
-    DefaultSettings.GAME_MODE,
+  const [ruleset, setRuleset] = useLocalStorage<Ruleset>(
+    LocalStorageKeys.RULESET,
+    DefaultSettings.RULESET,
   );
   const [wordLength, setWordLength] = useLocalStorage<WordLength>(
     LocalStorageKeys.WORD_LENGTH,
@@ -59,7 +59,7 @@ export const useSettings = () => {
     setAnimationSpeed(DefaultSettings.ANIMATION_SPEED);
     setVolume(DefaultSettings.VOLUME);
     setIsMuted(DefaultSettings.IS_MUTED);
-    setGameMode(DefaultSettings.GAME_MODE);
+    setRuleset(DefaultSettings.RULESET);
     setWordLength(DefaultSettings.WORD_LENGTH);
     setTheme(DefaultSettings.THEME);
     setShowReferenceGrid(DefaultSettings.SHOW_REFERENCE_GRID);
@@ -71,7 +71,7 @@ export const useSettings = () => {
     animationSpeed: { value: animationSpeed, setValue: setAnimationSpeed },
     volume: { value: volume, setValue: setVolume },
     isMuted: { value: isMuted, setValue: setIsMuted },
-    gameMode: { value: gameMode, setValue: setGameMode },
+    ruleset: { value: ruleset, setValue: setRuleset },
     wordLength: { value: wordLength, setValue: setWordLength },
     theme: { value: theme, setValue: setTheme },
     showReferenceGrid: {

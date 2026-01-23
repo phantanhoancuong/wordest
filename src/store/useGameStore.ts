@@ -4,7 +4,7 @@ import {
   ATTEMPTS,
   CellStatus,
   GameState,
-  GameMode,
+  Ruleset,
   WordLength,
 } from "@/lib/constants";
 import { CellStatusType, DataCell } from "@/types/cell";
@@ -57,13 +57,13 @@ type GameStore = {
   keyStatuses: Partial<Record<string, CellStatusType>>;
   setKeyStatuses: (
     updater: (
-      prevKeyStatuses: Partial<Record<string, CellStatusType>>
-    ) => Partial<Record<string, CellStatusType>>
+      prevKeyStatuses: Partial<Record<string, CellStatusType>>,
+    ) => Partial<Record<string, CellStatusType>>,
   ) => void;
   resetKeyStatuses: () => void;
 
-  sessionGameMode: GameMode | null;
-  setSessionGameMode: (newGameMode: GameMode) => void;
+  sessionRuleset: Ruleset | null;
+  setSessionRuleset: (newRuleset: Ruleset) => void;
 
   wordLength: WordLength | null;
   setWordLength: (newWordLength: WordLength) => void;
@@ -108,7 +108,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
       gameGrid: initEmptyDataGrid(
         ATTEMPTS,
         WordLength.FIVE,
-        CellStatus.DEFAULT
+        CellStatus.DEFAULT,
       ),
     }),
 
@@ -142,8 +142,8 @@ export const useGameStore = create<GameStore>((set, get) => ({
       keyStatuses: {},
     }),
 
-  sessionGameMode: null,
-  setSessionGameMode: (newGameMode) => set({ sessionGameMode: newGameMode }),
+  sessionRuleset: null,
+  setSessionRuleset: (newRuleset) => set({ sessionRuleset: newRuleset }),
 
   lockedPositions: new Map<number, string>(),
   setLockedPositions: (newLockedPositions) =>
