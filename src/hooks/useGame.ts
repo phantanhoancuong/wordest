@@ -8,6 +8,7 @@ import {
   AnimationSpeedMultiplier,
   CellAnimation,
   CellStatus,
+  GameSession,
   GameState,
   Ruleset,
 } from "@/lib/constants";
@@ -35,7 +36,7 @@ const LETTER_REGEX = /^[A-Z]$/;
  *
  * @returns Game controller and associated utilities.
  */
-export const useGame = (): UseGameReturn => {
+export const useGame = (gameSession: GameSession): UseGameReturn => {
   const {
     targetWord,
     targetLetterCount,

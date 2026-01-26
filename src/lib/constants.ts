@@ -139,3 +139,8 @@ export enum SettingsButtonVariant {
   DEFAULT = "default",
   DANGER = "danger",
 }
+
+export enum GameSession {
+  DAILY = "daily",
+  PRACTICE = "practice",
+}
