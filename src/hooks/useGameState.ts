@@ -17,7 +17,9 @@ import { UseGameStateReturn } from "@/types/useGameState.types";
  * 3. Call 'commitState()' to apply the queued state.
  */
 export const useGameState = (): UseGameStateReturn => {
-  const gameState = useGameStore((s) => s.gameState);
+  const gameState = useGameStore(
+    (s) => s.sessions.get(s.activeSession).gameState,
+  );
   const setGameState = useGameStore((s) => s.setGameState);
   const pendingGameState = useRef<GameState | null>(null);
 

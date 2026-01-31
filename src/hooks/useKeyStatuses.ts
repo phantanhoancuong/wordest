@@ -11,7 +11,9 @@ import { useGameStore } from "@/store/useGameStore";
  * and provides utilities to update or reset these states.
  */
 export const useKeyStatuses = (): UseKeyStatusesReturn => {
-  const keyStatuses = useGameStore((s) => s.keyStatuses);
+  const keyStatuses = useGameStore(
+    (s) => s.sessions.get(s.activeSession).keyStatuses,
+  );
   const setKeyStatuses = useGameStore((s) => s.setKeyStatuses);
   const resetKeyStatuses = useGameStore((s) => s.resetKeyStatuses);
 
@@ -21,7 +23,7 @@ export const useKeyStatuses = (): UseKeyStatusesReturn => {
    */
   const updateKeyStatuses = (
     guess: string,
-    statuses: CellStatusType[]
+    statuses: CellStatusType[],
   ): void => {
     setKeyStatuses((prev) => {
       const next = { ...prev };

@@ -15,7 +15,9 @@ import { countLetter } from "@/lib/utils";
  * and exposing any fetch errors.
  */
 export const useTargetWord = (): UseTargetWordReturn => {
-  const targetWord = useGameStore((s) => s.targetWord);
+  const targetWord = useGameStore(
+    (s) => s.sessions.get(s.activeSession).targetWord,
+  );
   const setTargetWord = useGameStore((s) => s.setTargetWord);
   const [error, setError] = useState<string>("");
   const targetLetterCount = useRef<Record<string, number>>({});
