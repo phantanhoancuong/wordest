@@ -1,10 +1,25 @@
+/** Zustand store for managing game state across multiple session types.
+ *
+ * Each session owns its own GameSession object:
+ * - Grids (gameGrid, referenceGrid).
+ * - Cursor position (row, col).
+ * - Game state (gameState, gameId, referenceGridId, targetWord).
+ * - Keyboard state (keyStatuses).
+ * - Ruleset and word length.
+ * - Constraint helpers (lockedPositions, minimumLetterCounts).
+ *
+ * The store keeps a Map <SessionType, GameSession> and an activeSession pointer.
+ */
+
 import { create } from "zustand";
+import type { StoreApi } from "zustand";
 
 import {
   ATTEMPTS,
   CellStatus,
   GameState,
   Ruleset,
+  SessionType,
   WordLength,
 } from "@/lib/constants";
 import { CellStatusType, DataCell } from "@/types/cell";
@@ -12,143 +27,227 @@ import { CellStatusType, DataCell } from "@/types/cell";
 import { initEmptyDataGrid } from "@/lib/utils";
 
 /**
- * Global game store.
- *
- * Persists game state across client-side route changes
- * within the same application session.
+ * State of a single game session.
+ * A session is isolated from the other.
  */
-type GameStore = {
-  // Phase of the game.
+type GameSession = {
   gameState: GameState;
-  setGameState: (state: GameState) => void;
-
-  // Active cursor position within the grid.
   row: number;
   col: number;
-  setRow: (row: number | ((prev: number) => number)) => void;
-  setCol: (col: number | ((prev: number) => number)) => void;
-
-  // Persistent grid data.
-  // These store the raw cell data so the game can be resumed when navigating away and back.
   referenceGrid: DataCell[][];
   gameGrid: DataCell[][];
-  setReferenceGrid: (grid: DataCell[][]) => void;
-  setGameGrid: (grid: DataCell[][]) => void;
-  resetReferenceGrid: () => void;
-  resetGameGrid: () => void;
-
-  // Target word for the player to guess.
-  // Stored globally to avoid refetching on route changes.
   targetWord: string;
-  setTargetWord: (word: string) => void;
-
-  // Identifier for the current game session.
-  // Incremented on restart to invalidate derived state.
   gameId: number;
-  incrementGameId: () => number;
-
-  // Tracks whether the reference grid has been initialized for the current gameId.
   referenceGridId: number | null;
-  setReferenceGridId: (id: number) => void;
-
-  // Keyboard key status map.
-  // Stores the strongest status per letter (correct > present > absent)
-  // and persists across navigation.
   keyStatuses: Partial<Record<string, CellStatusType>>;
-  setKeyStatuses: (
-    updater: (
-      prevKeyStatuses: Partial<Record<string, CellStatusType>>,
-    ) => Partial<Record<string, CellStatusType>>,
-  ) => void;
-  resetKeyStatuses: () => void;
-
-  sessionRuleset: Ruleset | null;
-  setSessionRuleset: (newRuleset: Ruleset) => void;
-
-  wordLength: WordLength | null;
-  setWordLength: (newWordLength: WordLength) => void;
-
+  ruleset: Ruleset;
+  wordLength: WordLength;
   lockedPositions: Map<number, string> | null;
-  setLockedPositions: (newLockedPosition: Map<number, string>) => void;
   minimumLetterCounts: Map<string, number> | null;
-  setMinimumLetterCounts: (newMinimumLetterCounts: Map<string, number>) => void;
 };
 
-export const useGameStore = create<GameStore>((set, get) => ({
-  wordLength: WordLength.FIVE,
-  setWordLength: (newWordLength: WordLength) =>
-    set({ wordLength: newWordLength }),
+/**
+ * Root store shape.
+ *
+ * - activeSession: Which session is currently being manipulated.
+ * - sessions: Map of session type -> GameSession.
+ * - setters: session-scope mutators that updates only the active session.
+ */
+type GameStore = {
+  activeSession: SessionType;
+  sessions: Map<SessionType, GameSession>;
+  setActiveSession: (session: SessionType) => void;
+  setGameState: (gameState: GameState) => void;
+  setRow: (row: number) => void;
+  setCol: (col: number) => void;
+  setReferenceGrid: (referenceGrid: DataCell[][]) => void;
+  setGameGrid: (gameGrid: DataCell[][]) => void;
+  setGameId: (gameId: number) => void;
+  setReferenceGridId: (referenceGridId: number) => void;
+  setKeyStatuses: (
+    updater:
+      | Partial<Record<string, CellStatusType>>
+      | ((
+          prev: Partial<Record<string, CellStatusType>>,
+        ) => Partial<Record<string, CellStatusType>>),
+  ) => void;
+  setRuleset: (ruleset: Ruleset) => void;
+  setWordLength: (wordlength: WordLength) => void;
+  setLockedPositions: (lockedPositions: Map<number, string>) => void;
+  setMinimumLetterCounts: (minimumLetterCounts: Map<string, number>) => void;
+  resetReferenceGrid: () => void;
+  resetGameGrid: () => void;
+  resetKeyStatuses: () => void;
+  setTargetWord: (targetWord: string) => void;
+  incrementGameId: () => number;
+  incrementRow: () => void;
+};
 
-  // Game state
+/**
+ * Creates a fresh GameSession.
+ */
+const initGameSession = (): GameSession => ({
   gameState: GameState.PLAYING,
-  setGameState: (gameState) => set({ gameState }),
-
-  // Cursor
   row: 0,
   col: 0,
-  setRow: (row) =>
-    set((state) => ({
-      row: typeof row === "function" ? row(state.row) : row,
-    })),
-
-  setCol: (col) =>
-    set((state) => ({
-      col: typeof col === "function" ? col(state.col) : col,
-    })),
-
-  // Grids
-  gameGrid: initEmptyDataGrid(ATTEMPTS, WordLength.FIVE),
   referenceGrid: initEmptyDataGrid(1, WordLength.FIVE),
-
-  setGameGrid: (grid) => set({ gameGrid: grid }),
-  setReferenceGrid: (grid) => set({ referenceGrid: grid }),
-
-  resetGameGrid: () =>
-    set({
-      gameGrid: initEmptyDataGrid(
-        ATTEMPTS,
-        WordLength.FIVE,
-        CellStatus.DEFAULT,
-      ),
-    }),
-
-  resetReferenceGrid: () =>
-    set({
-      referenceGrid: initEmptyDataGrid(1, WordLength.FIVE, CellStatus.HIDDEN),
-    }),
-
-  // Target word
+  gameGrid: initEmptyDataGrid(ATTEMPTS, WordLength.FIVE),
   targetWord: "",
-  setTargetWord: (word) => set({ targetWord: word }),
-
-  // Game ID
   gameId: 0,
-  incrementGameId: () => {
-    set((state) => ({ gameId: state.gameId + 1 }));
-    return get().gameId;
-  },
-
-  referenceGridId: null,
-  setReferenceGridId: (id) => set({ referenceGridId: id }),
-
-  // Keyboard
+  referenceGridId: 0,
   keyStatuses: {},
-  setKeyStatuses: (updater) =>
-    set((state) => ({
-      keyStatuses: updater(state.keyStatuses),
-    })),
-  resetKeyStatuses: () =>
-    set({
-      keyStatuses: {},
-    }),
-
-  sessionRuleset: null,
-  setSessionRuleset: (newRuleset) => set({ sessionRuleset: newRuleset }),
-
+  ruleset: null,
+  wordLength: WordLength.FIVE,
   lockedPositions: new Map<number, string>(),
-  setLockedPositions: (newLockedPositions) =>
-    set({ lockedPositions: newLockedPositions }),
   minimumLetterCounts: new Map<string, number>(),
-  setMinimumLetterCounts: (newMinimumLetterCounts) =>
-    set({ minimumLetterCounts: newMinimumLetterCounts }),
-}));
+});
+
+/**
+ * Helper factory that creates a session-scoped updater:
+ * - Clones the sessions Map.
+ * - Reads the current active session.
+ * - Applies the updater to that session only.
+ * - Writes the updated session back into the Map.
+ */
+const createUpdateSession = (set: StoreApi<GameStore>["setState"]) => {
+  return (updater: (prev: GameSession) => GameSession) => {
+    set((state) => {
+      const sessions = new Map(state.sessions);
+      const prev = sessions.get(state.activeSession);
+      if (!prev) return state;
+
+      sessions.set(state.activeSession, updater(prev));
+      return { sessions };
+    });
+  };
+};
+
+/**
+ * Main store hook.
+ *
+ * Exposes:
+ * - Session switching.
+ * - Per-session setters.
+ * - Reset helpers.
+ * - ID increment helpers.
+ *
+ * All setters operate on the currently active session only.
+ */
+export const useGameStore = create<GameStore>((set, get) => {
+  const updateSession = createUpdateSession(set);
+  return {
+    activeSession: SessionType.DAILY,
+    sessions: new Map<SessionType, GameSession>([
+      [SessionType.DAILY, initGameSession()],
+      [SessionType.PRACTICE, initGameSession()],
+    ]),
+    setActiveSession: (session: SessionType) => set({ activeSession: session }),
+
+    setGameState: (gameState: GameState) =>
+      updateSession((prev) => ({
+        ...prev,
+        gameState,
+      })),
+
+    setRow: (row: number) => updateSession((prev) => ({ ...prev, row })),
+    setCol: (col: number) => updateSession((prev) => ({ ...prev, col })),
+
+    setReferenceGrid: (referenceGrid: DataCell[][]) =>
+      updateSession((prev) => ({ ...prev, referenceGrid })),
+    setGameGrid: (gameGrid: DataCell[][]) =>
+      updateSession((prev) => ({ ...prev, gameGrid })),
+
+    setTargetWord: (targetWord: string) =>
+      updateSession((prev) => ({ ...prev, targetWord })),
+
+    setGameId: (gameId: number) =>
+      updateSession((prev) => ({
+        ...prev,
+        gameId,
+      })),
+
+    setReferenceGridId: (referenceGridId: number) =>
+      updateSession((prev) => ({
+        ...prev,
+        referenceGridId,
+      })),
+
+    setKeyStatuses: (
+      updater:
+        | Partial<Record<string, CellStatusType>>
+        | ((
+            prev: Partial<Record<string, CellStatusType>>,
+          ) => Partial<Record<string, CellStatusType>>),
+    ) =>
+      updateSession((prev) => {
+        const nextKeyStatuses =
+          typeof updater === "function" ? updater(prev.keyStatuses) : updater;
+
+        return {
+          ...prev,
+          keyStatuses: nextKeyStatuses,
+        };
+      }),
+
+    setRuleset: (ruleset: Ruleset) => {
+      updateSession((prev) => ({
+        ...prev,
+        ruleset,
+      }));
+    },
+
+    setWordLength: (wordLength: WordLength) => {
+      updateSession((prev) => ({
+        ...prev,
+        wordLength,
+      }));
+    },
+
+    setLockedPositions: (lockedPositions: Map<number, string>) => {
+      updateSession((prev) => ({
+        ...prev,
+        lockedPositions,
+      }));
+    },
+
+    setMinimumLetterCounts: (minimumLetterCounts: Map<string, number>) => {
+      updateSession((prev) => ({
+        ...prev,
+        minimumLetterCounts,
+      }));
+    },
+
+    resetReferenceGrid: () =>
+      updateSession((prev) => ({
+        ...prev,
+        referenceGrid: initEmptyDataGrid(1, prev.wordLength, CellStatus.HIDDEN),
+      })),
+
+    resetGameGrid: () =>
+      updateSession((prev) => ({
+        ...prev,
+        gameGrid: initEmptyDataGrid(ATTEMPTS, prev.wordLength),
+      })),
+
+    resetKeyStatuses: () =>
+      updateSession((prev) => ({
+        ...prev,
+        keyStatuses: {},
+      })),
+
+    incrementGameId: () => {
+      let nextId = 0;
+      updateSession((prev) => {
+        nextId = prev.gameId + 1;
+        return { ...prev, gameId: nextId };
+      });
+      return nextId;
+    },
+    incrementRow: () => {
+      updateSession((prev) => ({
+        ...prev,
+        row: prev.row + 1,
+      }));
+    },
+  };
+});
