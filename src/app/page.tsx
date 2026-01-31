@@ -4,8 +4,9 @@ import { useState } from "react";
 import Link from "next/link";
 
 import { useSettingsContext } from "@/app/contexts/SettingsContext";
+import { useGameStore } from "@/store/useGameStore";
 
-import { GameSession, Ruleset } from "@/lib/constants";
+import { Ruleset, SessionType } from "@/lib/constants";
 
 import { useGame } from "@/hooks/useGame";
 
@@ -25,12 +26,14 @@ import styles from "@/app/page.module.css";
  * - Forces a full remount of the game tree when the session changes.
  */
 export default function Home() {
-  const [gameSession, setGameSession] = useState(GameSession.DAILY);
+  const activeSession = useGameStore((s) => s.activeSession);
+  const setActiveSession = useGameStore((s) => s.setActiveSession);
+
   return (
     <GameRoot
-      key={gameSession}
-      gameSession={gameSession}
-      setGameSession={setGameSession}
+      key={activeSession}
+      gameSession={activeSession}
+      setGameSession={setActiveSession}
     />
   );
 }
@@ -57,11 +60,11 @@ function GameRoot({
   gameSession,
   setGameSession,
 }: {
-  gameSession: GameSession;
-  setGameSession: (gameSession: GameSession) => void;
+  gameSession: SessionType;
+  setGameSession: (gameSession: SessionType) => void;
 }) {
   const { gameGrid, referenceGrid, keyboard, game, toasts, input, render } =
-    useGame(gameSession);
+    useGame();
 
   const { ruleset, showReferenceGrid, showKeyStatuses } = useSettingsContext();
   const current = new Date();
@@ -76,12 +79,12 @@ function GameRoot({
   return (
     <div className={styles["app"]}>
       <header className={`${styles["app__banner"]} flex-center`}>
-        {gameSession === GameSession.DAILY ? (
+        {gameSession === SessionType.DAILY ? (
           <Banner
             right={[
               <InfinityIcon
                 key="practice"
-                onClick={() => setGameSession(GameSession.PRACTICE)}
+                onClick={() => setGameSession(SessionType.PRACTICE)}
               />,
               <Link key="settings" href="/settings">
                 <SettingsIcon />
@@ -93,7 +96,7 @@ function GameRoot({
             right={[
               <CalendarIcon
                 key="daily"
-                onClick={() => setGameSession(GameSession.DAILY)}
+                onClick={() => setGameSession(SessionType.DAILY)}
               />,
               <Link key="settings" href="/settings">
                 <SettingsIcon />
@@ -109,7 +112,7 @@ function GameRoot({
         ) : (
           <section className={styles["game-board__container"]}>
             <div className={styles["game-board__date"]}>
-              {gameSession === GameSession.DAILY
+              {gameSession === SessionType.DAILY
                 ? "daily mode (" + date + ")"
                 : "practice mode"}
             </div>

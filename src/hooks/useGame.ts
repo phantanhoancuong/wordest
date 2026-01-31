@@ -8,7 +8,6 @@ import {
   AnimationSpeedMultiplier,
   CellAnimation,
   CellStatus,
-  GameSession,
   GameState,
   Ruleset,
 } from "@/lib/constants";
@@ -36,7 +35,7 @@ const LETTER_REGEX = /^[A-Z]$/;
  *
  * @returns Game controller and associated utilities.
  */
-export const useGame = (gameSession: GameSession): UseGameReturn => {
+export const useGame = (): UseGameReturn => {
   const {
     targetWord,
     targetLetterCount,
@@ -57,13 +56,19 @@ export const useGame = (gameSession: GameSession): UseGameReturn => {
   const animationSpeedMultiplier =
     AnimationSpeedMultiplier[animationSpeed.value];
 
-  const dataGameGrid = useGameStore((s) => s.gameGrid);
+  const dataGameGrid = useGameStore(
+    (s) => s.sessions.get(s.activeSession).gameGrid,
+  );
   const setDataGameGrid = useGameStore((s) => s.setGameGrid);
   const resetDataGameGrid = useGameStore((s) => s.resetGameGrid);
-  const dataReferenceGrid = useGameStore((s) => s.referenceGrid);
+  const dataReferenceGrid = useGameStore(
+    (s) => s.sessions.get(s.activeSession).referenceGrid,
+  );
   const setDataReferenceGrid = useGameStore((s) => s.setReferenceGrid);
   const resetDataReferenceGrid = useGameStore((s) => s.resetReferenceGrid);
-  const wordLengthStore = useGameStore((s) => s.wordLength);
+  const wordLengthStore = useGameStore(
+    (s) => s.sessions.get(s.activeSession).wordLength,
+  );
   const setWordLengthStore = useGameStore((s) => s.setWordLength);
 
   const gameGrid = useGridState(
@@ -95,12 +100,16 @@ export const useGame = (gameSession: GameSession): UseGameReturn => {
     isMuted.value ? 0 : volume.value,
   );
 
-  const sessionRuleset = useGameStore((s) => s.sessionRuleset);
-  const setSessionRuleset = useGameStore((s) => s.setSessionRuleset);
+  const rulesetStore = useGameStore(
+    (s) => s.sessions.get(s.activeSession).ruleset,
+  );
+  const setRulesetStore = useGameStore((s) => s.setRuleset);
 
-  const gameId = useGameStore((s) => s.gameId);
+  const gameId = useGameStore((s) => s.sessions.get(s.activeSession).gameId);
   const incrementGameId = useGameStore((s) => s.incrementGameId);
-  const referenceGridId = useGameStore((s) => s.referenceGridId);
+  const referenceGridId = useGameStore(
+    (s) => s.sessions.get(s.activeSession).referenceGridId,
+  );
   const setReferenceGridId = useGameStore((s) => s.setReferenceGridId);
 
   const gameGridAnimationTracker = useAnimationTracker(
@@ -118,9 +127,8 @@ export const useGame = (gameSession: GameSession): UseGameReturn => {
   /**
    * Initialize the reference grid according to the fetched target word.
    */
-  const populateReferenceGrid = () => {
-    const currentWord = useGameStore.getState().targetWord;
-    const newRow = currentWord.split("").map((ch) => ({
+  const populateReferenceGrid = (word: string) => {
+    const newRow = word.split("").map((ch) => ({
       char: ch,
       status: CellStatus.HIDDEN,
       animation: CellAnimation.NONE,
@@ -142,9 +150,9 @@ export const useGame = (gameSession: GameSession): UseGameReturn => {
       return;
     }
 
-    if (ruleset.value !== sessionRuleset) {
+    if (ruleset.value !== rulesetStore) {
       // If the ruleset changed, restart and fetch new word
-      setSessionRuleset(ruleset.value);
+      setRulesetStore(ruleset.value);
       restartGame(); // restart handles target word fetch
       return;
     }
@@ -166,8 +174,8 @@ export const useGame = (gameSession: GameSession): UseGameReturn => {
       toastList.forEach((t) => removeToast(t.id));
       useStrictConstraints.resetStrictConstraints();
 
-      populateReferenceGrid();
-      setReferenceGridId(useGameStore.getState().gameId);
+      populateReferenceGrid(targetWord);
+      setReferenceGridId(gameId);
     }
   }, []);
 
@@ -351,7 +359,7 @@ export const useGame = (gameSession: GameSession): UseGameReturn => {
 
     if (!word) return;
 
-    populateReferenceGrid();
+    populateReferenceGrid(word);
     setReferenceGridId(newGameId);
   };
 
