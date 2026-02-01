@@ -21,6 +21,7 @@ export const useTargetWord = (): UseTargetWordReturn => {
   const setTargetWord = useGameStore((s) => s.setTargetWord);
   const [error, setError] = useState<string>("");
   const targetLetterCount = useRef<Record<string, number>>({});
+  const activeSession = useGameStore((s) => s.activeSession);
 
   /**
    * Clears the current target word from the store.
@@ -36,7 +37,7 @@ export const useTargetWord = (): UseTargetWordReturn => {
   const loadTargetWord = async (length: WordLength): Promise<string | null> => {
     try {
       setError("");
-      const word = await fetchWordFromApi(length);
+      const word = await fetchWordFromApi(length, activeSession);
       setTargetWord(word);
       return word;
     } catch (err: unknown) {

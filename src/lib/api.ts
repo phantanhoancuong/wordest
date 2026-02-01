@@ -1,6 +1,6 @@
-import { WordLength } from "@/lib/constants";
+import { SessionType, WordLength } from "@/lib/constants";
 
-interface FetchWordReponse {
+interface FetchWordResponse {
   target: string;
   error?: string;
 }
@@ -24,26 +24,31 @@ interface ValidationResult {
  *
  * @async
  * @param wordLength - The length of the guess.
+ * @param session - The game session type (SessionType.DAILY, SessionType.PRACTICE)
  * @returns The target word in uppercase.
  * @throws {Error} If the HTTP request fails or the response is invalid.
  */
 export const fetchWordFromApi = async (
-  wordLength: WordLength
+  wordLength: WordLength,
+  session: SessionType,
 ): Promise<string> => {
-  const res = await fetch(`/api/word?length=${wordLength}`);
+  const result = await fetch(
+    `/api/word?length=${wordLength}&session=${session}`,
+  );
 
-  if (!res.ok) {
-    throw new Error(`HTTP error! Status: ${res.status}`);
+  if (!result.ok) {
+    throw new Error(`HTTP error! Status: ${result.status}`);
   }
 
-  const data: FetchWordReponse = await res.json();
+  const data: FetchWordResponse = await result.json();
 
   if (data.error || !data.target) {
-    throw new Error(data.error ?? "Invalid server response");
+    throw new Error(data.error ?? "Invalid server response!");
   }
 
   return data.target.toUpperCase();
 };
+
 /**
  * Validates a guessed word against the dictionary API.
  *
@@ -56,7 +61,7 @@ export const fetchWordFromApi = async (
  */
 export const validateWord = async (
   word: string,
-  wordLength: number
+  wordLength: number,
 ): Promise<ValidationResult> => {
   try {
     const result = await fetch("/api/validate", {

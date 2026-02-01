@@ -1,6 +1,5 @@
 "use client";
 
-import { useState } from "react";
 import Link from "next/link";
 
 import { useSettingsContext } from "@/app/contexts/SettingsContext";
@@ -136,12 +135,14 @@ function GameRoot({
                       layoutCols={gameGrid.colNum}
                     />
                   ) : null}
-                  <button
-                    className={styles["game-board__button"]}
-                    onClick={game.restartGame}
-                  >
-                    restart
-                  </button>
+                  {gameSession === SessionType.PRACTICE ? (
+                    <button
+                      className={styles["game-board__button"]}
+                      onClick={game.restartGame}
+                    >
+                      restart
+                    </button>
+                  ) : null}
                 </div>
               </div>
 
