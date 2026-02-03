@@ -7,6 +7,7 @@ import {
   Theme,
   WordLength,
 } from "@/lib/constants";
+import { UseSettingsReturn } from "@/types/useSettingsReturn.types";
 
 import { useLocalStorage } from "@/hooks/useLocalStorage";
 
@@ -18,7 +19,7 @@ import { useLocalStorage } from "@/hooks/useLocalStorage";
  *
  * @returns An object to deal with animation speed, volume value, and whether or not the volume is muted.
  */
-export const useSettings = () => {
+export const useSettings = (): UseSettingsReturn => {
   // Persisted settings state, backed by localStorage.
   const [settings, setSettings] = useLocalStorage<Settings>(
     SETTINGS_KEY,
