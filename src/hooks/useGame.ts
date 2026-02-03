@@ -141,21 +141,84 @@ export const useGame = (): UseGameReturn => {
 
   const [hasHydrated, setHasHydrated] = useState(false);
 
+  /**
+   * Initializes the game state and UI.
+   *
+   * Resets states (cursor, animations, key statuses, grids, toasts, and strict constraints),
+   * optionally increments the game ID, and (re)loads the target word based on the current settings.
+   *
+   * When 'restart' is true, this is treated as a full restart:
+   * - Increments the game ID.
+   * - Clears the reference grid Id so a new target word is fetched and rendered.
+   *
+   * When 'restart' is false, perform a soft re-initialization:
+   * - Resets UI and state without incrementing the game ID.
+   * - Used when hydrating or re-syncing an existing session.
+   * @param restart - Whether to perform a full restart or not.
+   */
+  const initGame = async (restart: boolean = false) => {
+    isInputLocked.current = true;
+    gameState.resetState();
+    cursor.resetCursor();
+
+    resetKeyStatuses();
+    let newGameId = gameId;
+    if (restart) {
+      newGameId = incrementGameId();
+      setReferenceGridId(null);
+    }
+
+    gameGrid.resetGrid();
+    referenceGrid.resetGrid();
+
+    gameGridAnimationTracker.reset();
+    referenceGridAnimationTracker.reset();
+
+    toastList.forEach((t) => removeToast(t.id));
+
+    resetTargetWord();
+
+    useStrictConstraints.resetStrictConstraints();
+
+    const word = await loadTargetWord(
+      wordLength.value,
+      activeSession,
+      ruleset.value,
+    );
+
+    if (!word) return;
+
+    populateReferenceGrid(word);
+    setReferenceGridId(newGameId);
+
+    isInputLocked.current = false;
+  };
+
+  /** Fully restarts the game.
+   *
+   * This is a wrapper for 'initGame(true)'.
+   */
+  const restartGame = async () => {
+    await initGame(true);
+  };
+
   // Initialize the game
   useEffect(() => {
     // Mark client as hydrated to render
     setHasHydrated(true);
 
+    // If the user has changed settings that require a new game.
+    let shouldRestart = false;
     if (wordLength.value !== wordLengthStore) {
       setWordLengthStore(wordLength.value);
-      restartGame();
-      return;
+      shouldRestart = true;
     }
-
     if (ruleset.value !== rulesetStore) {
-      // If the ruleset changed, restart and fetch new word
       setRulesetStore(ruleset.value);
-      restartGame(); // restart handles target word fetch
+      shouldRestart = true;
+    }
+    if (shouldRestart) {
+      initGame(true);
       return;
     }
 
@@ -165,19 +228,7 @@ export const useGame = (): UseGameReturn => {
     // If this is a new game, reset UI and populate grid
     if (referenceGridId !== gameId) {
       // Reset state & UI (but does not increment the ID unlike restartGame)
-      gameState.resetState();
-      cursor.resetCursor();
-      isInputLocked.current = false;
-      resetKeyStatuses();
-      gameGrid.resetGrid();
-      referenceGrid.resetGrid();
-      gameGridAnimationTracker.reset();
-      referenceGridAnimationTracker.reset();
-      toastList.forEach((t) => removeToast(t.id));
-      useStrictConstraints.resetStrictConstraints();
-
-      populateReferenceGrid(targetWord);
-      setReferenceGridId(gameId);
+      initGame();
     }
   }, []);
 
@@ -185,7 +236,7 @@ export const useGame = (): UseGameReturn => {
     referenceGrid.flushAnimation(finishedMap);
   });
 
-  const isInputLocked = useRef(false);
+  const isInputLocked = useRef(true);
 
   /**
    * Handles the completion of a single cell's animation in the main game grid.
@@ -326,44 +377,6 @@ export const useGame = (): UseGameReturn => {
     if (isBackspace) return handleBackspace();
     else if (isEnter) return handleSubmit();
     else handleLetter(key);
-  };
-
-  /**
-   * Resets the game to its initial state.
-   *
-   * Clears the game grid, reference grid, keyboard statuses, animations, toasts,
-   * and reloads a new target word.
-   */
-  const restartGame = async (): Promise<void> => {
-    gameState.resetState();
-    cursor.resetCursor();
-    isInputLocked.current = false;
-
-    resetKeyStatuses();
-
-    const newGameId = incrementGameId();
-    setReferenceGridId(null);
-
-    gameGrid.resetGrid();
-    referenceGrid.resetGrid();
-
-    gameGridAnimationTracker.reset();
-    referenceGridAnimationTracker.reset();
-
-    toastList.forEach((t) => removeToast(t.id));
-
-    resetTargetWord();
-
-    useStrictConstraints.resetStrictConstraints();
-
-    const length = wordLength.value;
-
-    const word = await loadTargetWord(length);
-
-    if (!word) return;
-
-    populateReferenceGrid(word);
-    setReferenceGridId(newGameId);
   };
 
   /**
