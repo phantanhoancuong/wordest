@@ -1,8 +1,9 @@
 import {
+  SETTINGS_KEY,
   AnimationSpeed,
   DefaultSettings,
-  LocalStorageKeys,
   Ruleset,
+  Settings,
   Theme,
   WordLength,
 } from "@/lib/constants";
@@ -18,71 +19,56 @@ import { useLocalStorage } from "@/hooks/useLocalStorage";
  * @returns An object to deal with animation speed, volume value, and whether or not the volume is muted.
  */
 export const useSettings = () => {
-  const [animationSpeed, setAnimationSpeed] = useLocalStorage<AnimationSpeed>(
-    LocalStorageKeys.ANIMATION_SPEED,
-    DefaultSettings.ANIMATION_SPEED,
-  );
-  const [volume, setVolume] = useLocalStorage<number>(
-    LocalStorageKeys.VOLUME,
-    DefaultSettings.VOLUME,
-  );
-  const [isMuted, setIsMuted] = useLocalStorage<boolean>(
-    LocalStorageKeys.IS_MUTED,
-    DefaultSettings.IS_MUTED,
-  );
-  const [ruleset, setRuleset] = useLocalStorage<Ruleset>(
-    LocalStorageKeys.RULESET,
-    DefaultSettings.RULESET,
-  );
-  const [wordLength, setWordLength] = useLocalStorage<WordLength>(
-    LocalStorageKeys.WORD_LENGTH,
-    DefaultSettings.WORD_LENGTH,
-  );
-  const [theme, setTheme] = useLocalStorage<Theme>(
-    LocalStorageKeys.THEME,
-    DefaultSettings.THEME,
-  );
-  const [showReferenceGrid, setShowReferenceGrid] = useLocalStorage<boolean>(
-    LocalStorageKeys.SHOW_REFERENCE_GRID,
-    DefaultSettings.SHOW_REFERENCE_GRID,
-  );
-  const [showKeyStatuses, setShowKeyStatuses] = useLocalStorage<boolean>(
-    LocalStorageKeys.SHOW_KEY_STATUSES,
-    DefaultSettings.SHOW_KEY_STATUSES,
-  );
-  const [colorAccess, setColorAccess] = useLocalStorage<boolean>(
-    LocalStorageKeys.COLOR_ACCESS,
-    DefaultSettings.COLOR_ACCESS,
+  // Persisted settings state, backed by localStorage.
+  const [settings, setSettings] = useLocalStorage<Settings>(
+    SETTINGS_KEY,
+    DefaultSettings,
   );
 
+  // Updates a single setting key.
+  const set = <K extends keyof Settings>(key: K, value: Settings[K]) => {
+    setSettings((prev) => ({ ...prev, [key]: value }));
+  };
+
+  // Resets all settings back to their default values.
   const resetSettings = () => {
-    setAnimationSpeed(DefaultSettings.ANIMATION_SPEED);
-    setVolume(DefaultSettings.VOLUME);
-    setIsMuted(DefaultSettings.IS_MUTED);
-    setRuleset(DefaultSettings.RULESET);
-    setWordLength(DefaultSettings.WORD_LENGTH);
-    setTheme(DefaultSettings.THEME);
-    setShowReferenceGrid(DefaultSettings.SHOW_REFERENCE_GRID);
-    setShowKeyStatuses(DefaultSettings.SHOW_KEY_STATUSES);
-    setColorAccess(DefaultSettings.COLOR_ACCESS);
+    setSettings(DefaultSettings);
   };
 
   return {
-    animationSpeed: { value: animationSpeed, setValue: setAnimationSpeed },
-    volume: { value: volume, setValue: setVolume },
-    isMuted: { value: isMuted, setValue: setIsMuted },
-    ruleset: { value: ruleset, setValue: setRuleset },
-    wordLength: { value: wordLength, setValue: setWordLength },
-    theme: { value: theme, setValue: setTheme },
+    animationSpeed: {
+      value: settings.animationSpeed,
+      setValue: (v: AnimationSpeed) => set("animationSpeed", v),
+    },
+    volume: {
+      value: settings.volume,
+      setValue: (v: number) => set("volume", v),
+    },
+    isMuted: {
+      value: settings.isMuted,
+      setValue: (v: boolean) => set("isMuted", v),
+    },
+    ruleset: {
+      value: settings.ruleset,
+      setValue: (v: Ruleset) => set("ruleset", v),
+    },
+    wordLength: {
+      value: settings.wordLength,
+      setValue: (v: WordLength) => set("wordLength", v),
+    },
+    theme: { value: settings.theme, setValue: (v: Theme) => set("theme", v) },
     showReferenceGrid: {
-      value: showReferenceGrid,
-      setValue: setShowReferenceGrid,
+      value: settings.showReferenceGrid,
+      setValue: (v: boolean) => set("showReferenceGrid", v),
     },
     showKeyStatuses: {
-      value: showKeyStatuses,
-      setValue: setShowKeyStatuses,
+      value: settings.showKeyStatuses,
+      setValue: (v: boolean) => set("showReferenceGrid", v),
     },
-    colorAccess: { value: colorAccess, setValue: setColorAccess },
+    colorAccess: {
+      value: settings.colorAccess,
+      setValue: (v: boolean) => set("colorAccess", v),
+    },
     resetSettings,
   };
 };

@@ -107,40 +107,47 @@ export enum Theme {
   SYSTEM = "system",
 }
 
-// Keys and default values used for persisted user settings.
-export const LocalStorageKeys = {
-  ANIMATION_SPEED: "wordest:animationSpeed",
-  VOLUME: "wordest:volume",
-  IS_MUTED: "wordest:isMuted",
-  RULESET: "wordest:ruleset",
-  WORD_LENGTH: "wordest:wordLength",
-  THEME: "wordest:theme",
-  SHOW_REFERENCE_GRID: "wordest:showReferenceGrid",
-  SHOW_KEY_STATUSES: "wordest:showKeyStatuses",
-  COLOR_ACCESS: "wordest:colorAccess",
-};
-
-export const DefaultSettings = {
-  ANIMATION_SPEED: AnimationSpeed.NORMAL,
-  VOLUME: 2 / 3,
-  IS_MUTED: false,
-  RULESET: Ruleset.NORMAL,
-  WORD_LENGTH: WordLength.FIVE,
-  THEME: Theme.SYSTEM,
-  SHOW_REFERENCE_GRID: true,
-  SHOW_KEY_STATUSES: true,
-  COLOR_ACCESS: false,
-};
-
 // Default volume applied when unmuting from a zero-volume state.
 export const DEFAULT_UNMUTE_VOLUME = 1 / 3;
 
+// Visual variants for settings buttons.
 export enum SettingsButtonVariant {
   DEFAULT = "default",
+  // Destructive or dangerous action styling.
   DANGER = "danger",
 }
 
+// Support game sessions.
 export enum SessionType {
   DAILY = "daily",
   PRACTICE = "practice",
 }
+
+// Shape of persisted user settings object.
+export type Settings = {
+  animationSpeed: AnimationSpeed;
+  volume: number;
+  isMuted: boolean;
+  ruleset: Ruleset;
+  wordLength: WordLength;
+  theme: Theme;
+  showReferenceGrid: boolean;
+  showKeyStatuses: boolean;
+  colorAccess: boolean;
+};
+
+// Local storage key used to presist user settings.
+export const SETTINGS_KEY = "wordest:settings";
+
+// Default settings used when no persisted settings are found.
+export const DefaultSettings: Settings = {
+  animationSpeed: AnimationSpeed.NORMAL,
+  volume: 2 / 3,
+  isMuted: false,
+  ruleset: Ruleset.NORMAL,
+  wordLength: WordLength.FIVE,
+  theme: Theme.SYSTEM,
+  showReferenceGrid: true,
+  showKeyStatuses: true,
+  colorAccess: false,
+};
