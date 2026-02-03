@@ -138,7 +138,12 @@ function GameRoot({
                   {gameSession === SessionType.PRACTICE ? (
                     <button
                       className={styles["game-board__button"]}
-                      onClick={game.restartGame}
+                      onClick={(e) => {
+                        // Typing while the cursor is ontop of the restart button
+                        // introduces unexpected behavior.
+                        e.currentTarget.blur();
+                        game.restartGame();
+                      }}
                     >
                       restart
                     </button>
