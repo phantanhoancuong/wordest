@@ -42,16 +42,16 @@
   height: 100%;
 }
 
-.game-board__date {
+.game-board__info {
   height: 10%;
   display: flex;
   flex-direction: column;
   justify-content: flex-end;
   align-items: center;
-  font-size: calc(var(--item-font-scale) * 1.5rem);
+  font-size: calc(var(--item-font-scale) * 1.25rem);
   color: var(--app-text-color);
   user-select: none;
-  margin-bottom: calc(var(--item-font-scale) * 1.5rem);
+  margin-bottom: calc(var(--item-font-scale) * 1rem);
 }
 
 .game-board {

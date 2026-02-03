@@ -65,7 +65,8 @@ function GameRoot({
   const { gameGrid, referenceGrid, keyboard, game, toasts, input, render } =
     useGame();
 
-  const { ruleset, showReferenceGrid, showKeyStatuses } = useSettingsContext();
+  const { ruleset, showReferenceGrid, showKeyStatuses, wordLength } =
+    useSettingsContext();
   const current = new Date();
   const date = `${current.getDate()}/${current.getMonth() + 1}/${current.getFullYear()}`;
 
@@ -110,10 +111,15 @@ function GameRoot({
           <p className={styles["game__error"]}>{game.wordFetchError}</p>
         ) : (
           <section className={styles["game-board__container"]}>
-            <div className={styles["game-board__date"]}>
-              {gameSession === SessionType.DAILY
-                ? "daily mode (" + date + ")"
-                : "practice mode"}
+            <div className={styles["game-board__info"]}>
+              <div className={styles["game-board__date"]}>
+                {gameSession === SessionType.DAILY
+                  ? "daily mode (" + date + ")"
+                  : "practice mode"}
+              </div>
+              <div className={styles["game-board__ruleset"]}>
+                {ruleset.value + " " + wordLength.value + "-letter"}
+              </div>
             </div>
             <div className={`${styles["game-board"]} flex-center`}>
               <div className={styles["game-board__stack"]}>
