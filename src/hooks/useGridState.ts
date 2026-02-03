@@ -43,7 +43,7 @@ export const useGridState = (
   animationDelay: number = 0,
   dataGrid: DataCell[][],
   setDataGrid: (grid: DataCell[][]) => void,
-  resetDataGrid: () => void
+  resetDataGrid: () => void,
 ): UseGridStateReturn => {
   const rowNum = useRef(row);
   const colNum = useRef(col);
@@ -55,8 +55,8 @@ export const useGridState = (
     dataGridToRenderGrid(
       dataGrid,
       defaultAnimation.current,
-      defaultAnimationDelay.current
-    )
+      defaultAnimationDelay.current,
+    ),
   );
   const renderGridRef = useLatest(renderGrid);
 
@@ -71,8 +71,8 @@ export const useGridState = (
         colNum.current,
         defaultStatus.current,
         defaultAnimation.current,
-        defaultAnimationDelay.current
-      )
+        defaultAnimationDelay.current,
+      ),
     );
     resetDataGrid();
   };
@@ -103,7 +103,7 @@ export const useGridState = (
   const updateCell = (
     rowIndex: number,
     colIndex: number,
-    options: PartialRenderCell = {}
+    options: PartialRenderCell = {},
   ): void => {
     const {
       char = "",
@@ -131,7 +131,7 @@ export const useGridState = (
    * @param finishedCellMap - rowIndex -> array of finished colIndices.
    */
   const flushAnimation = (
-    finishedCellMap: Map<number, Array<number>>
+    finishedCellMap: Map<number, Array<number>>,
   ): void => {
     setRenderGrid((prevGrid: RenderCell[][]) => {
       const newGrid = [...prevGrid];
@@ -164,7 +164,7 @@ export const useGridState = (
   const applyValidGuessAnimation = (
     rowIndex: number,
     statuses: CellStatus[],
-    animationSpeedMultiplier: number
+    animationSpeedMultiplier: number,
   ): void => {
     const animatedRow = renderGridRef.current[rowIndex].map(
       (cell: RenderCell, i: number) => ({
@@ -173,7 +173,7 @@ export const useGridState = (
         animation: CellAnimation.BOUNCE,
         animationDelay:
           i * animationTiming.bounce.delay * animationSpeedMultiplier,
-      })
+      }),
     );
 
     updateRow(rowIndex, animatedRow);
@@ -190,7 +190,7 @@ export const useGridState = (
         ...cell,
         animation: CellAnimation.SHAKE,
         animationDelay: 0,
-      })
+      }),
     );
 
     updateRow(rowIndex, animatedRow);

@@ -1,3 +1,4 @@
+import { Ruleset, SessionType } from "@/lib/constants";
 import { WORD_LISTS, SupportedWordLength } from "@/types/wordList.types";
 
 /**
@@ -52,9 +53,10 @@ const getDateIndex = (): number => {
 export async function GET(req: Request) {
   try {
     const { searchParams } = new URL(req.url);
-
     const length = Number(searchParams.get("length")) as SupportedWordLength;
-    const sessionType = searchParams.get("session") ?? "practice"; // "daily" | "practice"
+    const sessionType =
+      (searchParams.get("session") as SessionType) ?? SessionType.PRACTICE;
+    const ruleset = (searchParams.get("ruleset") as Ruleset) ?? Ruleset.NORMAL;
 
     const lists = WORD_LISTS[length];
     if (!lists || lists.answers.length === 0) {
@@ -68,7 +70,12 @@ export async function GET(req: Request) {
       const cycleIndex = Math.floor(dateIndex / lists.answers.length);
       const wordIndex = dateIndex % lists.answers.length;
 
-      const rng = mulberry32(cycleIndex);
+      const seedBase = `${cycleIndex}|${length}|${sessionType}|${ruleset}`;
+      let seed = 0;
+      for (let i = 0; i < seedBase.length; i++)
+        seed = (seed * 31 + seedBase.charCodeAt(i)) >>> 0;
+
+      const rng = mulberry32(seed);
       const shuffledList = [...lists.answers];
 
       for (let i = shuffledList.length - 1; i > 0; i--) {

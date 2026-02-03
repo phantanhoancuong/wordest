@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 
 import { useGameStore } from "@/store/useGameStore";
 
-import { WordLength } from "@/lib/constants";
+import { Ruleset, SessionType, WordLength } from "@/lib/constants";
 import { UseTargetWordReturn } from "@/types/useTargetWord.types";
 
 import { fetchWordFromApi } from "@/lib/api";
@@ -21,7 +21,6 @@ export const useTargetWord = (): UseTargetWordReturn => {
   const setTargetWord = useGameStore((s) => s.setTargetWord);
   const [error, setError] = useState<string>("");
   const targetLetterCount = useRef<Record<string, number>>({});
-  const activeSession = useGameStore((s) => s.activeSession);
 
   /**
    * Clears the current target word from the store.
@@ -34,10 +33,14 @@ export const useTargetWord = (): UseTargetWordReturn => {
   };
 
   /** Fetches a new target word from the API and updates state. */
-  const loadTargetWord = async (length: WordLength): Promise<string | null> => {
+  const loadTargetWord = async (
+    length: WordLength,
+    activeSession: SessionType,
+    ruleset: Ruleset,
+  ): Promise<string | null> => {
     try {
       setError("");
-      const word = await fetchWordFromApi(length, activeSession);
+      const word = await fetchWordFromApi(length, activeSession, ruleset);
       setTargetWord(word);
       return word;
     } catch (err: unknown) {

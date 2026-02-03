@@ -1,4 +1,4 @@
-import { SessionType, WordLength } from "@/lib/constants";
+import { Ruleset, SessionType, WordLength } from "@/lib/constants";
 
 interface FetchWordResponse {
   target: string;
@@ -25,15 +25,17 @@ interface ValidationResult {
  * @async
  * @param wordLength - The length of the guess.
  * @param session - The game session type (SessionType.DAILY, SessionType.PRACTICE)
+ * @param ruleset - The ruleset the game uses (Ruleset.NORMAL, Ruleset.STRICT, Ruleset.HARDCORE)
  * @returns The target word in uppercase.
  * @throws {Error} If the HTTP request fails or the response is invalid.
  */
 export const fetchWordFromApi = async (
   wordLength: WordLength,
   session: SessionType,
+  ruleset: Ruleset,
 ): Promise<string> => {
   const result = await fetch(
-    `/api/word?length=${wordLength}&session=${session}`,
+    `/api/word?length=${wordLength}&session=${session}&ruleset=${ruleset}`,
   );
 
   if (!result.ok) {
