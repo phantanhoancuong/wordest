@@ -17,7 +17,7 @@
 }
 
 .preview-grid__legend {
-  font-size: calc(var(--item-font-scale) * 0.7rem);
+  font-size: calc(var(--item-font-scale) * 0.6rem);
 }
 
 .preview-grid__cell--correct,

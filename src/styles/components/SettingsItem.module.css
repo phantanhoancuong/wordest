@@ -41,6 +41,7 @@
   margin: 0;
   display: flex;
   flex-direction: column;
+  gap: calc(var(--item-font-scale) * 0.3rem);
 }
 
 .settings-item__actions {
