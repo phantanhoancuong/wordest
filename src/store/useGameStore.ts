@@ -37,8 +37,6 @@ type GameSession = {
   referenceGrid: DataCell[][];
   gameGrid: DataCell[][];
   targetWord: string;
-  gameId: number;
-  referenceGridId: number | null;
   keyStatuses: Partial<Record<string, CellStatusType>>;
   ruleset: Ruleset;
   wordLength: WordLength;
@@ -62,8 +60,6 @@ type GameStore = {
   setCol: (col: number) => void;
   setReferenceGrid: (referenceGrid: DataCell[][]) => void;
   setGameGrid: (gameGrid: DataCell[][]) => void;
-  setGameId: (gameId: number) => void;
-  setReferenceGridId: (referenceGridId: number) => void;
   setKeyStatuses: (
     updater:
       | Partial<Record<string, CellStatusType>>
@@ -79,7 +75,6 @@ type GameStore = {
   resetGameGrid: () => void;
   resetKeyStatuses: () => void;
   setTargetWord: (targetWord: string) => void;
-  incrementGameId: () => number;
   incrementRow: () => void;
 };
 
@@ -93,8 +88,6 @@ const initGameSession = (): GameSession => ({
   referenceGrid: initEmptyDataGrid(1, WordLength.FIVE),
   gameGrid: initEmptyDataGrid(ATTEMPTS, WordLength.FIVE),
   targetWord: "",
-  gameId: 0,
-  referenceGridId: 0,
   keyStatuses: {},
   ruleset: null,
   wordLength: WordLength.FIVE,
@@ -133,7 +126,7 @@ const createUpdateSession = (set: StoreApi<GameStore>["setState"]) => {
  *
  * All setters operate on the currently active session only.
  */
-export const useGameStore = create<GameStore>((set, get) => {
+export const useGameStore = create<GameStore>((set) => {
   const updateSession = createUpdateSession(set);
   return {
     activeSession: SessionType.DAILY,
@@ -159,18 +152,6 @@ export const useGameStore = create<GameStore>((set, get) => {
 
     setTargetWord: (targetWord: string) =>
       updateSession((prev) => ({ ...prev, targetWord })),
-
-    setGameId: (gameId: number) =>
-      updateSession((prev) => ({
-        ...prev,
-        gameId,
-      })),
-
-    setReferenceGridId: (referenceGridId: number) =>
-      updateSession((prev) => ({
-        ...prev,
-        referenceGridId,
-      })),
 
     setKeyStatuses: (
       updater:
@@ -235,14 +216,6 @@ export const useGameStore = create<GameStore>((set, get) => {
         keyStatuses: {},
       })),
 
-    incrementGameId: () => {
-      let nextId = 0;
-      updateSession((prev) => {
-        nextId = prev.gameId + 1;
-        return { ...prev, gameId: nextId };
-      });
-      return nextId;
-    },
     incrementRow: () => {
       updateSession((prev) => ({
         ...prev,

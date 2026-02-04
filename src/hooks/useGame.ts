@@ -36,9 +36,14 @@ const LETTER_REGEX = /^[A-Z]$/;
  * @returns Game controller and associated utilities.
  */
 export const useGame = (): UseGameReturn => {
+  /**
+   * Controller for reading/resetting/loading the target word.
+   * It reads the target word first from the global game store but it can be overridden.
+   */
   const targetWordController = useTargetWord();
-
+  /** Game state managing hook (PLAYING, WON, LOST). */
   const gameState = useGameState();
+  /** Cursor position managing hook. */
   const cursor = useCursorController();
 
   const [validationError, setValidationError] = useState("");
@@ -67,6 +72,7 @@ export const useGame = (): UseGameReturn => {
   );
   const setWordLengthStore = useGameStore((s) => s.setWordLength);
 
+  /** Main game grid state, persisted by the game store. */
   const gameGrid = useGridState(
     ATTEMPTS,
     wordLength.value,
@@ -77,7 +83,7 @@ export const useGame = (): UseGameReturn => {
     setDataGameGrid,
     resetDataGameGrid,
   );
-
+  /** Reference grid that helps the user accumulate clues and show the target word, persisted by the game store. */
   const referenceGrid = useGridState(
     1,
     wordLength.value,
@@ -101,13 +107,10 @@ export const useGame = (): UseGameReturn => {
   );
   const setRulesetStore = useGameStore((s) => s.setRuleset);
 
-  const gameId = useGameStore((s) => s.sessions.get(activeSession).gameId);
-  const incrementGameId = useGameStore((s) => s.incrementGameId);
-  const referenceGridId = useGameStore(
-    (s) => s.sessions.get(activeSession).referenceGridId,
-  );
-  const setReferenceGridId = useGameStore((s) => s.setReferenceGridId);
-
+  /**
+   * Tracks per-cell animations for the main game grid.
+   * When all animations finish, input is unlocked and any pending state is committed.
+   */
   const gameGridAnimationTracker = useAnimationTracker(
     (finishedMap) => {
       gameGrid.flushAnimation(finishedMap);
@@ -119,6 +122,11 @@ export const useGame = (): UseGameReturn => {
       }
     },
   );
+
+  /** Tracks per-cell animations for the reference grid and flushes them when finished. */
+  const referenceGridAnimationTracker = useAnimationTracker((finishedMap) => {
+    referenceGrid.flushAnimation(finishedMap);
+  });
 
   /**
    * Initialize the reference grid according to the fetched target word.
@@ -136,31 +144,22 @@ export const useGame = (): UseGameReturn => {
   const [hasHydrated, setHasHydrated] = useState(false);
 
   /**
-   * Initializes the game state and UI.
+   * Fully (re)initializes the game as a brand new game.
+   * - Locks input.
+   * - Resets game state, cursor, key statuses, grids, animations, toasts, and constraints.
+   * - Clears the current target word.
+   * - Fetches a new target word.
+   * - Populates the reference grid with the new word.
+   * - Unlocks input when ready.
    *
-   * Resets states (cursor, animations, key statuses, grids, toasts, and strict constraints),
-   * optionally increments the game ID, and (re)loads the target word based on the current settings.
-   *
-   * When 'restart' is true, this is treated as a full restart:
-   * - Increments the game ID.
-   * - Clears the reference grid Id so a new target word is fetched and rendered.
-   *
-   * When 'restart' is false, perform a soft re-initialization:
-   * - Resets UI and state without incrementing the game ID.
-   * - Used when hydrating or re-syncing an existing session.
-   * @param restart - Whether to perform a full restart or not.
+   * This should ONLY be called when creating a new game.
    */
-  const initGame = async (restart: boolean = false) => {
+  const initGame = async () => {
     isInputLocked.current = true;
     gameState.resetState();
     cursor.resetCursor();
 
     resetKeyStatuses();
-    let newGameId = gameId;
-    if (restart) {
-      newGameId = incrementGameId();
-      setReferenceGridId(null);
-    }
 
     gameGrid.resetGrid();
     referenceGrid.resetGrid();
@@ -183,17 +182,8 @@ export const useGame = (): UseGameReturn => {
     if (!word) return;
 
     populateReferenceGrid(word);
-    setReferenceGridId(newGameId);
 
     isInputLocked.current = false;
-  };
-
-  /** Fully restarts the game.
-   *
-   * This is a wrapper for 'initGame(true)'.
-   */
-  const restartGame = async () => {
-    await initGame(true);
   };
 
   // Initialize the game
@@ -201,7 +191,7 @@ export const useGame = (): UseGameReturn => {
     // Mark client as hydrated to render
     setHasHydrated(true);
 
-    // If the user has changed settings that require a new game.
+    // If the user has changed settings that require a new game or no word has been fetched (this is a fresh game).
     let shouldRestart = false;
     if (wordLength.value !== wordLengthStore) {
       setWordLengthStore(wordLength.value);
@@ -211,24 +201,15 @@ export const useGame = (): UseGameReturn => {
       setRulesetStore(ruleset.value);
       shouldRestart = true;
     }
+    // No word has been fetched, so just start a new game.
+    if (!targetWordController.targetWord) shouldRestart = true;
     if (shouldRestart) {
-      initGame(true);
+      initGame();
       return;
     }
 
-    // Only populate grid if we have a target word
-    if (!targetWordController.targetWord) return;
-
-    // If this is a new game, reset UI and populate grid
-    if (referenceGridId !== gameId) {
-      // Reset state & UI (but does not increment the ID unlike restartGame)
-      initGame();
-    }
+    isInputLocked.current = false;
   }, []);
-
-  const referenceGridAnimationTracker = useAnimationTracker((finishedMap) => {
-    referenceGrid.flushAnimation(finishedMap);
-  });
 
   const isInputLocked = useRef(true);
 
@@ -430,7 +411,7 @@ export const useGame = (): UseGameReturn => {
       validationError,
       wordFetchError: targetWordController.wordFetchError,
       targetWord: targetWordController.targetWord,
-      restartGame,
+      restartGame: initGame,
     },
 
     toasts: {
