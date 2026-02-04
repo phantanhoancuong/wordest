@@ -15,7 +15,7 @@ import { UseGameReturn } from "@/types/useGame.types";
 
 import { useAnimationTracker } from "@/hooks/useAnimationTracker";
 import { useCursorController } from "@/hooks/useCursorController";
-import { UseStrictConstraints } from "@/hooks/useStrictConstraints";
+import { useStrictConstraints } from "@/hooks/useStrictConstraints";
 import { useGameState } from "@/hooks/useGameState";
 import { useGridState } from "@/hooks/useGridState";
 import { useGuessSubmission } from "@/hooks/useGuessSubmission";
@@ -36,13 +36,7 @@ const LETTER_REGEX = /^[A-Z]$/;
  * @returns Game controller and associated utilities.
  */
 export const useGame = (): UseGameReturn => {
-  const {
-    targetWord,
-    targetLetterCount,
-    wordFetchError,
-    loadTargetWord,
-    resetTargetWord,
-  } = useTargetWord();
+  const targetWordController = useTargetWord();
 
   const gameState = useGameState();
   const cursor = useCursorController();
@@ -95,7 +89,7 @@ export const useGame = (): UseGameReturn => {
     resetDataReferenceGrid,
   );
 
-  const useStrictConstraints = UseStrictConstraints();
+  const strictConstraints = useStrictConstraints();
 
   const playKeySound = useSoundPlayer(
     ["/sounds/key_01.mp3", "/sounds/key_02.mp3"],
@@ -176,11 +170,11 @@ export const useGame = (): UseGameReturn => {
 
     toastList.forEach((t) => removeToast(t.id));
 
-    resetTargetWord();
+    targetWordController.resetTargetWord();
 
-    useStrictConstraints.resetStrictConstraints();
+    strictConstraints.resetStrictConstraints();
 
-    const word = await loadTargetWord(
+    const word = await targetWordController.loadTargetWord(
       wordLength.value,
       activeSession,
       ruleset.value,
@@ -223,7 +217,7 @@ export const useGame = (): UseGameReturn => {
     }
 
     // Only populate grid if we have a target word
-    if (!targetWord) return;
+    if (!targetWordController.targetWord) return;
 
     // If this is a new game, reset UI and populate grid
     if (referenceGridId !== gameId) {
@@ -360,7 +354,7 @@ export const useGame = (): UseGameReturn => {
    */
   const handleInput = (key: string): void => {
     if (
-      !targetWord ||
+      !targetWordController.targetWord ||
       isInputLocked.current ||
       gameState.state !== GameState.PLAYING
     )
@@ -393,15 +387,15 @@ export const useGame = (): UseGameReturn => {
   const submitGuess = useGuessSubmission(
     ruleset.value === Ruleset.STRICT || ruleset.value === Ruleset.HARDCORE,
     animationSpeedMultiplier,
-    targetLetterCount,
-    targetWord,
+    targetWordController.targetLetterCount,
+    targetWordController.targetWord,
     referenceGrid,
     gameGrid,
     gameState,
     cursor,
     gameGridAnimationTracker,
     referenceGridAnimationTracker,
-    useStrictConstraints,
+    strictConstraints,
     addToast,
     handleValidationError,
     setValidationError,
@@ -434,8 +428,8 @@ export const useGame = (): UseGameReturn => {
     game: {
       gameState: gameState.state,
       validationError,
-      wordFetchError,
-      targetWord,
+      wordFetchError: targetWordController.wordFetchError,
+      targetWord: targetWordController.targetWord,
       restartGame,
     },
 

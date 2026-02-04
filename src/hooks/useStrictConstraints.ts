@@ -17,7 +17,7 @@ import { countLetter } from "@/lib/utils";
  *
  *@param addToast - Function used to display validation error messages.
  */
-export const UseStrictConstraints = (): UseStrictConstraintsReturn => {
+export const useStrictConstraints = (): UseStrictConstraintsReturn => {
   const lockedPositions = useGameStore(
     (s) => s.sessions.get(s.activeSession).lockedPositions,
   );
