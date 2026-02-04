@@ -36,7 +36,7 @@ type GameSession = {
   col: number;
   referenceGrid: DataCell[][];
   gameGrid: DataCell[][];
-  targetWord: string;
+  targetWord: string | null;
   keyStatuses: Partial<Record<string, CellStatusType>>;
   ruleset: Ruleset;
   wordLength: WordLength;
@@ -74,7 +74,7 @@ type GameStore = {
   resetReferenceGrid: () => void;
   resetGameGrid: () => void;
   resetKeyStatuses: () => void;
-  setTargetWord: (targetWord: string) => void;
+  setTargetWord: (targetWord: string | null) => void;
   incrementRow: () => void;
 };
 
@@ -87,7 +87,7 @@ const initGameSession = (): GameSession => ({
   col: 0,
   referenceGrid: initEmptyDataGrid(1, WordLength.FIVE),
   gameGrid: initEmptyDataGrid(ATTEMPTS, WordLength.FIVE),
-  targetWord: "",
+  targetWord: null,
   keyStatuses: {},
   ruleset: null,
   wordLength: WordLength.FIVE,
@@ -150,7 +150,7 @@ export const useGameStore = create<GameStore>((set) => {
     setGameGrid: (gameGrid: DataCell[][]) =>
       updateSession((prev) => ({ ...prev, gameGrid })),
 
-    setTargetWord: (targetWord: string) =>
+    setTargetWord: (targetWord: string | null) =>
       updateSession((prev) => ({ ...prev, targetWord })),
 
     setKeyStatuses: (

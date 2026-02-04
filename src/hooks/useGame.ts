@@ -47,8 +47,8 @@ export const useGame = (): UseGameReturn => {
   const cursor = useCursorController();
 
   const [validationError, setValidationError] = useState("");
-  const { toastList, addToast, removeToast } = useToasts();
-  const { keyStatuses, updateKeyStatuses, resetKeyStatuses } = useKeyStatuses();
+  const toastsController = useToasts();
+  const keyStatusesController = useKeyStatuses();
   const { volume, animationSpeed, isMuted, ruleset, wordLength } =
     useSettingsContext();
 
@@ -159,7 +159,7 @@ export const useGame = (): UseGameReturn => {
     gameState.resetState();
     cursor.resetCursor();
 
-    resetKeyStatuses();
+    keyStatusesController.resetKeyStatuses();
 
     gameGrid.resetGrid();
     referenceGrid.resetGrid();
@@ -167,7 +167,9 @@ export const useGame = (): UseGameReturn => {
     gameGridAnimationTracker.reset();
     referenceGridAnimationTracker.reset();
 
-    toastList.forEach((t) => removeToast(t.id));
+    toastsController.toastList.forEach((t) =>
+      toastsController.removeToast(t.id),
+    );
 
     targetWordController.resetTargetWord();
 
@@ -184,6 +186,14 @@ export const useGame = (): UseGameReturn => {
     populateReferenceGrid(word);
 
     isInputLocked.current = false;
+  };
+
+  /** Fully restarts the game.
+   *
+   * This is a wrapper for 'initGame(true)'.
+   */
+  const restartGame = async () => {
+    await initGame();
   };
 
   // Initialize the game
@@ -362,7 +372,7 @@ export const useGame = (): UseGameReturn => {
   const handleValidationError = (): void => {
     const message = "Error validating word. Please try again.";
     setValidationError(message);
-    addToast(message);
+    toastsController.addToast(message);
   };
 
   const submitGuess = useGuessSubmission(
@@ -377,10 +387,10 @@ export const useGame = (): UseGameReturn => {
     gameGridAnimationTracker,
     referenceGridAnimationTracker,
     strictConstraints,
-    addToast,
+    toastsController.addToast,
     handleValidationError,
     setValidationError,
-    updateKeyStatuses,
+    keyStatusesController.updateKeyStatuses,
   );
 
   useKeyboardInput(handleInput);
@@ -401,9 +411,9 @@ export const useGame = (): UseGameReturn => {
     },
 
     keyboard: {
-      statuses: keyStatuses,
-      update: updateKeyStatuses,
-      reset: resetKeyStatuses,
+      statuses: keyStatusesController.keyStatuses,
+      update: keyStatusesController.updateKeyStatuses,
+      reset: keyStatusesController.resetKeyStatuses,
     },
 
     game: {
@@ -411,12 +421,12 @@ export const useGame = (): UseGameReturn => {
       validationError,
       wordFetchError: targetWordController.wordFetchError,
       targetWord: targetWordController.targetWord,
-      restartGame: initGame,
+      restartGame,
     },
 
     toasts: {
-      list: toastList,
-      removeToast,
+      list: toastsController.toastList,
+      removeToast: toastsController.removeToast,
     },
 
     input: {
