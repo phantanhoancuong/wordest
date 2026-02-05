@@ -1,7 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 
 import { useSettingsContext } from "@/app/contexts/SettingsContext";
-import { useGameStore } from "@/store/useGameStore";
 
 import {
   ATTEMPTS,
@@ -13,6 +12,7 @@ import {
 } from "@/lib/constants";
 import { UseGameReturn } from "@/types/useGame.types";
 
+import { useActiveSession } from "@/hooks/useActiveSession";
 import { useAnimationTracker } from "@/hooks/useAnimationTracker";
 import { useCursorController } from "@/hooks/useCursorController";
 import { useStrictConstraints } from "@/hooks/useStrictConstraints";
@@ -46,6 +46,8 @@ export const useGame = (): UseGameReturn => {
   /** Cursor position managing hook. */
   const cursor = useCursorController();
 
+  const activeSessionController = useActiveSession();
+
   const [validationError, setValidationError] = useState("");
   const toastsController = useToasts();
   const keyStatusesController = useKeyStatuses();
@@ -55,23 +57,6 @@ export const useGame = (): UseGameReturn => {
   const animationSpeedMultiplier =
     AnimationSpeedMultiplier[animationSpeed.value];
 
-  const activeSession = useGameStore((s) => s.activeSession);
-
-  const dataGameGrid = useGameStore(
-    (s) => s.sessions.get(activeSession).gameGrid,
-  );
-  const setDataGameGrid = useGameStore((s) => s.setGameGrid);
-  const resetDataGameGrid = useGameStore((s) => s.resetGameGrid);
-  const dataReferenceGrid = useGameStore(
-    (s) => s.sessions.get(activeSession).referenceGrid,
-  );
-  const setDataReferenceGrid = useGameStore((s) => s.setReferenceGrid);
-  const resetDataReferenceGrid = useGameStore((s) => s.resetReferenceGrid);
-  const wordLengthStore = useGameStore(
-    (s) => s.sessions.get(s.activeSession).wordLength,
-  );
-  const setWordLengthStore = useGameStore((s) => s.setWordLength);
-
   /** Main game grid state, persisted by the game store. */
   const gameGrid = useGridState(
     ATTEMPTS,
@@ -79,9 +64,9 @@ export const useGame = (): UseGameReturn => {
     CellStatus.DEFAULT,
     CellAnimation.NONE,
     0,
-    dataGameGrid,
-    setDataGameGrid,
-    resetDataGameGrid,
+    activeSessionController.gameGrid,
+    activeSessionController.setGameGrid,
+    activeSessionController.resetGameGrid,
   );
   /** Reference grid that helps the user accumulate clues and show the target word, persisted by the game store. */
   const referenceGrid = useGridState(
@@ -90,9 +75,9 @@ export const useGame = (): UseGameReturn => {
     CellStatus.HIDDEN,
     CellAnimation.NONE,
     0,
-    dataReferenceGrid,
-    setDataReferenceGrid,
-    resetDataReferenceGrid,
+    activeSessionController.referenceGrid,
+    activeSessionController.setReferenceGrid,
+    activeSessionController.resetReferenceGrid,
   );
 
   const strictConstraints = useStrictConstraints();
@@ -101,11 +86,6 @@ export const useGame = (): UseGameReturn => {
     ["/sounds/key_01.mp3", "/sounds/key_02.mp3"],
     isMuted.value ? 0 : volume.value,
   );
-
-  const rulesetStore = useGameStore(
-    (s) => s.sessions.get(activeSession).ruleset,
-  );
-  const setRulesetStore = useGameStore((s) => s.setRuleset);
 
   /**
    * Tracks per-cell animations for the main game grid.
@@ -177,7 +157,7 @@ export const useGame = (): UseGameReturn => {
 
     const word = await targetWordController.loadTargetWord(
       wordLength.value,
-      activeSession,
+      activeSessionController.activeSession,
       ruleset.value,
     );
 
@@ -203,12 +183,12 @@ export const useGame = (): UseGameReturn => {
 
     // If the user has changed settings that require a new game or no word has been fetched (this is a fresh game).
     let shouldRestart = false;
-    if (wordLength.value !== wordLengthStore) {
-      setWordLengthStore(wordLength.value);
+    if (wordLength.value !== activeSessionController.wordLength) {
+      activeSessionController.setWordLength(wordLength.value);
       shouldRestart = true;
     }
-    if (ruleset.value !== rulesetStore) {
-      setRulesetStore(ruleset.value);
+    if (ruleset.value !== activeSessionController.ruleset) {
+      activeSessionController.setRuleset(ruleset.value);
       shouldRestart = true;
     }
     // No word has been fetched, so just start a new game.
