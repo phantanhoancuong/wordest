@@ -178,6 +178,12 @@ export const useGridState = (
     });
   };
 
+  /**
+   * Applies a row animation directly onto renderGrid.
+   *
+   * @param rowIndex - The index of that row.
+   * @param animatedRow - The RenderCell[] that is going to be updated.
+   */
   const applyRowAnimation = (
     rowIndex: number,
     animatedRow: RenderCell[],
