@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 
-import { useGameStore } from "@/store/useGameStore";
+import { useActiveSession } from "@/hooks/useActiveSession";
 
 import { Ruleset, SessionType, WordLength } from "@/lib/constants";
 import { UseTargetWordReturn } from "@/types/useTargetWord.types";
@@ -15,10 +15,7 @@ import { countLetter } from "@/lib/utils";
  * and exposing any fetch errors.
  */
 export const useTargetWord = (): UseTargetWordReturn => {
-  const targetWord = useGameStore(
-    (s) => s.sessions.get(s.activeSession).targetWord,
-  );
-  const setTargetWord = useGameStore((s) => s.setTargetWord);
+  const { targetWord, setTargetWord } = useActiveSession();
   const [error, setError] = useState<string>("");
   const targetLetterCount = useRef<Record<string, number>>({});
 

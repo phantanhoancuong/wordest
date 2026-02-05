@@ -2,7 +2,7 @@ import { CellStatus } from "@/lib/constants";
 import { CellStatusType } from "@/types/cell";
 import { UseStrictConstraintsReturn } from "@/types/useStrictConstraints.types";
 
-import { useGameStore } from "@/store/useGameStore";
+import { useActiveSession } from "@/hooks/useActiveSession";
 
 import { countLetter } from "@/lib/utils";
 
@@ -18,15 +18,12 @@ import { countLetter } from "@/lib/utils";
  *@param addToast - Function used to display validation error messages.
  */
 export const useStrictConstraints = (): UseStrictConstraintsReturn => {
-  const lockedPositions = useGameStore(
-    (s) => s.sessions.get(s.activeSession).lockedPositions,
-  );
-  const setLockedPositions = useGameStore((s) => s.setLockedPositions);
-
-  const minimumLetterCounts = useGameStore(
-    (s) => s.sessions.get(s.activeSession).minimumLetterCounts,
-  );
-  const setMinimumLetterCounts = useGameStore((s) => s.setMinimumLetterCounts);
+  const {
+    lockedPositions,
+    setLockedPositions,
+    minimumLetterCounts,
+    setMinimumLetterCounts,
+  } = useActiveSession();
 
   /**
    * Validates a guess against Strict constraints.
