@@ -11,18 +11,19 @@ export interface UseGridStateReturn {
   updateCell: (
     rowIndex: number,
     colIndex: number,
-    options?: PartialRenderCell
+    options?: PartialRenderCell,
   ) => void;
   updateRow: (rowIndex: number, newRow: Array<RenderCell>) => void;
   applyValidGuessAnimation: (
     rowIndex: number,
     statuses: CellStatus[],
-    animationSpeedMultiplier: number
+    animationSpeedMultiplier: number,
   ) => void;
   applyInvalidGuessAnimation: (
     rowIndex: number,
-    animationSpeedMultiplier: number
+    animationSpeedMultiplier: number,
   ) => void;
   flushAnimation: (finishedCellMap: Map<number, Array<number>>) => void;
   resetGrid: () => void;
+  applyRowAnimation: (rowIndex: number, animatedRow: RenderCell[]) => void;
 }

@@ -269,7 +269,7 @@ export const useGame = (): UseGameReturn => {
       animationDelay: 0,
       animationKey: (cell.animationKey ?? 0) + 1,
     }));
-    referenceGrid.updateRow(0, revealedRow);
+    referenceGrid.applyRowAnimation(0, revealedRow);
   };
 
   /**

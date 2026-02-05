@@ -34,14 +34,14 @@ export const countLetter = (word: string): Record<string, number> => {
 export const dataGridToRenderGrid = (
   dataGrid: DataCell[][],
   animation: CellAnimationType,
-  animationDelay: number
+  animationDelay: number,
 ): RenderCell[][] => {
   return dataGrid.map((row) =>
     row.map((cell) => ({
       ...cell,
       animation,
       animationDelay,
-    }))
+    })),
   );
 };
 
@@ -54,13 +54,13 @@ export const dataGridToRenderGrid = (
  * @returns A 2D DataCell grid.
  */
 export const renderGridToDataGrid = (
-  renderGrid: RenderCell[][]
+  renderGrid: RenderCell[][],
 ): DataCell[][] => {
   return renderGrid.map((row) =>
     row.map(({ char, status }) => ({
       char,
       status,
-    }))
+    })),
   );
 };
 
@@ -75,13 +75,13 @@ export const renderGridToDataGrid = (
 export const initEmptyDataGrid = (
   rowNum: number,
   colNum: number,
-  defaultStatus: CellStatusType = CellStatus.DEFAULT
+  defaultStatus: CellStatusType = CellStatus.DEFAULT,
 ): DataCell[][] => {
   return Array.from({ length: rowNum }, () =>
     Array.from({ length: colNum }, () => ({
       char: "",
       status: defaultStatus,
-    }))
+    })),
   );
 };
 
@@ -100,7 +100,7 @@ export const initEmptyRenderGrid = (
   colNum: number,
   defaultStatus: CellStatusType = CellStatus.DEFAULT,
   defaultAnimation: CellAnimationType = CellAnimation.NONE,
-  animationDelay = 0
+  animationDelay = 0,
 ): Array<Array<RenderCell>> => {
   return Array.from({ length: rowNum }, () =>
     Array.from({ length: colNum }, () => ({
@@ -108,7 +108,7 @@ export const initEmptyRenderGrid = (
       status: defaultStatus,
       animation: defaultAnimation,
       animationDelay,
-    }))
+    })),
   );
 };
 
@@ -125,7 +125,7 @@ export const initEmptyRenderGrid = (
 export const evaluateGuess = (
   guess: string,
   targetWord: string,
-  targetLetterCount: Record<string, number>
+  targetLetterCount: Record<string, number>,
 ): Array<CellStatusType> => {
   const wordLength = guess.length;
   const tempLetterCount = { ...targetLetterCount };
@@ -160,7 +160,7 @@ export const evaluateGuess = (
 export const renderEmptyGrid = (
   rows: number,
   cols: number,
-  hidden = false
+  hidden = false,
 ): RenderCell[][] => {
   const status = hidden ? CellStatus.HIDDEN : CellStatus.DEFAULT;
 
@@ -170,6 +170,6 @@ export const renderEmptyGrid = (
       status,
       animation: CellAnimation.NONE,
       animationDelay: 0,
-    }))
+    })),
   );
 };
