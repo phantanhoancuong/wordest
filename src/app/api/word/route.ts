@@ -1,6 +1,8 @@
 import { Ruleset, SessionType } from "@/lib/constants";
 import { WORD_LISTS, SupportedWordLength } from "@/types/wordList.types";
 
+import { getDateIndex } from "@/lib/utils";
+
 /**
  * Creates a seeded PRNG using the Mulberry32 algorithm.
  *
@@ -19,23 +21,6 @@ function mulberry32(seed: number) {
     return ((r ^ (r >>> 14)) >>> 0) / 4294967296;
   };
 }
-
-/**
- * Computes the number of days since the Unix epoch in UTC.
- *
- * @returns The number of whole days since 01-01-1970 (UTC).
- */
-const getDateIndex = (): number => {
-  const now = new Date();
-  const utcToday = Date.UTC(
-    now.getUTCFullYear(),
-    now.getUTCMonth(),
-    now.getUTCDate(),
-  );
-  const utcEpoch = Date.UTC(1970, 0, 1);
-  const MS_PER_DAY = 24 * 60 * 60 * 1000;
-  return Math.floor((utcToday - utcEpoch) / MS_PER_DAY);
-};
 
 /**
  * GET /api/word
