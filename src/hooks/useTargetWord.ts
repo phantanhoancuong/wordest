@@ -16,7 +16,7 @@ import { countLetter } from "@/lib/utils";
  */
 export const useTargetWord = (): UseTargetWordReturn => {
   const { targetWord, setTargetWord } = useActiveSession();
-  const [error, setError] = useState<string>("");
+  const [error, setError] = useState<string>(null);
   const targetLetterCount = useRef<Record<string, number>>({});
 
   /**
@@ -26,7 +26,7 @@ export const useTargetWord = (): UseTargetWordReturn => {
    * Call 'reloadTargetWord' to explicitly load a replacement.
    */
   const resetTargetWord = () => {
-    setTargetWord("");
+    setTargetWord(null);
   };
 
   /** Fetches a new target word from the API and updates state. */
@@ -36,7 +36,7 @@ export const useTargetWord = (): UseTargetWordReturn => {
     ruleset: Ruleset,
   ): Promise<string | null> => {
     try {
-      setError("");
+      setError(null);
       const word = await fetchWordFromApi(length, activeSession, ruleset);
       setTargetWord(word);
       return word;

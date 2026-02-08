@@ -179,26 +179,16 @@ export const useGame = (): UseGameReturn => {
 
   // Initialize the game
   useEffect(() => {
+    // The game will need restarting if the word length or ruleset value has changed.
+    const needsRestart = activeSessionController.hydrateFromSettings(
+      ruleset.value,
+      wordLength.value,
+    );
     // Mark client as hydrated to render
     setHasHydrated(true);
 
-    // If the user has changed settings that require a new game or no word has been fetched (this is a fresh game).
-    let shouldRestart = false;
-    if (wordLength.value !== activeSessionController.wordLength) {
-      activeSessionController.setWordLength(wordLength.value);
-      shouldRestart = true;
-    }
-    if (ruleset.value !== activeSessionController.ruleset) {
-      activeSessionController.setRuleset(ruleset.value);
-      shouldRestart = true;
-    }
-    // No word has been fetched, so just start a new game.
-    if (!targetWordController.targetWord) shouldRestart = true;
-    if (shouldRestart) {
-      initGame();
-      return;
-    }
-
+    // If word length or ruleset has changed or there's no target word, start a new game.
+    if (needsRestart || !targetWordController.targetWord) initGame();
     isInputLocked.current = false;
   }, []);
 

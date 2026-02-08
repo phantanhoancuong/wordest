@@ -2,7 +2,7 @@ import { useGameStore } from "@/store/useGameStore";
 
 export const useActiveSession = () => {
   const activeSession = useGameStore((s) => s.activeSession);
-
+  const hydrateFromSettings = useGameStore((s) => s.hydrateFromSettings);
   const gameState = useGameStore(
     (s) => s.sessions.get(activeSession)!.gameState,
   );
@@ -55,6 +55,7 @@ export const useActiveSession = () => {
 
   return {
     activeSession,
+    hydrateFromSettings,
     gameState,
     setGameState,
     gameGrid,

@@ -54,6 +54,7 @@ type GameSession = {
 type GameStore = {
   activeSession: SessionType;
   sessions: Map<SessionType, GameSession>;
+  hydrateFromSettings: (ruleset: Ruleset, wordLength: WordLength) => boolean;
   setActiveSession: (session: SessionType) => void;
   setGameState: (gameState: GameState) => void;
   setRow: (row: number) => void;
@@ -81,16 +82,19 @@ type GameStore = {
 /**
  * Creates a fresh GameSession.
  */
-const initGameSession = (): GameSession => ({
+const initGameSession = (
+  ruleset: Ruleset = Ruleset.NORMAL,
+  wordLength: WordLength = WordLength.FIVE,
+): GameSession => ({
   gameState: GameState.PLAYING,
   row: 0,
   col: 0,
-  referenceGrid: initEmptyDataGrid(1, WordLength.FIVE),
-  gameGrid: initEmptyDataGrid(ATTEMPTS, WordLength.FIVE),
+  referenceGrid: initEmptyDataGrid(1, wordLength),
+  gameGrid: initEmptyDataGrid(ATTEMPTS, wordLength),
   targetWord: null,
   keyStatuses: {},
-  ruleset: null,
-  wordLength: WordLength.FIVE,
+  ruleset: ruleset,
+  wordLength: wordLength,
   lockedPositions: new Map<number, string>(),
   minimumLetterCounts: new Map<string, number>(),
 });
@@ -134,6 +138,34 @@ export const useGameStore = create<GameStore>((set) => {
       [SessionType.DAILY, initGameSession()],
       [SessionType.PRACTICE, initGameSession()],
     ]),
+
+    hydrateFromSettings: (ruleset: Ruleset, wordLength: WordLength) => {
+      let needsRestart = false;
+
+      set((state) => {
+        const sessions = new Map<SessionType, GameSession>();
+
+        for (const [key, session] of state.sessions) {
+          if (
+            session.ruleset !== ruleset ||
+            session.wordLength !== wordLength
+          ) {
+            needsRestart = true;
+          }
+
+          sessions.set(key, {
+            ...session,
+            ruleset,
+            wordLength,
+          });
+        }
+
+        return { sessions };
+      });
+
+      return needsRestart;
+    },
+
     setActiveSession: (session: SessionType) => set({ activeSession: session }),
 
     setGameState: (gameState: GameState) =>
