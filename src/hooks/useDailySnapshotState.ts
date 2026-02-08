@@ -76,12 +76,35 @@ export const useDailySnapshotState = () => {
       initDailySnapshotState(),
     );
 
+  /**
+   * Ensures that a snapshot exists for the given (ruleset, wordLength).
+   *
+   * If it does not exist yet (or the date has changed), it will be created.
+   * This is a no-op if the snapshot is already present and up-to-date.
+   *
+   * @param ruleset - Game ruleset identifier.
+   * @param wordLength - Target word length.
+   */
   const ensureSnapshot = (ruleset: Ruleset, wordLength: WordLength): void => {
     setDailySnapshotState((prev) =>
       getSnapshotStateBase(prev, ruleset, wordLength),
     );
   };
 
+  /**
+   * Returns a snapshot state that is guaranteed to contain a snapshot for the given (ruleset, wordLength), and is aligned to "today".
+   *
+   * Behavior:
+   * - If the stored date is not today, the entire state is reset and a fresh snapshot is created for the requested (ruleset, wordLength).
+   * - If today matches but the ruleset bucket does not exist, it is created.
+   * - If the ruleset exists but the wordLength bucket does not, it is created.
+   * - Otherwise, the previous state is returned unchanged.
+   *
+   * @param prev - Previous persisted DailySnapshotState.
+   * @param ruleset - Game ruleset identifier.
+   * @param wordLength - Target word length.
+   * @returns A state object that safely contains the requested snapshot.
+   */
   const getSnapshotStateBase = (
     prev: DailySnapshotState,
     ruleset: Ruleset,
@@ -126,6 +149,16 @@ export const useDailySnapshotState = () => {
     }
   };
 
+  /**
+   * Applies a partial update to the snapshot for (ruleset, wordLength).
+   *
+   * - First ensures the base snapshot exists and is for "today".
+   * - Then shallow-merges the provided patch into the snapshot.
+   *
+   * @param ruleset - Game ruleset identifier.
+   * @param wordLength - Target word length.
+   * @param patch - Partial snapshot fields to update.
+   */
   const updateSnapshot = (
     ruleset: Ruleset,
     wordLength: WordLength,
@@ -150,6 +183,16 @@ export const useDailySnapshotState = () => {
     });
   };
 
+  /**
+   * Retrieves the snapshot for the given (ruleset, wordLength) if it exists and belongs to today.
+   *
+   * @param ruleset - Game ruleset idenfitier.
+   * @param wordLength - Target word length.
+   * @returns The DailySnapshot, or null if:
+   * - The stored date is not today, or
+   * - The ruleset bucket does not exist, or
+   * - The wordLength snapshot does not exist.
+   */
   const getSnapshot = (
     ruleset: Ruleset,
     wordLength: WordLength,
