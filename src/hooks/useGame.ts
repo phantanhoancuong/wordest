@@ -15,13 +15,14 @@ import { UseGameReturn } from "@/types/useGame.types";
 import { useActiveSession } from "@/hooks/useActiveSession";
 import { useAnimationTracker } from "@/hooks/useAnimationTracker";
 import { useCursorController } from "@/hooks/useCursorController";
-import { useStrictConstraints } from "@/hooks/useStrictConstraints";
+import { useDailySnapshotState } from "@/hooks/useDailySnapshotState";
 import { useGameState } from "@/hooks/useGameState";
 import { useGridState } from "@/hooks/useGridState";
 import { useGuessSubmission } from "@/hooks/useGuessSubmission";
 import { useKeyboardInput } from "@/hooks/useKeyboardInput";
 import { useKeyStatuses } from "@/hooks/useKeyStatuses";
 import { useSoundPlayer } from "@/hooks/useSoundPlayer";
+import { useStrictConstraints } from "@/hooks/useStrictConstraints";
 import { useTargetWord } from "@/hooks/useTargetWord";
 import { useToasts } from "@/hooks/useToasts";
 
