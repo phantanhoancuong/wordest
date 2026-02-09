@@ -10,6 +10,7 @@ import {
   GameState,
   Ruleset,
 } from "@/lib/constants";
+import { DataCell } from "@/types/cell";
 import { UseGameReturn } from "@/types/useGame.types";
 
 import { useActiveSession } from "@/hooks/useActiveSession";
@@ -113,11 +114,9 @@ export const useGame = (): UseGameReturn => {
    * Initialize the reference grid according to the fetched target word.
    */
   const populateReferenceGrid = (word: string) => {
-    const newRow = word.split("").map((ch) => ({
+    const newRow: DataCell[] = word.split("").map((ch) => ({
       char: ch,
       status: CellStatus.HIDDEN,
-      animation: CellAnimation.NONE,
-      animationDelay: 0,
     }));
     referenceGrid.updateRow(0, newRow);
   };
@@ -177,6 +176,8 @@ export const useGame = (): UseGameReturn => {
     await initGame();
   };
 
+  const dailySnapshotState = useDailySnapshotState();
+
   // Initialize the game
   useEffect(() => {
     // The game will need restarting if the word length or ruleset value has changed.
@@ -188,7 +189,9 @@ export const useGame = (): UseGameReturn => {
     setHasHydrated(true);
 
     // If word length or ruleset has changed or there's no target word, start a new game.
-    if (needsRestart || !targetWordController.targetWord) initGame();
+    if (needsRestart || !targetWordController.targetWord) {
+      initGame();
+    }
     isInputLocked.current = false;
   }, []);
 
@@ -283,8 +286,6 @@ export const useGame = (): UseGameReturn => {
     gameGrid.updateCell(cursor.row.current, colToUpdate, {
       char: "",
       status: CellStatus.DEFAULT,
-      animation: CellAnimation.NONE,
-      animationDelay: 0,
     });
   };
 
@@ -301,8 +302,6 @@ export const useGame = (): UseGameReturn => {
     gameGrid.updateCell(cursor.row.current, colToUpdate, {
       char: letter,
       status: CellStatus.DEFAULT,
-      animation: CellAnimation.NONE,
-      animationDelay: 0,
     });
   };
 

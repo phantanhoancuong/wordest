@@ -73,6 +73,12 @@ export const useGridState = (
     setDataGrid(newGrid);
   };
 
+  const applyReferenceGridAnimation = (newRow: RenderCell[]): void => {
+    const newGrid = [...renderGrid];
+    newGrid[0] = newRow;
+    setRenderGrid(newGrid);
+  };
+
   /**
    * Updates a single cell's data in the grid.
    *
@@ -85,11 +91,11 @@ export const useGridState = (
   const updateCell = (
     rowIndex: number,
     colIndex: number,
-    cell: DataCell = { char: "", status: defaultStatus.current },
+    newCell: DataCell = { char: "", status: defaultStatus.current },
   ): void => {
     const prevRow = dataGrid[rowIndex];
     const newRow = [...prevRow];
-    newRow[colIndex] = cell;
+    newRow[colIndex] = newCell;
     updateRow(rowIndex, newRow);
   };
 
@@ -200,6 +206,7 @@ export const useGridState = (
     colNum: colNum.current,
     updateCell,
     updateRow,
+    applyReferenceGridAnimation,
     applyValidGuessAnimation,
     applyInvalidGuessAnimation,
     flushAnimation,

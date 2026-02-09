@@ -113,7 +113,8 @@ export const useGuessSubmission = (
 
     if (changedCount > 0) {
       referenceGridAnimationTracker.add(changedCount);
-      referenceGrid.updateRow(0, referenceRow);
+
+      referenceGrid.applyReferenceGridAnimation(referenceRow);
     }
 
     gameGridAnimationTracker.add(gameGrid.colNum);
