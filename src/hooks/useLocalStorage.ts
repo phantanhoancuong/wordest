@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 /**
  * Loads the stored value when key changes.
@@ -24,11 +24,25 @@ function getLocalStorageValue<T>(key: string, defaultValue: T): T {
  */
 export const useLocalStorage = <T>(
   key: string,
-  initialValue: T
+  initialValue: T,
 ): [T, (value: T | ((value: T) => T)) => void] => {
   const [storedValue, setStoredValue] = useState<T>(() =>
-    getLocalStorageValue(key, initialValue)
+    getLocalStorageValue(key, initialValue),
   );
+
+  /**
+   * Seed localStorage if empty or invalid.
+   */
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    try {
+      const existing = localStorage.getItem(key);
+      if (existing === null)
+        localStorage.setItem(key, JSON.stringify(storedValue));
+    } catch {
+      localStorage.setItem(key, JSON.stringify(storedValue));
+    }
+  }, [key, storedValue]);
 
   /**
    * Updates state and syncs the value to 'localStorage'.

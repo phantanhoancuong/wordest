@@ -1,21 +1,12 @@
 import { useEffect, useRef, useState } from "react";
 
 import { animationTiming, CellStatus, CellAnimation } from "@/lib/constants";
-import {
-  DataCell,
-  RenderCell,
-  PartialRenderCell,
-  CellStatusType,
-} from "@/types/cell";
+import { DataCell, RenderCell } from "@/types/cell";
 import { UseGridStateReturn } from "@/types/useGridState.types";
 
 import { useLatest } from "@/hooks/useLatest";
 
-import {
-  dataGridToRenderGrid,
-  initEmptyRenderGrid,
-  renderGridToDataGrid,
-} from "@/lib/utils";
+import { dataGridToRenderGrid } from "@/lib/utils";
 
 /**
  * Manages a 2D grid of cells representing player's guesses.
@@ -38,12 +29,12 @@ import {
 export const useGridState = (
   row: number,
   col: number,
-  status: CellStatusType,
+  status: CellStatus,
   animation: CellAnimation = CellAnimation.NONE,
   animationDelay: number = 0,
   dataGrid: DataCell[][],
   setDataGrid: (grid: DataCell[][]) => void,
-  resetDataGrid: () => void
+  resetDataGrid: () => void,
 ): UseGridStateReturn => {
   const rowNum = useRef(row);
   const colNum = useRef(col);
@@ -55,25 +46,18 @@ export const useGridState = (
     dataGridToRenderGrid(
       dataGrid,
       defaultAnimation.current,
-      defaultAnimationDelay.current
-    )
+      defaultAnimationDelay.current,
+    ),
   );
   const renderGridRef = useLatest(renderGrid);
 
-  /** Syncs the render grid to the external store whenever it changes. */
-  useEffect(() => setDataGrid(renderGridToDataGrid(renderGrid)), [renderGrid]);
+  /** Update the renderGrid with new data from the data grid when the data grid changes. */
+  useEffect(() => {
+    setRenderGrid(dataGridToRenderGrid(dataGrid, CellAnimation.NONE, 0));
+  }, [dataGrid]);
 
   /** Resets the grid to its initial empty state.*/
   const resetGrid = () => {
-    setRenderGrid(
-      initEmptyRenderGrid(
-        rowNum.current,
-        colNum.current,
-        defaultStatus.current,
-        defaultAnimation.current,
-        defaultAnimationDelay.current
-      )
-    );
     resetDataGrid();
   };
 
@@ -83,12 +67,16 @@ export const useGridState = (
    * @param rowIndex - Index of the row to replace.
    * @param newRow - The new row of cell objects.
    */
-  const updateRow = (rowIndex: number, newRow: Array<RenderCell>): void => {
-    setRenderGrid((prevGrid) => {
-      const newGrid = [...prevGrid];
-      newGrid[rowIndex] = newRow;
-      return newGrid;
-    });
+  const updateRow = (rowIndex: number, newRow: DataCell[]): void => {
+    const newGrid = [...dataGrid];
+    newGrid[rowIndex] = newRow;
+    setDataGrid(newGrid);
+  };
+
+  const applyReferenceGridAnimation = (newRow: RenderCell[]): void => {
+    const newGrid = [...renderGrid];
+    newGrid[0] = newRow;
+    setRenderGrid(newGrid);
   };
 
   /**
@@ -103,26 +91,11 @@ export const useGridState = (
   const updateCell = (
     rowIndex: number,
     colIndex: number,
-    options: PartialRenderCell = {}
+    newCell: DataCell = { char: "", status: defaultStatus.current },
   ): void => {
-    const {
-      char = "",
-      status = CellStatus.DEFAULT,
-      animation = CellAnimation.NONE,
-      animationDelay = 0,
-    } = options;
-
-    const newRow = [...renderGridRef.current[rowIndex]];
-    const prevCell = newRow[colIndex];
-
-    newRow[colIndex] = {
-      ...prevCell,
-      char,
-      status,
-      animation,
-      animationDelay,
-    };
-
+    const prevRow = dataGrid[rowIndex];
+    const newRow = [...prevRow];
+    newRow[colIndex] = newCell;
     updateRow(rowIndex, newRow);
   };
 
@@ -130,28 +103,37 @@ export const useGridState = (
    * Reset animation data after cell's animation ends.
    * @param finishedCellMap - rowIndex -> array of finished colIndices.
    */
-  const flushAnimation = (
-    finishedCellMap: Map<number, Array<number>>
-  ): void => {
-    setRenderGrid((prevGrid: RenderCell[][]) => {
-      const newGrid = [...prevGrid];
+  const flushAnimation = (finishedCellMap: Map<number, number[]>) => {
+    const finalGrid = renderGridRef.current;
 
-      for (const [rowIndex, finishedCols] of finishedCellMap.entries()) {
-        const newRow = [...newGrid[rowIndex]];
+    const nextDataGrid = [...dataGrid];
+    const nextRenderGrid = [...finalGrid];
 
-        finishedCols.forEach((colIndex) => {
-          const cell = newRow[colIndex];
-          newRow[colIndex] = {
-            ...cell,
-            animation: CellAnimation.NONE,
-            animationDelay: 0,
-          };
-        });
-        newGrid[rowIndex] = newRow;
-      }
+    for (const [rowIndex, cols] of finishedCellMap.entries()) {
+      const dataRow = [...nextDataGrid[rowIndex]];
+      const renderRow = [...nextRenderGrid[rowIndex]];
 
-      return newGrid;
-    });
+      cols.forEach((colIndex) => {
+        const cell = renderRow[colIndex];
+
+        dataRow[colIndex] = {
+          ...dataRow[colIndex],
+          status: cell.status,
+        };
+
+        renderRow[colIndex] = {
+          ...cell,
+          animation: CellAnimation.NONE,
+          animationDelay: 0,
+        };
+      });
+
+      nextDataGrid[rowIndex] = dataRow;
+      nextRenderGrid[rowIndex] = renderRow;
+    }
+
+    setDataGrid(nextDataGrid);
+    setRenderGrid(nextRenderGrid);
   };
 
   /**
@@ -164,19 +146,22 @@ export const useGridState = (
   const applyValidGuessAnimation = (
     rowIndex: number,
     statuses: CellStatus[],
-    animationSpeedMultiplier: number
-  ): void => {
-    const animatedRow = renderGridRef.current[rowIndex].map(
-      (cell: RenderCell, i: number) => ({
-        ...cell,
-        status: statuses[i],
-        animation: CellAnimation.BOUNCE,
-        animationDelay:
-          i * animationTiming.bounce.delay * animationSpeedMultiplier,
-      })
-    );
-
-    updateRow(rowIndex, animatedRow);
+    animationSpeedMultiplier: number,
+  ) => {
+    setRenderGrid((prevRenderGrid) => {
+      const animatedRow = prevRenderGrid[rowIndex].map(
+        (cell: RenderCell, i: number) => ({
+          ...cell,
+          status: statuses[i],
+          animation: CellAnimation.BOUNCE,
+          animationDelay:
+            i * animationTiming.bounce.delay * animationSpeedMultiplier,
+        }),
+      );
+      const nextRenderGrid = [...prevRenderGrid];
+      nextRenderGrid[rowIndex] = animatedRow;
+      return nextRenderGrid;
+    });
   };
 
   /**
@@ -185,15 +170,33 @@ export const useGridState = (
    * @param rowIndex - Row to animate.
    */
   const applyInvalidGuessAnimation = (rowIndex: number): void => {
-    const animatedRow = renderGridRef.current[rowIndex].map(
-      (cell: RenderCell) => ({
+    setRenderGrid((prevGrid) => {
+      const newGrid = [...prevGrid];
+      const prevRow = newGrid[rowIndex];
+      const newRow = prevRow.map((cell: RenderCell) => ({
         ...cell,
         animation: CellAnimation.SHAKE,
         animationDelay: 0,
-      })
-    );
+      }));
 
-    updateRow(rowIndex, animatedRow);
+      newGrid[rowIndex] = newRow;
+      return newGrid;
+    });
+  };
+
+  /**
+   * Applies a row animation directly onto renderGrid.
+   *
+   * @param rowIndex - The index of that row.
+   * @param animatedRow - The RenderCell[] that is going to be updated.
+   */
+  const applyRowAnimation = (
+    rowIndex: number,
+    animatedRow: RenderCell[],
+  ): void => {
+    const nextRenderGrid = [...renderGrid];
+    nextRenderGrid[rowIndex] = animatedRow;
+    setRenderGrid(nextRenderGrid);
   };
 
   return {
@@ -203,9 +206,11 @@ export const useGridState = (
     colNum: colNum.current,
     updateCell,
     updateRow,
+    applyReferenceGridAnimation,
     applyValidGuessAnimation,
     applyInvalidGuessAnimation,
     flushAnimation,
     resetGrid,
+    applyRowAnimation,
   };
 };

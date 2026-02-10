@@ -1,6 +1,6 @@
 import { useRef } from "react";
 
-import { useGameStore } from "@/store/useGameStore";
+import { useActiveSession } from "@/hooks/useActiveSession";
 
 import { UseCursorControllerReturn } from "@/types/useCursorController.types";
 
@@ -12,10 +12,13 @@ import { useLatest } from "@/hooks/useLatest";
  * Tracks the current index of where the user is typing to guide grid rendering, animation, and game logic.
  */
 export const useCursorController = (): UseCursorControllerReturn => {
-  const rowState = useGameStore((s) => s.row);
-  const colState = useGameStore((s) => s.col);
-  const setRowState = useGameStore((s) => s.setRow);
-  const setColState = useGameStore((s) => s.setCol);
+  const {
+    row: rowState,
+    col: colState,
+    setRow: setRowState,
+    setCol: setColState,
+    incrementRow: incrementRowState,
+  } = useActiveSession();
 
   const rowRef = useLatest(rowState);
   const colRef = useLatest(colState);
@@ -45,7 +48,7 @@ export const useCursorController = (): UseCursorControllerReturn => {
   const advanceRow = (): void => {
     pendingRowAdvance.current = false;
     setColState(0);
-    setRowState((prevRow) => prevRow + 1);
+    incrementRowState();
   };
 
   /**

@@ -2,7 +2,7 @@ import { CellStatus } from "@/lib/constants";
 import { CellStatusType } from "@/types/cell";
 import { UseStrictConstraintsReturn } from "@/types/useStrictConstraints.types";
 
-import { useGameStore } from "@/store/useGameStore";
+import { useActiveSession } from "@/hooks/useActiveSession";
 
 import { countLetter } from "@/lib/utils";
 
@@ -17,12 +17,13 @@ import { countLetter } from "@/lib/utils";
  *
  *@param addToast - Function used to display validation error messages.
  */
-export const UseStrictConstraints = (): UseStrictConstraintsReturn => {
-  const lockedPositions = useGameStore((s) => s.lockedPositions);
-  const setLockedPositions = useGameStore((s) => s.setLockedPositions);
-
-  const minimumLetterCounts = useGameStore((s) => s.minimumLetterCounts);
-  const setMinimumLetterCounts = useGameStore((s) => s.setMinimumLetterCounts);
+export const useStrictConstraints = (): UseStrictConstraintsReturn => {
+  const {
+    lockedPositions,
+    setLockedPositions,
+    minimumLetterCounts,
+    setMinimumLetterCounts,
+  } = useActiveSession();
 
   /**
    * Validates a guess against Strict constraints.
@@ -33,7 +34,7 @@ export const UseStrictConstraints = (): UseStrictConstraintsReturn => {
    *  - message: explanation if invalid, empty string if valid.
    */
   const checkValidStrictGuess = (
-    guess: string
+    guess: string,
   ): { isValid: boolean; message: string } => {
     // Enforce locked (green) positions.
     for (const [index, letter] of lockedPositions) {
@@ -66,7 +67,7 @@ export const UseStrictConstraints = (): UseStrictConstraintsReturn => {
    */
   const updateStrictConstraints = (
     guess: string,
-    statuses: CellStatusType[]
+    statuses: CellStatusType[],
   ): void => {
     /**
      * Tracks minimum letter counts contributed by this specific guess.

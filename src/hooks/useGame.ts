@@ -1,7 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 
 import { useSettingsContext } from "@/app/contexts/SettingsContext";
-import { useGameStore } from "@/store/useGameStore";
 
 import {
   ATTEMPTS,
@@ -9,21 +8,26 @@ import {
   CellAnimation,
   CellStatus,
   GameState,
-  GameMode,
+  Ruleset,
+  SessionType,
 } from "@/lib/constants";
+import { DataCell } from "@/types/cell";
 import { UseGameReturn } from "@/types/useGame.types";
 
+import { useActiveSession } from "@/hooks/useActiveSession";
 import { useAnimationTracker } from "@/hooks/useAnimationTracker";
 import { useCursorController } from "@/hooks/useCursorController";
-import { UseStrictConstraints } from "@/hooks/useStrictConstraints";
+import { useDailySnapshotState } from "@/hooks/useDailySnapshotState";
 import { useGameState } from "@/hooks/useGameState";
 import { useGridState } from "@/hooks/useGridState";
 import { useGuessSubmission } from "@/hooks/useGuessSubmission";
 import { useKeyboardInput } from "@/hooks/useKeyboardInput";
 import { useKeyStatuses } from "@/hooks/useKeyStatuses";
 import { useSoundPlayer } from "@/hooks/useSoundPlayer";
+import { useStrictConstraints } from "@/hooks/useStrictConstraints";
 import { useTargetWord } from "@/hooks/useTargetWord";
 import { useToasts } from "@/hooks/useToasts";
+import { mapToRecordStringNumber, mapToRecordNumberString } from "@/lib/utils";
 
 /** Matches a single uppercase character, used to validate keyboard letter input. */
 const LETTER_REGEX = /^[A-Z]$/;
@@ -36,74 +40,84 @@ const LETTER_REGEX = /^[A-Z]$/;
  * @returns Game controller and associated utilities.
  */
 export const useGame = (): UseGameReturn => {
-  const {
-    targetWord,
-    targetLetterCount,
-    wordFetchError,
-    loadTargetWord,
-    resetTargetWord,
-  } = useTargetWord();
-
-  const gameState = useGameState();
-  const cursor = useCursorController();
-
+  /** Whether the hook has hydrated all of its components to display yet. */
+  const [hasHydrated, setHasHydrated] = useState(false);
+  /** Last validation error message. */
   const [validationError, setValidationError] = useState("");
-  const { toastList, addToast, removeToast } = useToasts();
-  const { keyStatuses, updateKeyStatuses, resetKeyStatuses } = useKeyStatuses();
-  const { volume, animationSpeed, isMuted, gameMode, wordLength } =
-    useSettingsContext();
+  /** Keeps track of the last hydrated snapshot to avoid duplicate hydration.  */
+  const lastHydratedKeyRef = useRef<string | null>(null);
+  /** Ref used to block user input during animations. */
+  const isInputLocked = useRef(true);
 
+  /**
+   * Controller for reading/resetting/loading the target word.
+   * The word may come from the global store or be freshly fetched.
+   */
+  const targetWordController = useTargetWord();
+  /** Game state managing hook (PLAYING, WON, LOST), with pending transitions. */
+  const gameState = useGameState();
+  /** Cursor position managing hook (row/column of the current input). */
+  const cursor = useCursorController();
+  /** Active session controller (DAILY, PRACTICE) and persisted session state.*/
+  const activeSessionController = useActiveSession();
+  /** Toast notifications controller. */
+  const toastsController = useToasts();
+  /** Keyboard key statuses controller (CORRECT, PRESENT, ABSENT, etc.). */
+  const keyStatusesController = useKeyStatuses();
+  /** Persisted user settings in localStorage. */
+  const settingsContext = useSettingsContext();
+
+  /** Convert user animation speed settings into a numeric multiplier. */
   const animationSpeedMultiplier =
-    AnimationSpeedMultiplier[animationSpeed.value];
+    AnimationSpeedMultiplier[settingsContext.animationSpeed.value];
 
-  const dataGameGrid = useGameStore((s) => s.gameGrid);
-  const setDataGameGrid = useGameStore((s) => s.setGameGrid);
-  const resetDataGameGrid = useGameStore((s) => s.resetGameGrid);
-  const dataReferenceGrid = useGameStore((s) => s.referenceGrid);
-  const setDataReferenceGrid = useGameStore((s) => s.setReferenceGrid);
-  const resetDataReferenceGrid = useGameStore((s) => s.resetReferenceGrid);
-  const wordLengthStore = useGameStore((s) => s.wordLength);
-  const setWordLengthStore = useGameStore((s) => s.setWordLength);
-
+  /**
+   * Main game grid state (the guesses grid).
+   * This is persisted in the active session store.
+   */
   const gameGrid = useGridState(
     ATTEMPTS,
-    wordLength.value,
+    settingsContext.wordLength.value,
     CellStatus.DEFAULT,
     CellAnimation.NONE,
     0,
-    dataGameGrid,
-    setDataGameGrid,
-    resetDataGameGrid,
+    activeSessionController.gameGrid,
+    activeSessionController.setGameGrid,
+    activeSessionController.resetGameGrid,
   );
 
+  /**
+   * Reference grid state (the target word row shown at the bottom).
+   * This is persisted in the active session store.
+   */
   const referenceGrid = useGridState(
     1,
-    wordLength.value,
+    settingsContext.wordLength.value,
     CellStatus.HIDDEN,
     CellAnimation.NONE,
     0,
-    dataReferenceGrid,
-    setDataReferenceGrid,
-    resetDataReferenceGrid,
+    activeSessionController.referenceGrid,
+    activeSessionController.setReferenceGrid,
+    activeSessionController.resetReferenceGrid,
   );
 
-  const useStrictConstraints = UseStrictConstraints();
+  /** Enforces strict/hardcore constraints across guesses. */
+  const strictConstraints = useStrictConstraints();
 
+  /** Plays key press sounds (disabled when muted or volume is zero). */
   const playKeySound = useSoundPlayer(
     ["/sounds/key_01.mp3", "/sounds/key_02.mp3"],
-    isMuted.value ? 0 : volume.value,
+    settingsContext.isMuted.value ? 0 : settingsContext.volume.value,
   );
 
-  const sessionGameMode = useGameStore((s) => s.sessionGameMode);
-  const setSessionGameMode = useGameStore((s) => s.setSessionGameMode);
-
-  const gameId = useGameStore((s) => s.gameId);
-  const incrementGameId = useGameStore((s) => s.incrementGameId);
-  const referenceGridId = useGameStore((s) => s.referenceGridId);
-  const setReferenceGridId = useGameStore((s) => s.setReferenceGridId);
-
+  /**
+   * Tracks per-cell animations for the main game grid.
+   *
+   * - When animations finish, we reset animation data from the renderGrid.
+   * - When all animations in a batch finish, we unlock input and commit any pending game state.
+   */
   const gameGridAnimationTracker = useAnimationTracker(
-    (finishedMap) => {
+    (finishedMap): void => {
       gameGrid.flushAnimation(finishedMap);
     },
     () => {
@@ -115,66 +129,221 @@ export const useGame = (): UseGameReturn => {
   );
 
   /**
-   * Initialize the reference grid according to the fetched target word.
+   * Tracks per-cell animations for the reference grid.
+   *
+   * - When animations finish, we reset animation data from the renderGrid.
+   */ const referenceGridAnimationTracker = useAnimationTracker(
+    (finishedMap): void => {
+      referenceGrid.flushAnimation(finishedMap);
+    },
+  );
+
+  /**
+   * Populates the reference grid with the target word.
+   * Each character starts hidden and will be revealed at game end
+   * or when the player guesses a correct letter in the correct position.
+   *
+   * @param word - The guessed word.
    */
-  const populateReferenceGrid = () => {
-    const currentWord = useGameStore.getState().targetWord;
-    const newRow = currentWord.split("").map((ch) => ({
+  const populateReferenceGrid = (word: string): void => {
+    const newRow: DataCell[] = word.split("").map((ch) => ({
       char: ch,
       status: CellStatus.HIDDEN,
-      animation: CellAnimation.NONE,
-      animationDelay: 0,
     }));
     referenceGrid.updateRow(0, newRow);
   };
 
-  const [hasHydrated, setHasHydrated] = useState(false);
+  /**
+   * Fully (re)initializes the game as a brand new game.
+   *
+   * Steps:
+   * - Locks input.
+   * - Resets game state, cursor, key statuses, grids, animations, toasts, and constraints.
+   * - Clears the current target word.
+   * - Fetches a new target word.
+   * - Populates the reference grid with the new word.
+   * - Unlocks input when ready.
+   *
+   * This should ONLY be called when creating a new game, not when restoring from snapshot,
+   * or resuming from the game state.
+   */
+  const initGame = async () => {
+    isInputLocked.current = true;
+    gameState.resetState();
+    cursor.resetCursor();
 
-  // Initialize the game
+    keyStatusesController.resetKeyStatuses();
+
+    gameGrid.resetGrid();
+    referenceGrid.resetGrid();
+
+    gameGridAnimationTracker.reset();
+    referenceGridAnimationTracker.reset();
+
+    toastsController.toastList.forEach((t) =>
+      toastsController.removeToast(t.id),
+    );
+
+    targetWordController.resetTargetWord();
+
+    strictConstraints.resetStrictConstraints();
+
+    const word = await targetWordController.loadTargetWord(
+      settingsContext.wordLength.value,
+      activeSessionController.activeSession,
+      settingsContext.ruleset.value,
+    );
+
+    if (!word) return;
+
+    populateReferenceGrid(word);
+
+    isInputLocked.current = false;
+  };
+
+  /** Daily snapshot persistence controller (localStorage-backed). */
+  const dailySnapshotState = useDailySnapshotState();
+
+  /** Current snapshot for a given (ruleset, wordLength) combination if there's any. */
+  const snapshot = dailySnapshotState.getSnapshot(
+    settingsContext.ruleset.value,
+    settingsContext.wordLength.value,
+  );
+
+  /** Stable key used to detect when a different snapshot should be hydratead. */
+  const snapshotKey = snapshot
+    ? `${dailySnapshotState.todayIndex}:${settingsContext.ruleset.value}:${settingsContext.wordLength.value}`
+    : null;
+
+  /**
+   * Ensures that a snapshot exists whenever we are in DAILY mode and the (ruleset, wordLength) combination changes.
+   */
   useEffect(() => {
-    // Mark client as hydrated to render
-    setHasHydrated(true);
+    if (activeSessionController.activeSession !== SessionType.DAILY) return;
+    dailySnapshotState.ensureSnapshot(
+      settingsContext.ruleset.value,
+      settingsContext.wordLength.value,
+    );
+  }, [
+    activeSessionController.activeSession,
+    settingsContext.ruleset.value,
+    settingsContext.wordLength.value,
+  ]);
 
-    if (wordLength.value !== wordLengthStore) {
-      setWordLengthStore(wordLength.value);
-      restartGame();
-      return;
-    }
+  /**
+   * Hydrate session state from the daily snapshot.
+   * This runs when the snapshot key changes (new day, ruleset, or word length);
+   */
+  useEffect(() => {
+    if (activeSessionController.activeSession !== SessionType.DAILY) return;
+    if (!snapshot || !snapshotKey) return;
+    if (lastHydratedKeyRef.current === snapshotKey) return;
 
-    if (gameMode.value !== sessionGameMode) {
-      // If game mode changed, restart and fetch new word
-      setSessionGameMode(gameMode.value);
-      restartGame(); // restart handles target word fetch
-      return;
-    }
+    lastHydratedKeyRef.current = snapshotKey;
 
-    // Only populate grid if we have a target word
-    if (!targetWord) return;
+    (async () => {
+      isInputLocked.current = true;
+      setHasHydrated(false);
 
-    // If this is a new game, reset UI and populate grid
-    if (referenceGridId !== gameId) {
-      // Reset state & UI (but does not increment the ID unlike restartGame)
-      gameState.resetState();
-      cursor.resetCursor();
+      // Load target word for DAILY (should be stable for the day).
+      const word = await targetWordController.loadTargetWord(
+        settingsContext.wordLength.value,
+        SessionType.DAILY,
+        settingsContext.ruleset.value,
+      );
+
+      activeSessionController.setRuleset(settingsContext.ruleset.value);
+      activeSessionController.setWordLength(settingsContext.wordLength.value);
+
+      // Hydrate session state from snapshot.
+      activeSessionController.hydrateFromSnapshot(snapshot);
+
+      // If this snapshot was just created, initialize reference grid.
+      if (snapshot.isNew && word) populateReferenceGrid(word);
+
+      setHasHydrated(true);
       isInputLocked.current = false;
-      resetKeyStatuses();
-      gameGrid.resetGrid();
-      referenceGrid.resetGrid();
-      gameGridAnimationTracker.reset();
-      referenceGridAnimationTracker.reset();
-      toastList.forEach((t) => removeToast(t.id));
-      useStrictConstraints.resetStrictConstraints();
+    })();
+  }, [
+    activeSessionController.activeSession,
+    snapshotKey,
+    settingsContext.ruleset.value,
+    settingsContext.wordLength.value,
+  ]);
 
-      populateReferenceGrid();
-      setReferenceGridId(useGameStore.getState().gameId);
+  /** Handles PRACTICE mode initialize and restarts when (ruleset, word length) combination changes. */
+  useEffect(() => {
+    if (activeSessionController.activeSession !== SessionType.PRACTICE) return;
+
+    setHasHydrated(false);
+    let needsRestart = false;
+
+    // Sunc ruleset and word length into session state.
+    if (settingsContext.ruleset.value !== activeSessionController.ruleset) {
+      needsRestart = true;
+      activeSessionController.setRuleset(settingsContext.ruleset.value);
     }
-  }, []);
+    if (
+      settingsContext.wordLength.value !== activeSessionController.wordLength
+    ) {
+      needsRestart = true;
+      activeSessionController.setWordLength(settingsContext.wordLength.value);
+    }
 
-  const referenceGridAnimationTracker = useAnimationTracker((finishedMap) => {
-    referenceGrid.flushAnimation(finishedMap);
-  });
+    // Start a new game if needed or if there is not target word yet.
+    if (targetWordController.targetWord === null || needsRestart) {
+      initGame();
+    }
 
-  const isInputLocked = useRef(false);
+    setHasHydrated(true);
+    isInputLocked.current = false;
+  }, [
+    activeSessionController.activeSession,
+    settingsContext.ruleset.value,
+    settingsContext.wordLength.value,
+  ]);
+
+  /** Persist DAILY session state into the snapshot whenever relevant. */
+  useEffect(() => {
+    if (
+      activeSessionController.activeSession === SessionType.PRACTICE ||
+      !hasHydrated ||
+      !snapshot
+    )
+      return;
+
+    dailySnapshotState.updateSnapshot(
+      settingsContext.ruleset.value,
+      settingsContext.wordLength.value,
+      {
+        gameGrid: activeSessionController.gameGrid,
+        referenceGrid: activeSessionController.referenceGrid,
+        row: activeSessionController.row,
+        col: activeSessionController.col,
+        gameState: activeSessionController.gameState,
+        keyStatuses: activeSessionController.keyStatuses,
+        minimumLetterCounts: mapToRecordStringNumber(
+          activeSessionController.minimumLetterCounts,
+        ),
+        lockedPositions: mapToRecordNumberString(
+          activeSessionController.lockedPositions,
+        ),
+      },
+    );
+  }, [
+    hasHydrated,
+    activeSessionController.activeSession,
+    activeSessionController.gameGrid,
+    activeSessionController.referenceGrid,
+    activeSessionController.row,
+    activeSessionController.col,
+    activeSessionController.gameState,
+    activeSessionController.keyStatuses,
+    activeSessionController.minimumLetterCounts,
+    activeSessionController.lockedPositions,
+    settingsContext.ruleset.value,
+    settingsContext.wordLength.value,
+  ]);
 
   /**
    * Handles the completion of a single cell's animation in the main game grid.
@@ -242,7 +411,7 @@ export const useGame = (): UseGameReturn => {
       animationDelay: 0,
       animationKey: (cell.animationKey ?? 0) + 1,
     }));
-    referenceGrid.updateRow(0, revealedRow);
+    referenceGrid.applyRowAnimation(0, revealedRow);
   };
 
   /**
@@ -265,8 +434,6 @@ export const useGame = (): UseGameReturn => {
     gameGrid.updateCell(cursor.row.current, colToUpdate, {
       char: "",
       status: CellStatus.DEFAULT,
-      animation: CellAnimation.NONE,
-      animationDelay: 0,
     });
   };
 
@@ -283,8 +450,6 @@ export const useGame = (): UseGameReturn => {
     gameGrid.updateCell(cursor.row.current, colToUpdate, {
       char: letter,
       status: CellStatus.DEFAULT,
-      animation: CellAnimation.NONE,
-      animationDelay: 0,
     });
   };
 
@@ -298,7 +463,7 @@ export const useGame = (): UseGameReturn => {
    */
   const handleInput = (key: string): void => {
     if (
-      !targetWord ||
+      !targetWordController.targetWord ||
       isInputLocked.current ||
       gameState.state !== GameState.PLAYING
     )
@@ -318,43 +483,6 @@ export const useGame = (): UseGameReturn => {
   };
 
   /**
-   * Resets the game to its initial state.
-   *
-   * Clears the game grid, reference grid, keyboard statuses, animations, toasts,
-   * and reloads a new target word.
-   */
-  const restartGame = async (): Promise<void> => {
-    gameState.resetState();
-    cursor.resetCursor();
-    isInputLocked.current = false;
-
-    resetKeyStatuses();
-
-    const newGameId = incrementGameId();
-    setReferenceGridId(null);
-
-    gameGrid.resetGrid();
-    referenceGrid.resetGrid();
-
-    gameGridAnimationTracker.reset();
-    referenceGridAnimationTracker.reset();
-
-    toastList.forEach((t) => removeToast(t.id));
-
-    resetTargetWord();
-
-    useStrictConstraints.resetStrictConstraints();
-
-    const length = wordLength.value;
-    const word = await loadTargetWord(length);
-
-    if (!word) return;
-
-    populateReferenceGrid();
-    setReferenceGridId(newGameId);
-  };
-
-  /**
    * Handles a word validation error.
    *
    * Displays a toast notification and sets the validation error state.
@@ -362,27 +490,29 @@ export const useGame = (): UseGameReturn => {
   const handleValidationError = (): void => {
     const message = "Error validating word. Please try again.";
     setValidationError(message);
-    addToast(message);
+    toastsController.addToast(message);
   };
 
   const submitGuess = useGuessSubmission(
-    gameMode.value === GameMode.STRICT || gameMode.value === GameMode.HARDCORE,
+    settingsContext.ruleset.value === Ruleset.STRICT ||
+      settingsContext.ruleset.value === Ruleset.HARDCORE,
     animationSpeedMultiplier,
-    targetLetterCount,
-    targetWord,
+    targetWordController.targetLetterCount,
+    targetWordController.targetWord,
     referenceGrid,
     gameGrid,
     gameState,
     cursor,
     gameGridAnimationTracker,
     referenceGridAnimationTracker,
-    useStrictConstraints,
-    addToast,
+    strictConstraints,
+    toastsController.addToast,
     handleValidationError,
     setValidationError,
-    updateKeyStatuses,
+    keyStatusesController.updateKeyStatuses,
   );
 
+  /** Attaches global keyboard input listener. */
   useKeyboardInput(handleInput);
 
   return {
@@ -401,22 +531,22 @@ export const useGame = (): UseGameReturn => {
     },
 
     keyboard: {
-      statuses: keyStatuses,
-      update: updateKeyStatuses,
-      reset: resetKeyStatuses,
+      statuses: keyStatusesController.keyStatuses,
+      update: keyStatusesController.updateKeyStatuses,
+      reset: keyStatusesController.resetKeyStatuses,
     },
 
     game: {
       gameState: gameState.state,
       validationError,
-      wordFetchError,
-      targetWord,
-      restartGame,
+      wordFetchError: targetWordController.wordFetchError,
+      targetWord: targetWordController.targetWord,
+      restartGame: initGame,
     },
 
     toasts: {
-      list: toastList,
-      removeToast,
+      list: toastsController.toastList,
+      removeToast: toastsController.removeToast,
     },
 
     input: {

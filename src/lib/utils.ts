@@ -34,14 +34,14 @@ export const countLetter = (word: string): Record<string, number> => {
 export const dataGridToRenderGrid = (
   dataGrid: DataCell[][],
   animation: CellAnimationType,
-  animationDelay: number
+  animationDelay: number,
 ): RenderCell[][] => {
   return dataGrid.map((row) =>
     row.map((cell) => ({
       ...cell,
       animation,
       animationDelay,
-    }))
+    })),
   );
 };
 
@@ -54,13 +54,13 @@ export const dataGridToRenderGrid = (
  * @returns A 2D DataCell grid.
  */
 export const renderGridToDataGrid = (
-  renderGrid: RenderCell[][]
+  renderGrid: RenderCell[][],
 ): DataCell[][] => {
   return renderGrid.map((row) =>
     row.map(({ char, status }) => ({
       char,
       status,
-    }))
+    })),
   );
 };
 
@@ -75,13 +75,13 @@ export const renderGridToDataGrid = (
 export const initEmptyDataGrid = (
   rowNum: number,
   colNum: number,
-  defaultStatus: CellStatusType = CellStatus.DEFAULT
+  defaultStatus: CellStatusType = CellStatus.DEFAULT,
 ): DataCell[][] => {
   return Array.from({ length: rowNum }, () =>
     Array.from({ length: colNum }, () => ({
       char: "",
       status: defaultStatus,
-    }))
+    })),
   );
 };
 
@@ -100,7 +100,7 @@ export const initEmptyRenderGrid = (
   colNum: number,
   defaultStatus: CellStatusType = CellStatus.DEFAULT,
   defaultAnimation: CellAnimationType = CellAnimation.NONE,
-  animationDelay = 0
+  animationDelay = 0,
 ): Array<Array<RenderCell>> => {
   return Array.from({ length: rowNum }, () =>
     Array.from({ length: colNum }, () => ({
@@ -108,7 +108,7 @@ export const initEmptyRenderGrid = (
       status: defaultStatus,
       animation: defaultAnimation,
       animationDelay,
-    }))
+    })),
   );
 };
 
@@ -125,7 +125,7 @@ export const initEmptyRenderGrid = (
 export const evaluateGuess = (
   guess: string,
   targetWord: string,
-  targetLetterCount: Record<string, number>
+  targetLetterCount: Record<string, number>,
 ): Array<CellStatusType> => {
   const wordLength = guess.length;
   const tempLetterCount = { ...targetLetterCount };
@@ -160,7 +160,7 @@ export const evaluateGuess = (
 export const renderEmptyGrid = (
   rows: number,
   cols: number,
-  hidden = false
+  hidden = false,
 ): RenderCell[][] => {
   const status = hidden ? CellStatus.HIDDEN : CellStatus.DEFAULT;
 
@@ -170,6 +170,51 @@ export const renderEmptyGrid = (
       status,
       animation: CellAnimation.NONE,
       animationDelay: 0,
-    }))
+    })),
   );
+};
+
+/**
+ * Computes the number of days since the Unix epoch in UTC.
+ *
+ * @returns The number of whole days since 01-01-1970 (UTC).
+ */
+export const getDateIndex = (): number => {
+  const now = new Date();
+  const utcToday = Date.UTC(
+    now.getUTCFullYear(),
+    now.getUTCMonth(),
+    now.getUTCDate(),
+  );
+  const utcEpoch = Date.UTC(1970, 0, 1);
+  const MS_PER_DAY = 24 * 60 * 60 * 1000;
+  return Math.floor((utcToday - utcEpoch) / MS_PER_DAY);
+};
+
+/** Converts a Map<string, number> into a plain object (Record<string, number>).
+ *
+ * @param map - The source map to convert. If null, an empty object is returned.
+ * @returns A plain object with the same key/value pairs as the input map.
+ */
+export const mapToRecordStringNumber = (map: Map<string, number> | null) => {
+  const obj: Record<string, number> = {};
+  if (!map) return obj;
+  for (const [k, v] of map.entries()) {
+    obj[k] = v;
+  }
+  return obj;
+};
+
+/** Converts a Map<number, string> into a plain object (Record<number, string>).
+ *
+ * @param - The source map to convert. If null, an empty object is returned.
+ * @returns A plain object with the same key/value pairs as the input map.
+ */
+export const mapToRecordNumberString = (map: Map<number, string> | null) => {
+  const obj: Record<number, string> = {};
+  if (!map) return obj;
+  for (const [k, v] of map.entries()) {
+    obj[k] = v;
+  }
+  return obj;
 };

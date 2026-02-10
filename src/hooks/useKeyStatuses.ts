@@ -2,7 +2,7 @@ import { CellStatus } from "@/lib/constants";
 import { CellStatusType } from "@/types/cell";
 import { UseKeyStatusesReturn } from "@/types/useKeyStatuses.types";
 
-import { useGameStore } from "@/store/useGameStore";
+import { useActiveSession } from "@/hooks/useActiveSession";
 
 /**
  * Hook to manage the visual status of keyboard keys.
@@ -11,9 +11,7 @@ import { useGameStore } from "@/store/useGameStore";
  * and provides utilities to update or reset these states.
  */
 export const useKeyStatuses = (): UseKeyStatusesReturn => {
-  const keyStatuses = useGameStore((s) => s.keyStatuses);
-  const setKeyStatuses = useGameStore((s) => s.setKeyStatuses);
-  const resetKeyStatuses = useGameStore((s) => s.resetKeyStatuses);
+  const { keyStatuses, setKeyStatuses, resetKeyStatuses } = useActiveSession();
 
   /**
    * Updates key statuses based on the latest guess.
@@ -21,7 +19,7 @@ export const useKeyStatuses = (): UseKeyStatusesReturn => {
    */
   const updateKeyStatuses = (
     guess: string,
-    statuses: CellStatusType[]
+    statuses: CellStatusType[],
   ): void => {
     setKeyStatuses((prev) => {
       const next = { ...prev };

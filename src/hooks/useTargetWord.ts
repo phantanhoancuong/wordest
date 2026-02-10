@@ -1,8 +1,8 @@
 import { useEffect, useRef, useState } from "react";
 
-import { useGameStore } from "@/store/useGameStore";
+import { useActiveSession } from "@/hooks/useActiveSession";
 
-import { WordLength } from "@/lib/constants";
+import { Ruleset, SessionType, WordLength } from "@/lib/constants";
 import { UseTargetWordReturn } from "@/types/useTargetWord.types";
 
 import { fetchWordFromApi } from "@/lib/api";
@@ -15,9 +15,8 @@ import { countLetter } from "@/lib/utils";
  * and exposing any fetch errors.
  */
 export const useTargetWord = (): UseTargetWordReturn => {
-  const targetWord = useGameStore((s) => s.targetWord);
-  const setTargetWord = useGameStore((s) => s.setTargetWord);
-  const [error, setError] = useState<string>("");
+  const { targetWord, setTargetWord } = useActiveSession();
+  const [error, setError] = useState<string>(null);
   const targetLetterCount = useRef<Record<string, number>>({});
 
   /**
@@ -27,14 +26,18 @@ export const useTargetWord = (): UseTargetWordReturn => {
    * Call 'reloadTargetWord' to explicitly load a replacement.
    */
   const resetTargetWord = () => {
-    setTargetWord("");
+    setTargetWord(null);
   };
 
   /** Fetches a new target word from the API and updates state. */
-  const loadTargetWord = async (length: WordLength): Promise<string | null> => {
+  const loadTargetWord = async (
+    length: WordLength,
+    activeSession: SessionType,
+    ruleset: Ruleset,
+  ): Promise<string | null> => {
     try {
-      setError("");
-      const word = await fetchWordFromApi(length);
+      setError(null);
+      const word = await fetchWordFromApi(length, activeSession, ruleset);
       setTargetWord(word);
       return word;
     } catch (err: unknown) {
