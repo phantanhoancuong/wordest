@@ -20,7 +20,7 @@ export interface UseGridStateReturn {
     rowIndex: number,
     animationSpeedMultiplier: number,
   ) => void;
-  flushAnimation: (finishedCellMap: Map<number, Array<number>>) => void;
+  flushAnimation: (finishedCellMap: Record<number, Array<number>>) => void;
   resetGrid: () => void;
   applyRowAnimation: (rowIndex: number, animatedRow: RenderCell[]) => void;
 }

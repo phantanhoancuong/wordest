@@ -103,13 +103,16 @@ export const useGridState = (
    * Reset animation data after cell's animation ends.
    * @param finishedCellMap - rowIndex -> array of finished colIndices.
    */
-  const flushAnimation = (finishedCellMap: Map<number, number[]>) => {
+  const flushAnimation = (finishedCellMap: Record<number, number[]>) => {
     const finalGrid = renderGridRef.current;
 
     const nextDataGrid = [...dataGrid];
     const nextRenderGrid = [...finalGrid];
 
-    for (const [rowIndex, cols] of finishedCellMap.entries()) {
+    for (const rowKey in finishedCellMap) {
+      const rowIndex = Number(rowKey);
+      const cols = finishedCellMap[rowIndex];
+
       const dataRow = [...nextDataGrid[rowIndex]];
       const renderRow = [...nextRenderGrid[rowIndex]];
 

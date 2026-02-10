@@ -126,7 +126,7 @@ export const useGame = (): UseGameReturn => {
    * - When all animations in a batch finish, we unlock input and commit any pending game state.
    */
   const gameGridAnimationTracker = useAnimationTracker(
-    (finishedMap): void => {
+    (finishedMap: Record<number, number[]>): void => {
       gameGrid.flushAnimation(finishedMap);
     },
     () => {
@@ -142,7 +142,7 @@ export const useGame = (): UseGameReturn => {
    *
    * - When animations finish, we reset animation data from the renderGrid.
    */ const referenceGridAnimationTracker = useAnimationTracker(
-    (finishedMap): void => {
+    (finishedMap: Record<number, number[]>): void => {
       referenceGrid.flushAnimation(finishedMap);
     },
   );

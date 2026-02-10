@@ -14,11 +14,11 @@ import { UseAnimationTrackerReturn } from "@/types/useAnimationTracker.types";
  * @param onAllEnd - Optional callback for custom logic after flush.
  */
 export const useAnimationTracker = (
-  flushCallback: (finishedMap: Map<number, Array<number>>) => void,
-  onAllEnd?: () => void
+  flushCallback: (finishedMap: Record<number, number[]>) => void,
+  onAllEnd?: () => void,
 ): UseAnimationTrackerReturn => {
   const animatingCount = useRef(0);
-  const finished = useRef(new Map<number, Array<number>>());
+  const finished = useRef<Record<number, number[]>>({});
 
   const add = (num: number): void => {
     if (num <= 0) return;
@@ -27,20 +27,23 @@ export const useAnimationTracker = (
 
   const markEnd = (row: number, col: number): void => {
     const map = finished.current;
-    if (!map.has(row)) map.set(row, []);
-    map.get(row)!.push(col);
+
+    if (!map[row]) map[row] = [];
+    map[row].push(col);
+
     animatingCount.current -= 1;
 
     if (animatingCount.current === 0) {
-      flushCallback(new Map(map));
-      map.clear();
+      // Shallow copy so the consumer can’t mutate our internal ref
+      flushCallback({ ...map });
+      finished.current = {};
       onAllEnd?.();
     }
   };
 
   const reset = (): void => {
     animatingCount.current = 0;
-    finished.current.clear();
+    finished.current = {};
   };
 
   const getCount = (): number => {
