@@ -24,6 +24,7 @@ export type DailySnapshot = {
   keyStatuses: Partial<Record<string, CellStatusType>>;
   lockedPositions: Record<number, string>;
   minimumLetterCounts: Record<string, number>;
+  isNew: boolean;
 };
 
 /**
@@ -50,6 +51,7 @@ const initDailySnapshot = (wordLength: WordLength): DailySnapshot => ({
   keyStatuses: {},
   lockedPositions: {},
   minimumLetterCounts: {},
+  isNew: true,
 });
 
 /**
@@ -76,6 +78,8 @@ export const useDailySnapshotState = () => {
       initDailySnapshotState(),
     );
 
+  const todayIndex = dailySnapshotState.dateIndex;
+
   /**
    * Ensures that a snapshot exists for the given (ruleset, wordLength).
    *
@@ -85,10 +89,28 @@ export const useDailySnapshotState = () => {
    * @param ruleset - Game ruleset identifier.
    * @param wordLength - Target word length.
    */
-  const ensureSnapshot = (ruleset: Ruleset, wordLength: WordLength): void => {
-    setDailySnapshotState((prev) =>
-      getSnapshotStateBase(prev, ruleset, wordLength),
-    );
+  const ensureSnapshot = (
+    ruleset: Ruleset,
+    wordLength: WordLength,
+  ): boolean => {
+    let created = false;
+
+    setDailySnapshotState((prev) => {
+      const todayIndex = getDateIndex();
+
+      // date rollover or missing bucket = new snapshot
+      if (
+        todayIndex !== prev.dateIndex ||
+        !prev.snapshots[ruleset] ||
+        !prev.snapshots[ruleset]?.[wordLength]
+      ) {
+        created = true;
+      }
+
+      return getSnapshotStateBase(prev, ruleset, wordLength);
+    });
+
+    return created;
   };
 
   /**
@@ -176,13 +198,13 @@ export const useDailySnapshotState = () => {
             [wordLength]: {
               ...base.snapshots[ruleset][wordLength],
               ...patch,
+              isNew: false,
             },
           },
         },
       };
     });
   };
-
   /**
    * Retrieves the snapshot for the given (ruleset, wordLength) if it exists and belongs to today.
    *
@@ -209,5 +231,5 @@ export const useDailySnapshotState = () => {
     return snapshot;
   };
 
-  return { ensureSnapshot, getSnapshot, updateSnapshot };
+  return { todayIndex, ensureSnapshot, getSnapshot, updateSnapshot };
 };

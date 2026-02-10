@@ -25,6 +25,7 @@ import {
 import { CellStatusType, DataCell } from "@/types/cell";
 
 import { initEmptyDataGrid } from "@/lib/utils";
+import { DailySnapshot } from "@/hooks/useDailySnapshotState";
 
 /**
  * State of a single game session.
@@ -54,13 +55,27 @@ type GameSession = {
 type GameStore = {
   activeSession: SessionType;
   sessions: Map<SessionType, GameSession>;
-  hydrateFromSettings: (ruleset: Ruleset, wordLength: WordLength) => boolean;
+
+  /** Hydrate the active session from a persisted daily snapshot. */
+  hydrateFromSnapshot: (dailySnapshot: DailySnapshot) => void;
+
+  /** Switch the active session (DAILY <-> PRACTICE). */
   setActiveSession: (session: SessionType) => void;
+
+  /** Setters for session states. */
   setGameState: (gameState: GameState) => void;
   setRow: (row: number) => void;
   setCol: (col: number) => void;
+
+  /** Replace the entire reference or game grid. */
   setReferenceGrid: (referenceGrid: DataCell[][]) => void;
   setGameGrid: (gameGrid: DataCell[][]) => void;
+
+  /**
+   * Update keyboard key statuses.
+   * Accepts either a partial object or an updater function.
+   *
+   */
   setKeyStatuses: (
     updater:
       | Partial<Record<string, CellStatusType>>
@@ -68,19 +83,29 @@ type GameStore = {
           prev: Partial<Record<string, CellStatusType>>,
         ) => Partial<Record<string, CellStatusType>>),
   ) => void;
+
+  /** Set session configuration. */
   setRuleset: (ruleset: Ruleset) => void;
   setWordLength: (wordlength: WordLength) => void;
+
+  /** Set constraint helper structured (used in strict/hardcore mode). */
   setLockedPositions: (lockedPositions: Map<number, string>) => void;
   setMinimumLetterCounts: (minimumLetterCounts: Map<string, number>) => void;
+
+  /** Reset helpers for parts of the session state. */
   resetReferenceGrid: () => void;
   resetGameGrid: () => void;
   resetKeyStatuses: () => void;
+
+  /** Set or clear the current target word. */
   setTargetWord: (targetWord: string | null) => void;
+
+  /** Advance the current row (after a guess is committed). */
   incrementRow: () => void;
 };
 
 /**
- * Creates a fresh GameSession.
+ * Creates a fresh GameSession with default values.
  */
 const initGameSession = (
   ruleset: Ruleset = Ruleset.NORMAL,
@@ -101,6 +126,8 @@ const initGameSession = (
 
 /**
  * Helper factory that creates a session-scoped updater:
+ *
+ * The updater:
  * - Clones the sessions Map.
  * - Reads the current active session.
  * - Applies the updater to that session only.
@@ -123,68 +150,84 @@ const createUpdateSession = (set: StoreApi<GameStore>["setState"]) => {
  * Main store hook.
  *
  * Exposes:
- * - Session switching.
- * - Per-session setters.
- * - Reset helpers.
- * - ID increment helpers.
- *
- * All setters operate on the currently active session only.
+ * - Sesssion switching.
+ * - Per-session setters (operate only on the active session).
+ * - Reset helpers (operate only on the active session).
+ * - Row increment helper (operate only on the active session)..
  */
 export const useGameStore = create<GameStore>((set) => {
   const updateSession = createUpdateSession(set);
   return {
     activeSession: SessionType.DAILY,
+
+    // Initialize both sessions.
     sessions: new Map<SessionType, GameSession>([
       [SessionType.DAILY, initGameSession()],
       [SessionType.PRACTICE, initGameSession()],
     ]),
 
-    hydrateFromSettings: (ruleset: Ruleset, wordLength: WordLength) => {
-      let needsRestart = false;
-
+    /**
+     * Hydrate the active session from a DailySnapshot.
+     * This is used when restoring DAILY mode from localStorage.
+     *
+     * @param snapshot - The DailySnapshot's data to hydrate from.
+     */
+    hydrateFromSnapshot: (snapshot: DailySnapshot): void => {
       set((state) => {
-        const sessions = new Map<SessionType, GameSession>();
+        const sessions = new Map(state.sessions);
+        const prev = sessions.get(state.activeSession);
+        if (!prev) return state;
 
-        for (const [key, session] of state.sessions) {
-          if (
-            session.ruleset !== ruleset ||
-            session.wordLength !== wordLength
-          ) {
-            needsRestart = true;
-          }
+        sessions.set(state.activeSession, {
+          ...prev,
+          gameState: snapshot.gameState,
+          gameGrid: snapshot.gameGrid,
+          referenceGrid: snapshot.referenceGrid,
+          row: snapshot.row,
+          col: snapshot.col,
+          keyStatuses: snapshot.keyStatuses,
 
-          sessions.set(key, {
-            ...session,
-            ruleset,
-            wordLength,
-          });
-        }
+          lockedPositions: new Map(
+            Object.entries(snapshot.lockedPositions).map(([k, v]) => [
+              Number(k),
+              v,
+            ]),
+          ),
+          minimumLetterCounts: new Map(
+            Object.entries(snapshot.minimumLetterCounts),
+          ),
+        });
 
         return { sessions };
       });
-
-      return needsRestart;
     },
 
+    /** Switch which session is active. */
     setActiveSession: (session: SessionType) => set({ activeSession: session }),
 
+    /** Primitive setters. */
     setGameState: (gameState: GameState) =>
       updateSession((prev) => ({
         ...prev,
         gameState,
       })),
-
     setRow: (row: number) => updateSession((prev) => ({ ...prev, row })),
     setCol: (col: number) => updateSession((prev) => ({ ...prev, col })),
 
+    /** Grid setters. */
     setReferenceGrid: (referenceGrid: DataCell[][]) =>
       updateSession((prev) => ({ ...prev, referenceGrid })),
     setGameGrid: (gameGrid: DataCell[][]) =>
       updateSession((prev) => ({ ...prev, gameGrid })),
 
+    /** Set or clear the target word. */
     setTargetWord: (targetWord: string | null) =>
       updateSession((prev) => ({ ...prev, targetWord })),
 
+    /**
+     * Update key statuses.
+     * Supports both direct replacement and functional updates.
+     */
     setKeyStatuses: (
       updater:
         | Partial<Record<string, CellStatusType>>
@@ -202,13 +245,13 @@ export const useGameStore = create<GameStore>((set) => {
         };
       }),
 
+    /** Configuration setters. */
     setRuleset: (ruleset: Ruleset) => {
       updateSession((prev) => ({
         ...prev,
         ruleset,
       }));
     },
-
     setWordLength: (wordLength: WordLength) => {
       updateSession((prev) => ({
         ...prev,
@@ -216,13 +259,13 @@ export const useGameStore = create<GameStore>((set) => {
       }));
     },
 
+    /**Constraint helpers setters. */
     setLockedPositions: (lockedPositions: Map<number, string>) => {
       updateSession((prev) => ({
         ...prev,
         lockedPositions,
       }));
     },
-
     setMinimumLetterCounts: (minimumLetterCounts: Map<string, number>) => {
       updateSession((prev) => ({
         ...prev,
@@ -230,24 +273,24 @@ export const useGameStore = create<GameStore>((set) => {
       }));
     },
 
+    /** Reset helpers. */
     resetReferenceGrid: () =>
       updateSession((prev) => ({
         ...prev,
         referenceGrid: initEmptyDataGrid(1, prev.wordLength, CellStatus.HIDDEN),
       })),
-
     resetGameGrid: () =>
       updateSession((prev) => ({
         ...prev,
         gameGrid: initEmptyDataGrid(ATTEMPTS, prev.wordLength),
       })),
-
     resetKeyStatuses: () =>
       updateSession((prev) => ({
         ...prev,
         keyStatuses: {},
       })),
 
+    /** Advance to the next row after a guess is committed. */
     incrementRow: () => {
       updateSession((prev) => ({
         ...prev,

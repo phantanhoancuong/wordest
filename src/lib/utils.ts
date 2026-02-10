@@ -190,3 +190,31 @@ export const getDateIndex = (): number => {
   const MS_PER_DAY = 24 * 60 * 60 * 1000;
   return Math.floor((utcToday - utcEpoch) / MS_PER_DAY);
 };
+
+/** Converts a Map<string, number> into a plain object (Record<string, number>).
+ *
+ * @param map - The source map to convert. If null, an empty object is returned.
+ * @returns A plain object with the same key/value pairs as the input map.
+ */
+export const mapToRecordStringNumber = (map: Map<string, number> | null) => {
+  const obj: Record<string, number> = {};
+  if (!map) return obj;
+  for (const [k, v] of map.entries()) {
+    obj[k] = v;
+  }
+  return obj;
+};
+
+/** Converts a Map<number, string> into a plain object (Record<number, string>).
+ *
+ * @param - The source map to convert. If null, an empty object is returned.
+ * @returns A plain object with the same key/value pairs as the input map.
+ */
+export const mapToRecordNumberString = (map: Map<number, string> | null) => {
+  const obj: Record<number, string> = {};
+  if (!map) return obj;
+  for (const [k, v] of map.entries()) {
+    obj[k] = v;
+  }
+  return obj;
+};
