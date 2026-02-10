@@ -14,30 +14,39 @@ import {
 import { DataCell } from "@/types/cell";
 import { UseGameReturn } from "@/types/useGame.types";
 
-import { useActiveSession } from "@/hooks/useActiveSession";
-import { useAnimationTracker } from "@/hooks/useAnimationTracker";
-import { useCursorController } from "@/hooks/useCursorController";
-import { useDailySnapshotState } from "@/hooks/useDailySnapshotState";
-import { useGameState } from "@/hooks/useGameState";
-import { useGridState } from "@/hooks/useGridState";
-import { useGuessSubmission } from "@/hooks/useGuessSubmission";
-import { useKeyboardInput } from "@/hooks/useKeyboardInput";
-import { useKeyStatuses } from "@/hooks/useKeyStatuses";
-import { useSoundPlayer } from "@/hooks/useSoundPlayer";
-import { useStrictConstraints } from "@/hooks/useStrictConstraints";
-import { useTargetWord } from "@/hooks/useTargetWord";
-import { useToasts } from "@/hooks/useToasts";
-import { mapToRecordStringNumber, mapToRecordNumberString } from "@/lib/utils";
+import {
+  useActiveSession,
+  useAnimationTracker,
+  useCursorController,
+  useDailySnapshotState,
+  useGameState,
+  useGridState,
+  useGuessSubmission,
+  useKeyboardInput,
+  useKeyStatuses,
+  useSoundPlayer,
+  useStrictConstraints,
+  useTargetWord,
+  useToasts,
+} from "@/hooks";
 
 /** Matches a single uppercase character, used to validate keyboard letter input. */
 const LETTER_REGEX = /^[A-Z]$/;
 
 /**
- * Hook to manage the state and logic of the game.
+ * Main game hook.
  *
- * Tracks the grid of guesses, keyboard statuses, game state, toasts, input handling, and sound playback.
+ * Coordinates:
+ * - Grid states (game grid and reference grid).
+ * - Keyboard state.
+ * - Cursor movement.
+ * - Game state transitions.
+ * - Animations.
+ * - Input handling.
+ * - Toasts and sound effects.
+ * - Session persistence (DAILY / PRACTICE).
  *
- * @returns Game controller and associated utilities.
+ * @returns Game controller and UI-facing state.
  */
 export const useGame = (): UseGameReturn => {
   /** Whether the hook has hydrated all of its components to display yet. */
@@ -322,12 +331,8 @@ export const useGame = (): UseGameReturn => {
         col: activeSessionController.col,
         gameState: activeSessionController.gameState,
         keyStatuses: activeSessionController.keyStatuses,
-        minimumLetterCounts: mapToRecordStringNumber(
-          activeSessionController.minimumLetterCounts,
-        ),
-        lockedPositions: mapToRecordNumberString(
-          activeSessionController.lockedPositions,
-        ),
+        minimumLetterCounts: activeSessionController.minimumLetterCounts,
+        lockedPositions: activeSessionController.lockedPositions,
       },
     );
   }, [
@@ -350,8 +355,8 @@ export const useGame = (): UseGameReturn => {
    *
    * Marks the animation as finished and advances the cursor if all animations in the current row are completed.
    *
-   * @param rowIndex - Index of the row of the animated cell.
-   * @param colIndex - Index of the column of the animated cell.
+   * @param rowIndex - Row index of the animated cell.
+   * @param colIndex - Column index of the animated cell.
    */
   const handleGameGridAnimationEnd = (
     rowIndex: number,

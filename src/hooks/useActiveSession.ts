@@ -3,34 +3,30 @@ import { useGameStore } from "@/store/useGameStore";
 export const useActiveSession = () => {
   const activeSession = useGameStore((s) => s.activeSession);
   const hydrateFromSnapshot = useGameStore((s) => s.hydrateFromSnapshot);
-  const gameState = useGameStore(
-    (s) => s.sessions.get(activeSession)!.gameState,
-  );
+  const gameState = useGameStore((s) => s.sessions[activeSession]!.gameState);
 
-  const gameGrid = useGameStore((s) => s.sessions.get(activeSession)!.gameGrid);
+  const gameGrid = useGameStore((s) => s.sessions[activeSession]!.gameGrid);
 
   const referenceGrid = useGameStore(
-    (s) => s.sessions.get(activeSession)!.referenceGrid,
+    (s) => s.sessions[activeSession]!.referenceGrid,
   );
 
-  const row = useGameStore((s) => s.sessions.get(activeSession)!.row);
-  const col = useGameStore((s) => s.sessions.get(activeSession)!.col);
+  const row = useGameStore((s) => s.sessions[activeSession]!.row);
+  const col = useGameStore((s) => s.sessions[activeSession]!.col);
 
   const keyStatuses = useGameStore(
-    (s) => s.sessions.get(activeSession)!.keyStatuses,
+    (s) => s.sessions[activeSession]!.keyStatuses,
   );
 
   const lockedPositions = useGameStore(
-    (s) => s.sessions.get(activeSession)!.lockedPositions,
+    (s) => s.sessions[activeSession]!.lockedPositions,
   );
 
   const minimumLetterCounts = useGameStore(
-    (s) => s.sessions.get(activeSession)!.minimumLetterCounts,
+    (s) => s.sessions[activeSession]!.minimumLetterCounts,
   );
 
-  const targetWord = useGameStore(
-    (s) => s.sessions.get(activeSession)!.targetWord,
-  );
+  const targetWord = useGameStore((s) => s.sessions[activeSession]!.targetWord);
 
   const setGameState = useGameStore((s) => s.setGameState);
   const setGameGrid = useGameStore((s) => s.setGameGrid);
@@ -48,10 +44,8 @@ export const useActiveSession = () => {
   const setWordLength = useGameStore((s) => s.setWordLength);
   const setRuleset = useGameStore((s) => s.setRuleset);
 
-  const wordLength = useGameStore(
-    (s) => s.sessions.get(activeSession)!.wordLength,
-  );
-  const ruleset = useGameStore((s) => s.sessions.get(activeSession)!.ruleset);
+  const wordLength = useGameStore((s) => s.sessions[activeSession]!.wordLength);
+  const ruleset = useGameStore((s) => s.sessions[activeSession]!.ruleset);
 
   return {
     activeSession,

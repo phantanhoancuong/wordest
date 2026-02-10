@@ -7,15 +7,14 @@ import { useActiveSession } from "@/hooks/useActiveSession";
 import { countLetter } from "@/lib/utils";
 
 /**
- * Hook to manage Strict constraints and validation logic.
+ * Hook for managing Strict and Hardcore constraints and validation logic.
  *
- * This hook tracks accumulated constraints derived from previous guesses:
- * - Locked positions (green letters that must stay in the same position).
- * - Minimum letter counts (letters that must appear at least N times).
+ * This hook tracks constraints accumulated from previous guesses:
+ * - Locked positions: green letters that must stay in the same positions.
+ * - Minimum letter counts: letters that must appear at least N times due to them being revealed as present.
  *
- * These constraints persist across guesses within a single game and are enforced before allowing a new guess submission.
- *
- *@param addToast - Function used to display validation error messages.
+ * These constraints persist across guesses within a single game session
+ * and are enforced before allowing a new guess to be submitted.
  */
 export const useStrictConstraints = (): UseStrictConstraintsReturn => {
   const {
@@ -26,10 +25,10 @@ export const useStrictConstraints = (): UseStrictConstraintsReturn => {
   } = useActiveSession();
 
   /**
-   * Validates a guess against Strict constraints.
+   * Validates a guess against the current Strict constraints.
    *
    * @param guess - The guess string to validate.
-   * @returns An object with `isValid` and `message`:
+   * @returns An object with:
    *  - isValid: true if the guess satisfies all Strict constraints.
    *  - message: explanation if invalid, empty string if valid.
    */
@@ -37,21 +36,25 @@ export const useStrictConstraints = (): UseStrictConstraintsReturn => {
     guess: string,
   ): { isValid: boolean; message: string } => {
     // Enforce locked (green) positions.
-    for (const [index, letter] of lockedPositions) {
-      if (guess[index] !== letter) {
-        const message = `${letter} must be in cell ${index + 1}`;
+    for (const index in lockedPositions) {
+      const i = Number(index);
+      const letter = lockedPositions[i];
+      if (guess[i] !== letter) {
+        const message = `${letter} must be in cell ${i + 1}`;
         return { isValid: false, message };
       }
     }
 
-    // Enforce minimum letter counts
-    const guessCounts = new Map(Object.entries(countLetter(guess)));
-    for (const [letter, minCount] of minimumLetterCounts) {
-      if ((guessCounts.get(letter) ?? 0) < minCount) {
+    // Enforce minimum letter counts.
+    const guessCounts = countLetter(guess);
+    for (const letter in minimumLetterCounts) {
+      const minCount = minimumLetterCounts[letter];
+      if ((guessCounts[letter] ?? 0) < minCount) {
         const message = `Must have at least ${minCount} ${letter}`;
         return { isValid: false, message };
       }
     }
+
     return { isValid: true, message: "" };
   };
 
@@ -60,7 +63,7 @@ export const useStrictConstraints = (): UseStrictConstraintsReturn => {
    *a
    * Rules:
    * - CORRECT (green) letters lock the letter to its exact position.
-   * - CORRECT AND PRESENT (green and yellow) letters contribute to minimum letter counts.
+   * - CORRECT and PRESENT (green and yellow) letters contribute to minimum letter counts.
    *
    * @param guess - The submitted guess string.
    * @param statuses - Cell evoluation results corresponding to the guess.
@@ -71,40 +74,45 @@ export const useStrictConstraints = (): UseStrictConstraintsReturn => {
   ): void => {
     /**
      * Tracks minimum letter counts contributed by this specific guess.
-     * Used to merge with previously accumulated constraints.
+     * These values are merged into the accumulated constraints.
      */
-    const guessMinCounts = new Map<string, number>();
-    const nextLockedPositions = new Map(lockedPositions);
-    const nextGuessMinimumLetterCounts = new Map(minimumLetterCounts);
+    const guessMinCounts: Record<string, number> = {};
+    const nextLockedPositions: Record<number, string> = { ...lockedPositions };
+    const nextMinimumLetterCounts: Record<string, number> = {
+      ...minimumLetterCounts,
+    };
 
     for (let i = 0; i < statuses.length; i++) {
       const status = statuses[i];
       const letter = guess[i];
 
-      // Lock green letters to their
+      // Lock green letters to their positions.
       if (status === CellStatus.CORRECT) {
-        nextLockedPositions.set(i, letter);
+        nextLockedPositions[i] = letter;
       }
 
       // Count green and yellow letters toward minimum requirements.
       if (status === CellStatus.CORRECT || status === CellStatus.PRESENT) {
-        guessMinCounts.set(letter, (guessMinCounts.get(letter) ?? 0) + 1);
+        guessMinCounts[letter] = (guessMinCounts[letter] ?? 0) + 1;
       }
     }
 
-    // Merge per-guess counts into global minimum counts.
-    for (const [letter, count] of guessMinCounts.entries()) {
-      const prev = nextGuessMinimumLetterCounts.get(letter) ?? 0;
-      nextGuessMinimumLetterCounts.set(letter, Math.max(prev, count));
+    // Merge per-guess minimum counts into the accumulated constraints.
+    for (const letter in guessMinCounts) {
+      const prev = nextMinimumLetterCounts[letter] ?? 0;
+      nextMinimumLetterCounts[letter] = Math.max(prev, guessMinCounts[letter]);
     }
 
     setLockedPositions(nextLockedPositions);
-    setMinimumLetterCounts(nextGuessMinimumLetterCounts);
+    setMinimumLetterCounts(nextMinimumLetterCounts);
   };
 
+  /**
+   * Reset all Strict constraints for the current session.
+   */
   const resetStrictConstraints = (): void => {
-    setLockedPositions(new Map<number, string>());
-    setMinimumLetterCounts(new Map<string, number>());
+    setLockedPositions({});
+    setMinimumLetterCounts({});
   };
 
   return {

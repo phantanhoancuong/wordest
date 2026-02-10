@@ -1,16 +1,18 @@
-/** Zustand store for managing game state across multiple session types.
+/**
+ * Zustand store for managing game state across multiple session types.
  *
- * Each session owns its own GameSession object:
+ * Each session owns its own GameSession object, including:
  * - Grids (gameGrid, referenceGrid).
  * - Cursor position (row, col).
- * - Game state (gameState, gameId, referenceGridId, targetWord).
- * - Keyboard state (keyStatuses).
+ * - Game state (gameState, targetWord, etc.).
+ * - Keyboard statae (keyStatuses).
  * - Ruleset and word length.
  * - Constraint helpers (lockedPositions, minimumLetterCounts).
  *
- * The store keeps a Map <SessionType, GameSession> and an activeSession pointer.
+ * The store keeps:
+ * - An 'activeSession' pointer.
+ * - A Record<SessionType, GameSession> holding all sessions' data.
  */
-
 import { create } from "zustand";
 import type { StoreApi } from "zustand";
 
@@ -28,8 +30,10 @@ import { initEmptyDataGrid } from "@/lib/utils";
 import { DailySnapshot } from "@/hooks/useDailySnapshotState";
 
 /**
- * State of a single game session.
- * A session is isolated from the other.
+ * State for a single game session.
+ *
+ * Each session is isolated from the others
+ * and contains all data required to run one game instance.
  */
 type GameSession = {
   gameState: GameState;
@@ -41,20 +45,20 @@ type GameSession = {
   keyStatuses: Partial<Record<string, CellStatusType>>;
   ruleset: Ruleset;
   wordLength: WordLength;
-  lockedPositions: Map<number, string> | null;
-  minimumLetterCounts: Map<string, number> | null;
+  lockedPositions: Record<number, string>;
+  minimumLetterCounts: Record<string, number>;
 };
 
 /**
  * Root store shape.
  *
- * - activeSession: Which session is currently being manipulated.
- * - sessions: Map of session type -> GameSession.
- * - setters: session-scope mutators that updates only the active session.
+ * - activeSession: Which session is currently being manipulted.
+ * - sessions: Mapping of sessionType to GameSession.
+ * - setters: Session-scoped mutators that update only the active session.
  */
 type GameStore = {
   activeSession: SessionType;
-  sessions: Map<SessionType, GameSession>;
+  sessions: Record<SessionType, GameSession>;
 
   /** Hydrate the active session from a persisted daily snapshot. */
   hydrateFromSnapshot: (dailySnapshot: DailySnapshot) => void;
@@ -74,7 +78,6 @@ type GameStore = {
   /**
    * Update keyboard key statuses.
    * Accepts either a partial object or an updater function.
-   *
    */
   setKeyStatuses: (
     updater:
@@ -89,8 +92,8 @@ type GameStore = {
   setWordLength: (wordlength: WordLength) => void;
 
   /** Set constraint helper structured (used in strict/hardcore mode). */
-  setLockedPositions: (lockedPositions: Map<number, string>) => void;
-  setMinimumLetterCounts: (minimumLetterCounts: Map<string, number>) => void;
+  setLockedPositions: (lockedPositions: Record<number, string>) => void;
+  setMinimumLetterCounts: (minimumLetterCounts: Record<string, number>) => void;
 
   /** Reset helpers for parts of the session state. */
   resetReferenceGrid: () => void;
@@ -120,28 +123,30 @@ const initGameSession = (
   keyStatuses: {},
   ruleset: ruleset,
   wordLength: wordLength,
-  lockedPositions: new Map<number, string>(),
-  minimumLetterCounts: new Map<string, number>(),
+  lockedPositions: {},
+  minimumLetterCounts: {},
 });
 
 /**
- * Helper factory that creates a session-scoped updater:
+ * Helper factory that creates a session-scoped updater.
  *
  * The updater:
- * - Clones the sessions Map.
  * - Reads the current active session.
- * - Applies the updater to that session only.
- * - Writes the updated session back into the Map.
+ * - Applies the provided updater to that session only.
+ * - Writes the updated session back into the sessions record.
  */
 const createUpdateSession = (set: StoreApi<GameStore>["setState"]) => {
   return (updater: (prev: GameSession) => GameSession) => {
     set((state) => {
-      const sessions = new Map(state.sessions);
-      const prev = sessions.get(state.activeSession);
+      const prev = state.sessions[state.activeSession];
       if (!prev) return state;
 
-      sessions.set(state.activeSession, updater(prev));
-      return { sessions };
+      return {
+        sessions: {
+          ...state.sessions,
+          [state.activeSession]: updater(prev),
+        },
+      };
     });
   };
 };
@@ -161,10 +166,10 @@ export const useGameStore = create<GameStore>((set) => {
     activeSession: SessionType.DAILY,
 
     // Initialize both sessions.
-    sessions: new Map<SessionType, GameSession>([
-      [SessionType.DAILY, initGameSession()],
-      [SessionType.PRACTICE, initGameSession()],
-    ]),
+    sessions: {
+      [SessionType.DAILY]: initGameSession(),
+      [SessionType.PRACTICE]: initGameSession(),
+    },
 
     /**
      * Hydrate the active session from a DailySnapshot.
@@ -174,31 +179,25 @@ export const useGameStore = create<GameStore>((set) => {
      */
     hydrateFromSnapshot: (snapshot: DailySnapshot): void => {
       set((state) => {
-        const sessions = new Map(state.sessions);
-        const prev = sessions.get(state.activeSession);
+        const prev = state.sessions[state.activeSession];
         if (!prev) return state;
 
-        sessions.set(state.activeSession, {
-          ...prev,
-          gameState: snapshot.gameState,
-          gameGrid: snapshot.gameGrid,
-          referenceGrid: snapshot.referenceGrid,
-          row: snapshot.row,
-          col: snapshot.col,
-          keyStatuses: snapshot.keyStatuses,
-
-          lockedPositions: new Map(
-            Object.entries(snapshot.lockedPositions).map(([k, v]) => [
-              Number(k),
-              v,
-            ]),
-          ),
-          minimumLetterCounts: new Map(
-            Object.entries(snapshot.minimumLetterCounts),
-          ),
-        });
-
-        return { sessions };
+        return {
+          sessions: {
+            ...state.sessions,
+            [state.activeSession]: {
+              ...prev,
+              gameState: snapshot.gameState,
+              gameGrid: snapshot.gameGrid,
+              referenceGrid: snapshot.referenceGrid,
+              row: snapshot.row,
+              col: snapshot.col,
+              keyStatuses: snapshot.keyStatuses,
+              lockedPositions: snapshot.lockedPositions,
+              minimumLetterCounts: snapshot.minimumLetterCounts,
+            },
+          },
+        };
       });
     },
 
@@ -260,13 +259,13 @@ export const useGameStore = create<GameStore>((set) => {
     },
 
     /**Constraint helpers setters. */
-    setLockedPositions: (lockedPositions: Map<number, string>) => {
+    setLockedPositions: (lockedPositions: Record<number, string>) => {
       updateSession((prev) => ({
         ...prev,
         lockedPositions,
       }));
     },
-    setMinimumLetterCounts: (minimumLetterCounts: Map<string, number>) => {
+    setMinimumLetterCounts: (minimumLetterCounts: Record<string, number>) => {
       updateSession((prev) => ({
         ...prev,
         minimumLetterCounts,
