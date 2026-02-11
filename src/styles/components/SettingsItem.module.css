@@ -9,8 +9,7 @@
 
 .settings-item__header {
   display: flex;
-  align-items: end;
-  gap: 0.5em;
+  align-items: flex-end;
   font-size: calc(var(--item-font-scale) * 0.8rem);
   line-height: 1;
   gap: calc(var(--item-font-scale) * 0.35rem);
