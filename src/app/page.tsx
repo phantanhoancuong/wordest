@@ -122,7 +122,7 @@ function GameRoot({
                 {ruleset.value + " " + wordLength.value + "-letter"}
               </div>
             </div>
-            <div className={`${styles["game-board"]} flex-center`}>
+            <div className={`${styles["game-board"]}`}>
               <div className={styles["game-board__stack"]}>
                 <div className={styles["game-board__grid"]}>
                   <Grid
