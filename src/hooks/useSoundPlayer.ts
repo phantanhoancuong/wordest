@@ -1,3 +1,5 @@
+"use client";
+
 import { useEffect, useRef } from "react";
 
 /**
@@ -11,7 +13,7 @@ import { useEffect, useRef } from "react";
  */
 export const useSoundPlayer = (
   soundPaths: Array<string> = [],
-  volume: number
+  volume: number,
 ): (() => void) => {
   const sounds = useRef<Array<HTMLAudioElement>>([]);
 
@@ -28,7 +30,7 @@ export const useSoundPlayer = (
     if (sounds.current.length === 0) return;
     const randomIndex = Math.floor(Math.random() * sounds.current.length);
     const audioClone = sounds.current[randomIndex].cloneNode(
-      true
+      true,
     ) as HTMLAudioElement;
 
     audioClone.volume = volume;

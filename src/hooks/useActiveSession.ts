@@ -1,3 +1,5 @@
+"use client";
+
 import { useGameStore } from "@/store/useGameStore";
 
 export const useActiveSession = () => {

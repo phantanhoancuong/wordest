@@ -1,3 +1,5 @@
+"use client";
+
 import { useEffect } from "react";
 
 /**
@@ -11,7 +13,7 @@ import { useEffect } from "react";
  * @param onKeyPress - Callback fired with the pressed key.
  */
 export const useKeyboardInput = (
-  onKeyPress: (key: string, event: KeyboardEvent) => void
+  onKeyPress: (key: string, event: KeyboardEvent) => void,
 ): void => {
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {

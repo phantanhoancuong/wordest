@@ -9,7 +9,8 @@ import { Ruleset, SessionType } from "@/lib/constants";
 
 import { useGame } from "@/hooks";
 
-import { Grid, Keyboard, ToastBar, Banner } from "@/components";
+import { Grid, Keyboard, ToastBar } from "@/components/client";
+import { Banner } from "@/components/server";
 
 import CalendarIcon from "@/assets/icons/calendar_today_24dp_000000_FILL0_wght400_GRAD0_opsz24.svg";
 import InfinityIcon from "@/assets/icons/all_inclusive_24dp_000000_FILL0_wght400_GRAD0_opsz24.svg";

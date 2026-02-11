@@ -1,3 +1,5 @@
+"use client";
+
 import {
   SETTINGS_KEY,
   AnimationSpeed,

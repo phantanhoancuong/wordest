@@ -1,3 +1,5 @@
+"use client";
+
 import { CellStatus } from "@/lib/constants";
 
 import { CellStatusType } from "@/types/cell";

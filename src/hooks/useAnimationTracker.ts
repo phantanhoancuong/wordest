@@ -1,3 +1,5 @@
+"use client";
+
 import { useRef } from "react";
 
 import { UseAnimationTrackerReturn } from "@/types/useAnimationTracker.types";

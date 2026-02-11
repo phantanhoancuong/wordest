@@ -1,3 +1,5 @@
+"use client";
+
 import ArrowIcon from "@/assets/icons/keyboard_arrow_right_24dp_000000_FILL0_wght400_GRAD0_opsz24.svg";
 
 import styles from "@/styles/components/SettingsSectionHeader.module.css";

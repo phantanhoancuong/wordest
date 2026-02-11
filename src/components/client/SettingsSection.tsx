@@ -1,6 +1,8 @@
+"use client";
+
 import { ReactNode } from "react";
 
-import SettingsSectionHeader from "@/components/SettingsSectionHeader";
+import { SettingsSectionHeader } from "@/components/client";
 
 import styles from "@/styles/components/SettingsSection.module.css";
 

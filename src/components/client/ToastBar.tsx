@@ -1,6 +1,8 @@
+"use client";
+
 import { UseGameReturn } from "@/types/useGame.types";
 
-import Toast from "@/components/Toast";
+import Toast from "@/components/client/Toast";
 
 import styles from "@/styles/components/ToastBar.module.css";
 

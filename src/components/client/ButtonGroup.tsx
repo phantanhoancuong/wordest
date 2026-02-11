@@ -1,3 +1,5 @@
+"use client";
+
 import { useSettingsContext } from "@/app/contexts/SettingsContext";
 
 import { SettingsButtonVariant } from "@/lib/constants";

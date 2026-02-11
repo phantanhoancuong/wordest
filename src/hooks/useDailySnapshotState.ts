@@ -1,3 +1,5 @@
+"use client";
+
 import {
   ATTEMPTS,
   DAILY_SNAPSHOT_STATE_KEY,

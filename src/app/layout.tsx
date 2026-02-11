@@ -1,6 +1,9 @@
 import { SettingsProvider } from "@/app/contexts/SettingsContext";
 
-import { DailySnapshotStateVersionGuard, ThemeProvider } from "@/components";
+import {
+  DailySnapshotStateVersionGuard,
+  ThemeProvider,
+} from "@/components/client";
 
 import "@/styles/globals.css";
 

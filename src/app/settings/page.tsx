@@ -17,12 +17,11 @@ import {
 
 import {
   ActionButton,
-  Banner,
   ButtonGroup,
-  PreviewGrid,
-  SettingsItem,
+  ConfirmDialog,
   SettingsSection,
-} from "@/components";
+} from "@/components/client";
+import { Banner, PreviewGrid, SettingsItem } from "@/components/server";
 
 import { playVolumePreview } from "@/lib/audio";
 import { getVolumeIcon } from "@/lib/volumeIcons";
@@ -37,7 +36,6 @@ import SpeedometerIcon from "@/assets/icons/speed_24dp_000000_FILL0_wght400_GRAD
 import StarIcon from "@/assets/icons/star_24dp_000000_FILL0_wght400_GRAD0_opsz24.svg";
 import VolumeUpIcon from "@/assets/icons/volume_up_24dp_000000_FILL0_wght400_GRAD0_opsz24.svg";
 import styles from "@/app/settings/page.module.css";
-import ConfirmDialog from "@/components/ConfirmDialog";
 
 /**
  * Settings page component.

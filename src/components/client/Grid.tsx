@@ -1,7 +1,9 @@
+"use client";
+
 import { RenderCell } from "@/types/cell";
 import { UseGameReturn } from "@/types/useGame.types";
 
-import Cell from "@/components/Cell";
+import Cell from "@/components/client/Cell";
 
 import styles from "@/styles/components/Grid.module.css";
 

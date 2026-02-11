@@ -1,3 +1,5 @@
+"use client";
+
 import { CellStatus } from "@/lib/constants";
 import { CellStatusType } from "@/types/cell";
 import { UseStrictConstraintsReturn } from "@/types/useStrictConstraints.types";

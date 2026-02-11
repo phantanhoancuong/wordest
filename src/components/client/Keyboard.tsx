@@ -1,3 +1,5 @@
+"use client";
+
 import { UseGameReturn } from "@/types/useGame.types";
 
 import styles from "@/styles/components/Keyboard.module.css";
