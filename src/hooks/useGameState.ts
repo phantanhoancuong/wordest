@@ -1,6 +1,6 @@
 import { useRef } from "react";
 
-import { useActiveSession } from "@/hooks/useActiveSession";
+import { useActiveSession } from "@/hooks";
 
 import { GameState } from "@/lib/constants";
 

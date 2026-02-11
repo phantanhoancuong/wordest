@@ -24,6 +24,7 @@ import {
   SessionType,
   WordLength,
 } from "@/lib/constants";
+
 import { CellStatusType, DataCell } from "@/types/cell";
 
 import { initEmptyDataGrid } from "@/lib/utils";

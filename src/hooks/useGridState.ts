@@ -1,10 +1,11 @@
 import { useEffect, useRef, useState } from "react";
 
 import { animationTiming, CellStatus, CellAnimation } from "@/lib/constants";
+
 import { DataCell, RenderCell } from "@/types/cell";
 import { UseGridStateReturn } from "@/types/useGridState.types";
 
-import { useLatest } from "@/hooks/useLatest";
+import { useLatest } from "@/hooks";
 
 import { dataGridToRenderGrid } from "@/lib/utils";
 

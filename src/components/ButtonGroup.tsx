@@ -2,13 +2,11 @@ import { useSettingsContext } from "@/app/contexts/SettingsContext";
 
 import { SettingsButtonVariant } from "@/lib/constants";
 
-import { useSoundPlayer } from "@/hooks/useSoundPlayer";
+import { useSoundPlayer } from "@/hooks";
 
 import styles from "@/styles/components/ButtonGroup.module.css";
 
-/**
- * Represents a single slectable button option in a ButtonGroup
- */
+/** Represents a single slectable button option in a ButtonGroup. */
 interface ButtonOption<T> {
   label: string;
   value: T;
@@ -16,9 +14,7 @@ interface ButtonOption<T> {
   disabled?: boolean;
 }
 
-/**
- * Props for the ButtonGroup component.
- */
+/** Props for the {@link ButtonGroup} component. */
 interface ButtonGroupProps<T> {
   options: ButtonOption<T>[];
   selected: T;
@@ -30,11 +26,7 @@ interface ButtonGroupProps<T> {
  *
  * Renders a group of buttons with one selected option at a time.
  */
-const ButtonGroup = <T,>({
-  options,
-  selected,
-  onSelect,
-}: ButtonGroupProps<T>) => {
+function ButtonGroup<T>({ options, selected, onSelect }: ButtonGroupProps<T>) {
   const { volume, isMuted } = useSettingsContext();
   const playKeySound = useSoundPlayer(
     ["/sounds/key_01.mp3", "/sounds/key_02.mp3"],
@@ -72,6 +64,6 @@ const ButtonGroup = <T,>({
       })}
     </div>
   );
-};
+}
 
 export default ButtonGroup;

@@ -7,7 +7,7 @@ import { useGameStore } from "@/store/useGameStore";
 
 import { Ruleset, SessionType } from "@/lib/constants";
 
-import { useGame } from "@/hooks/useGame";
+import { useGame } from "@/hooks";
 
 import { Grid, Keyboard, ToastBar, Banner } from "@/components";
 

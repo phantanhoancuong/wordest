@@ -2,6 +2,12 @@ import { CellStatus } from "@/lib/constants";
 
 import styles from "@/styles/components/PreviewGrid.module.css";
 
+/**
+ * Static preview data used to demonstrate the different {@link CellStATUS} values
+ * and their corresponding visual stytles.
+ *
+ * Each entry represents a single cell with a character and a status.
+ */
 const previewGridData = [
   {
     char: "W",
@@ -25,6 +31,11 @@ const previewGridData = [
   },
 ];
 
+/**
+ * Render a small preview grid showcasing the visual appearance of each {@link CellStatus}.
+ *
+ * This component is intended for UI desmonstration. It allows users to see how different cell states are styled.
+ */
 const PreviewGrid = () => {
   return (
     <div className={styles["preview-grid"]}>

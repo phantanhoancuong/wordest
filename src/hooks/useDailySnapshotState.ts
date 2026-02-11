@@ -8,8 +8,10 @@ import {
 } from "@/lib/constants";
 
 import { CellStatusType, DataCell } from "@/types/cell";
+
+import { useLocalStorage } from "@/hooks";
+
 import { initEmptyDataGrid, getDateIndex } from "@/lib/utils";
-import { useLocalStorage } from "@/hooks/useLocalStorage";
 
 /**
  * Represents a single playable game snapshot for a given (ruleset, wordLength) on a specific day.

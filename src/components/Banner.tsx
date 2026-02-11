@@ -1,20 +1,44 @@
 import Link from "next/link";
+import { ReactNode } from "react";
 
 import Logo from "@/assets/icons/logo.svg";
 import SettingsIcon from "@/assets/icons/settings_24dp_000000_FILL0_wght400_GRAD0_opsz24.svg";
 
 import styles from "@/styles/components/Banner.module.css";
 
+/** Props for the {@link Banner} component. */
 interface BannerProps {
-  left?: React.ReactNode | React.ReactNode[];
-  right?: React.ReactNode | React.ReactNode[];
+  /**
+   * Optional content to render on the left side of the banner.
+   *
+   * If not provided, the game logo linking to the home page is shown.
+   */
+  left?: ReactNode | ReactNode[];
+
+  /**
+   * Optional content to render on the right side of the banner.
+   *
+   * If not provided, a settings icon linking to the settings page is shown.
+   */
+  right?: ReactNode | ReactNode[];
 }
 
 /**
- * Banner component — displays the game title.
+ * Banner component.
+ *
+ * Displays the game banner with optional left and right content slots.
+ * By default, shows the game logo on the right and a settings button on the left.
  */
-const Banner: React.FC<BannerProps> = ({ left, right }) => {
-  const renderIcons = (content?: React.ReactNode | React.ReactNode[]) => {
+function Banner({ left, right }: BannerProps) {
+  /**
+   * Normalize and wrap one or more React nodes in icon containers.
+   *
+   * @param content - A single React node or an array of nodes to render.
+   * @returns An array of wrapped React elements, or null if no content is provided.
+   */
+  const renderIcons = (
+    content?: React.ReactNode | React.ReactNode[],
+  ): ReactNode[] | null => {
     if (!content) return null;
 
     const nodes = Array.isArray(content) ? content : [content];
@@ -59,6 +83,6 @@ const Banner: React.FC<BannerProps> = ({ left, right }) => {
       </div>
     </div>
   );
-};
+}
 
 export default Banner;

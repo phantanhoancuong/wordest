@@ -7,9 +7,10 @@ import {
   Theme,
   WordLength,
 } from "@/lib/constants";
+
 import { UseSettingsReturn } from "@/types/useSettingsReturn.types";
 
-import { useLocalStorage } from "@/hooks/useLocalStorage";
+import { useLocalStorage } from "@/hooks";
 
 /**
  * Hook to manage user-configurable game settings.

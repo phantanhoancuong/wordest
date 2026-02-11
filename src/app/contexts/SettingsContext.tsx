@@ -4,11 +4,9 @@ import { createContext, useContext } from "react";
 
 import { AnimationSpeed, Ruleset, Theme, WordLength } from "@/lib/constants";
 
-import { useSettings } from "@/hooks/useSettings";
+import { useSettings } from "@/hooks";
 
-/**
- * Shape of the settings context.
- */
+/** Shape of the settings context. */
 interface SettingsContextType {
   animationSpeed: {
     value: AnimationSpeed;
@@ -49,9 +47,7 @@ interface SettingsContextType {
   resetSettings: () => void;
 }
 
-/**
- * React context for global game settings.
- */
+/** React context for global game settings. */
 const SettingsContext = createContext<SettingsContextType | undefined>(
   undefined,
 );
@@ -76,16 +72,12 @@ export const useSettingsContext = (): SettingsContextType => {
   return context;
 };
 
-/**
- * Props for {@link SettingsProvider}.
- */
+/** Props for {@link SettingsProvider}. */
 interface SettingsProviderProps {
   children: React.ReactNode;
 }
 
-/**
- * Provider component for global game settings.
- */
+/** Provider component for global game settings. */
 export const SettingsProvider = ({ children }: SettingsProviderProps) => {
   const settings = useSettings();
 

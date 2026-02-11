@@ -5,18 +5,19 @@ import Cell from "@/components/Cell";
 
 import styles from "@/styles/components/Grid.module.css";
 
-/**
- * Props for the {@link Grid} component.
- */
+/** Props for the {@link Grid} component. */
 interface GridProps {
-  grid: Array<Array<RenderCell>>;
+  /** 2D array of renderable cells representing the game board data. */
+  grid: RenderCell[][];
   dataRows?: number;
   dataCols?: number;
   layoutRows?: number;
   layoutCols?: number;
+  /** Optional callback fired when a cell animation finishes. */
   onAnimationEnd?: UseGameReturn["gameGrid"]["handleAnimationEnd"];
 }
 
+/** CSS custom properties consumed by 'Grid.module.css' to control the grid's data and layout dimensions. */
 interface GridStyleVars extends React.CSSProperties {
   "--data-rows"?: number;
   "--data-cols"?: number;
@@ -27,16 +28,18 @@ interface GridStyleVars extends React.CSSProperties {
 /**
  * Renders the game board as a grid of {@link Cell} components.
  *
- * CSS grid layout is controlled by CSS variables derived from the given row and column counts.
+ * The visual layout is driven by CSS Grid and configured via CSS custom properties derived from the provided row and column counts.
+ * If explicit dimensions are not provided, they are inferred from the {@link grid} data.
  */
-const Grid = ({
+function Grid({
   grid,
   dataRows,
   dataCols,
   layoutRows,
   layoutCols,
   onAnimationEnd,
-}: GridProps) => {
+}: GridProps) {
+  /** Inline CSS variables controlling the grid dimensions. */
   const style: GridStyleVars = {
     "--data-rows": dataRows ?? grid.length,
     "--data-cols": dataCols ?? grid[0].length,
@@ -55,10 +58,10 @@ const Grid = ({
             col={colIndex}
             onAnimationEnd={onAnimationEnd}
           />
-        ))
+        )),
       )}
     </div>
   );
-};
+}
 
 export default Grid;

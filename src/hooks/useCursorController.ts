@@ -1,10 +1,8 @@
 import { useRef } from "react";
 
-import { useActiveSession } from "@/hooks/useActiveSession";
+import { useActiveSession, useLatest } from "@/hooks";
 
 import { UseCursorControllerReturn } from "@/types/useCursorController.types";
-
-import { useLatest } from "@/hooks/useLatest";
 
 /**
  * Hook to manage cursor state.

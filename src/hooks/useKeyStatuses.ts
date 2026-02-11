@@ -1,8 +1,9 @@
 import { CellStatus } from "@/lib/constants";
+
 import { CellStatusType } from "@/types/cell";
 import { UseKeyStatusesReturn } from "@/types/useKeyStatuses.types";
 
-import { useActiveSession } from "@/hooks/useActiveSession";
+import { useActiveSession } from "@/hooks";
 
 /**
  * Hook to manage the visual status of keyboard keys.

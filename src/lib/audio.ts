@@ -1,5 +1,6 @@
 let volumePreviewAudio: HTMLAudioElement | null = null;
 
+/** Play a short audio preview at the given volume level. */
 export const playVolumePreview = (volume: number) => {
   if (!volumePreviewAudio) {
     volumePreviewAudio = new Audio("/sounds/key_01.mp3");

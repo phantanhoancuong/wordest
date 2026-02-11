@@ -2,7 +2,7 @@ import { CellStatus } from "@/lib/constants";
 import { CellStatusType } from "@/types/cell";
 import { UseStrictConstraintsReturn } from "@/types/useStrictConstraints.types";
 
-import { useActiveSession } from "@/hooks/useActiveSession";
+import { useActiveSession } from "@/hooks";
 
 import { countLetter } from "@/lib/utils";
 

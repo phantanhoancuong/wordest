@@ -1,9 +1,4 @@
-import {
-  DAILY_SNAPSHOT_STATE_PREFIX,
-  DAILY_SNAPSHOT_STATE_KEY,
-  CellAnimation,
-  CellStatus,
-} from "@/lib/constants";
+import { CellAnimation, CellStatus } from "@/lib/constants";
 
 import {
   CellAnimationType,
@@ -11,20 +6,6 @@ import {
   DataCell,
   RenderCell,
 } from "@/types/cell";
-
-/**
- * Counts the occurrences of each letter in a word.
- *
- * @param word - The word to count letters from.
- * @returns An object mapping each letter to its frequency.
- */
-export const countLetter = (word: string): Record<string, number> => {
-  const count = {};
-  for (const char of word) {
-    count[char] = (count[char] || 0) + 1;
-  }
-  return count;
-};
 
 /**
  * Convert a 2D grid of DataCell to a 2d grid of RenderCell[][].
@@ -118,43 +99,6 @@ export const initEmptyRenderGrid = (
 };
 
 /**
- * Evaluates a guessed word against the target word.
- *
- * Returns an array of `CellStatus` values representing the accuracy of each letter.
- *
- * @param guess - The guessed word.
- * @param targetWord - The target word to compare against.
- * @param targetLetterCount - Letter frequency map of the target word.
- * @returns Array of `CellStatus` values for each letter.
- */
-export const evaluateGuess = (
-  guess: string,
-  targetWord: string,
-  targetLetterCount: Record<string, number>,
-): Array<CellStatusType> => {
-  const wordLength = guess.length;
-  const tempLetterCount = { ...targetLetterCount };
-  const statuses = Array(wordLength).fill(CellStatus.ABSENT);
-
-  for (let i = 0; i < wordLength; i++) {
-    if (guess[i] === targetWord[i]) {
-      statuses[i] = CellStatus.CORRECT;
-      tempLetterCount[guess[i]] -= 1;
-    }
-  }
-
-  for (let i = 0; i < wordLength; i++) {
-    if (statuses[i] === CellStatus.CORRECT) continue;
-    if (tempLetterCount[guess[i]] > 0) {
-      statuses[i] = CellStatus.PRESENT;
-      tempLetterCount[guess[i]] -= 1;
-    }
-  }
-
-  return statuses;
-};
-
-/**
  * Generates an empty grid of DataCells.
  *
  * @param rows - Number of rows in the grid.
@@ -177,36 +121,4 @@ export const renderEmptyGrid = (
       animationDelay: 0,
     })),
   );
-};
-
-/**
- * Computes the number of days since the Unix epoch in UTC.
- *
- * @returns The number of whole days since 01-01-1970 (UTC).
- */
-export const getDateIndex = (): number => {
-  const now = new Date();
-  const utcToday = Date.UTC(
-    now.getUTCFullYear(),
-    now.getUTCMonth(),
-    now.getUTCDate(),
-  );
-  const utcEpoch = Date.UTC(1970, 0, 1);
-  const MS_PER_DAY = 24 * 60 * 60 * 1000;
-  return Math.floor((utcToday - utcEpoch) / MS_PER_DAY);
-};
-
-export const clearOldDailySnapshotStateVersion = () => {
-  try {
-    for (let i = localStorage.length - 1; i >= 0; i--) {
-      const key = localStorage.key(i);
-      if (!key) continue;
-
-      if (
-        key.startsWith(DAILY_SNAPSHOT_STATE_PREFIX) &&
-        key !== DAILY_SNAPSHOT_STATE_KEY
-      )
-        localStorage.removeItem(key);
-    }
-  } catch {}
 };

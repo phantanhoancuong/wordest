@@ -1,9 +1,9 @@
 import { useEffect, useRef, useState } from "react";
 
-import { useActiveSession } from "@/hooks/useActiveSession";
-
 import { Ruleset, SessionType, WordLength } from "@/lib/constants";
 import { UseTargetWordReturn } from "@/types/useTargetWord.types";
+
+import { useActiveSession } from "@/hooks";
 
 import { fetchWordFromApi } from "@/lib/api";
 import { countLetter } from "@/lib/utils";

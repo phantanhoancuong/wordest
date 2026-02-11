@@ -4,6 +4,7 @@ import {
   CellStatus,
   GameState,
 } from "@/lib/constants";
+
 import { CellStatusType } from "@/types/cell";
 import { UseAnimationTrackerReturn } from "@/types/useAnimationTracker.types";
 import { UseCursorControllerReturn } from "@/types/useCursorController.types";

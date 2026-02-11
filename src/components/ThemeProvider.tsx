@@ -8,8 +8,10 @@ import { Theme } from "@/lib/constants";
 
 /**
  * Client-only component responsible for resolving and applying the application's active color theme.
- * - Read the browser's "prefers-color-theme" media query, apply the resolved theme to the <html> element via "data-theme".
+ *
+ * - Read the browser's 'prefers-color-scheme' media query and applies the resolved theme to the <html> element via the 'data-theme' attribute.
  * - React to live OS / browser theme changes while the app is running.
+ * - Expose the color accessibility mode via "data-color-access".
  */
 const ThemeProvider = () => {
   const { theme, colorAccess } = useSettingsContext();
@@ -18,7 +20,8 @@ const ThemeProvider = () => {
     const root = document.documentElement;
     const media = window.matchMedia("(prefers-color-scheme: dark)");
 
-    const applyTheme = () => {
+    /** Resolve the effective theme (system vs explicit) and apply it to the <html> dataset. */
+    const applyTheme = (): void => {
       const resolvedTheme =
         theme.value === Theme.SYSTEM
           ? media.matches

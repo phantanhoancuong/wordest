@@ -1,5 +1,10 @@
 import { create } from "zustand";
 
+/**
+ * UI state for the Settings panel sections.
+ *
+ * Controls whether each settings category section is expanded or collapsed.
+ */
 type SettingsUIStore = {
   isGeneralOpen: boolean;
   isGameplayOpen: boolean;
@@ -11,6 +16,11 @@ type SettingsUIStore = {
   setIsAccessOpen: (isOpen: boolean) => void;
 };
 
+/**
+ * Zustand store for managing the open/closed state of Settings UI sections.
+ *
+ * All sections are open by default.
+ */
 export const useSettingsUIStore = create<SettingsUIStore>((set) => ({
   isGeneralOpen: true,
   isGameplayOpen: true,
