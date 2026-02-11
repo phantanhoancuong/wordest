@@ -1,5 +1,6 @@
 import { SettingsProvider } from "@/app/contexts/SettingsContext";
 
+import { DailySnapshotStateVersionGuard } from "@/components/DailySnapshotStateVersionGuard";
 import ThemeProvider from "@/components/ThemeProvider";
 
 import "@/styles/globals.css";
@@ -24,6 +25,7 @@ export default function RootLayout({ children }) {
       <body>
         <SettingsProvider>
           <ThemeProvider />
+          <DailySnapshotStateVersionGuard />
           {children}
         </SettingsProvider>
       </body>

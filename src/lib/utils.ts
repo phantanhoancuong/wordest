@@ -1,4 +1,9 @@
-import { CellAnimation, CellStatus } from "@/lib/constants";
+import {
+  DAILY_SNAPSHOT_STATE_PREFIX,
+  DAILY_SNAPSHOT_STATE_KEY,
+  CellAnimation,
+  CellStatus,
+} from "@/lib/constants";
 
 import {
   CellAnimationType,
@@ -189,4 +194,19 @@ export const getDateIndex = (): number => {
   const utcEpoch = Date.UTC(1970, 0, 1);
   const MS_PER_DAY = 24 * 60 * 60 * 1000;
   return Math.floor((utcToday - utcEpoch) / MS_PER_DAY);
+};
+
+export const clearOldDailySnapshotStateVersion = () => {
+  try {
+    for (let i = localStorage.length - 1; i >= 0; i--) {
+      const key = localStorage.key(i);
+      if (!key) continue;
+
+      if (
+        key.startsWith(DAILY_SNAPSHOT_STATE_PREFIX) &&
+        key !== DAILY_SNAPSHOT_STATE_KEY
+      )
+        localStorage.removeItem(key);
+    }
+  } catch {}
 };

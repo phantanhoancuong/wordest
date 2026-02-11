@@ -151,3 +151,7 @@ export const DefaultSettings: Settings = {
   showKeyStatuses: true,
   colorAccess: false,
 };
+
+export const DAILY_SNAPSHOT_STATE_PREFIX = "wordest:dailySnapshotState";
+const DAILY_SNAPSHOT_STATE_VERSION = "1.0.0";
+export const DAILY_SNAPSHOT_STATE_KEY = `${DAILY_SNAPSHOT_STATE_PREFIX}:${DAILY_SNAPSHOT_STATE_VERSION}`;

@@ -1,5 +1,6 @@
 import {
   ATTEMPTS,
+  DAILY_SNAPSHOT_STATE_KEY,
   CellStatus,
   GameState,
   Ruleset,
@@ -37,8 +38,6 @@ type DailySnapshotState = {
   >;
 };
 
-const DAILY_SNAPSHOT_KEY = "wordest:dailySnapshotState";
-
 /**
  * Create a fresh, empty snapshot for a new game.
  */
@@ -74,7 +73,7 @@ const initDailySnapshotState = (): DailySnapshotState => ({
 export const useDailySnapshotState = () => {
   const [dailySnapshotState, setDailySnapshotState] =
     useLocalStorage<DailySnapshotState>(
-      DAILY_SNAPSHOT_KEY,
+      DAILY_SNAPSHOT_STATE_KEY,
       initDailySnapshotState(),
     );
 
