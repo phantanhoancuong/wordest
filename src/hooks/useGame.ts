@@ -27,6 +27,7 @@ import {
   useGuessSubmission,
   useKeyboardInput,
   useKeyStatuses,
+  usePlayerStatsState,
   useSoundPlayer,
   useStrictConstraints,
   useTargetWord,
@@ -215,17 +216,36 @@ export const useGame = (): UseGameReturn => {
 
   /** Daily snapshot persistence controller (localStorage-backed). */
   const dailySnapshotState = useDailySnapshotState();
-
   /** Current snapshot for a given (ruleset, wordLength) combination if there's any. */
   const snapshot = dailySnapshotState.getSnapshot(
     settingsContext.ruleset.value,
     settingsContext.wordLength.value,
   );
-
   /** Stable key used to detect when a different snapshot should be hydratead. */
   const snapshotKey = snapshot
     ? `${dailySnapshotState.todayIndex}:${settingsContext.ruleset.value}:${settingsContext.wordLength.value}`
     : null;
+
+  /** Player stats persistence controller (localStorage-backed). */
+  const playerStatsState = usePlayerStatsState();
+  /** Current player stats for a given (ruleset, wordLength) combination if there's any. */
+  const playerStats = playerStatsState.getStats(
+    activeSessionController.activeSession,
+    settingsContext.ruleset.value,
+    settingsContext.wordLength.value,
+  );
+
+  useEffect(() => {
+    playerStatsState.ensureStats(
+      activeSessionController.activeSession,
+      settingsContext.ruleset.value,
+      settingsContext.wordLength.value,
+    );
+  }, [
+    activeSessionController.activeSession,
+    settingsContext.ruleset.value,
+    settingsContext.wordLength.value,
+  ]);
 
   /**
    * Ensures that a snapshot exists whenever we are in DAILY mode and the (ruleset, wordLength) combination changes.
@@ -399,6 +419,20 @@ export const useGame = (): UseGameReturn => {
     if (nextState !== GameState.PLAYING) {
       revealReferenceGrid(nextState);
     }
+
+    if (nextState === GameState.WON)
+      playerStatsState.handleWon(
+        activeSessionController.activeSession,
+        settingsContext.ruleset.value,
+        settingsContext.wordLength.value,
+      );
+
+    if (nextState === GameState.LOST)
+      playerStatsState.handleLost(
+        activeSessionController.activeSession,
+        settingsContext.ruleset.value,
+        settingsContext.wordLength.value,
+      );
 
     isInputLocked.current = false;
   };

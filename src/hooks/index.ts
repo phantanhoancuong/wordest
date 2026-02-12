@@ -10,6 +10,7 @@ export { useKeyboardInput } from "./useKeyboardInput";
 export { useKeyStatuses } from "./useKeyStatuses";
 export { useLatest } from "./useLatest";
 export { useLocalStorage } from "./useLocalStorage";
+export { usePlayerStatsState } from "./usePlayerStatsState";
 export { useSettings } from "./useSettings";
 export { useSoundPlayer } from "./useSoundPlayer";
 export { useStrictConstraints } from "./useStrictConstraints";
