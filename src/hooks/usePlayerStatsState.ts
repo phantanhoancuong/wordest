@@ -1,0 +1,278 @@
+"use client";
+
+import {
+  PLAYER_STATS_STATE_KEY,
+  Ruleset,
+  SessionType,
+  WordLength,
+} from "@/lib/constants";
+
+import { useLocalStorage } from "@/hooks";
+
+import { getDateIndex } from "@/lib/utils";
+
+/**
+ * Aggregate stats for a single (session, ruleset, wordLength) combination.
+ *
+ * - gamesPlay: total completed games.
+ * - gamesWon: total wins.
+ * - lastCompletedDateIndex: dateIndex of the last completed game (win or loss).
+ * - lastWonDateIndex: dateIndex of the last win.
+ */
+type PlayerStats = {
+  gamesPlayed: number;
+  gamesWon: number;
+  lastCompletedDateIndex: number | null;
+  lastWonDateIndex: number | null;
+};
+
+/**
+ * Root persisted player stats state.
+ *
+ * Indexed by: stats[session][ruleset][wordLength] -> PlayerStats.
+ *
+ * All levels are Partial to allow lazy initialization on demand.
+ */
+type PlayerStatsState = {
+  stats: Partial<
+    Record<
+      SessionType,
+      Partial<Record<Ruleset, Partial<Record<WordLength, PlayerStats>>>>
+    >
+  >;
+};
+
+/** Create a fresh PlayerStats bucket with zeroed counters. */
+const initPlayerStats = (): PlayerStats => ({
+  gamesPlayed: 0,
+  gamesWon: 0,
+  lastCompletedDateIndex: null,
+  lastWonDateIndex: null,
+});
+
+/** Create an empty root stats state. */
+const initPlayerStatsState = (): PlayerStatsState => ({
+  stats: {},
+});
+
+/**
+ * React hook that manages persisted player statistics in localStorage.
+ *
+ * Responsibilities:
+ * - Lazily initialize stats buckets for (session, ruleset, wordLength).
+ * - Record wins and losses.
+ * - Provide read/write access to stats.
+ * - Persist everything via useLocalStorage.
+ *
+ * @returns
+ */
+export const usePlayerStatsState = () => {
+  const [playerStatsState, setPlayerStatsState] =
+    useLocalStorage<PlayerStatsState>(
+      PLAYER_STATS_STATE_KEY,
+      initPlayerStatsState(),
+    );
+
+  /**
+   * Record a win for the given (session, ruleset, wordLength) combination.
+   *
+   * - Increment gamesPlayed and gamesWon.
+   * - Update lastCompletedDateIndex and lastWonDateIndex to today.
+   *
+   * @param session - The session key.
+   * @param ruleset - The ruleset key.
+   * @param wordLength - The wordLength key.
+   */
+  const handleWon = (
+    session: SessionType,
+    ruleset: Ruleset,
+    wordLength: WordLength,
+  ): void => {
+    ensureStats(session, ruleset, wordLength);
+    updateStats(session, ruleset, wordLength, (prev) => ({
+      ...prev,
+      gamesPlayed: prev.gamesPlayed + 1,
+      gamesWon: prev.gamesWon + 1,
+      lastCompletedDateIndex: getDateIndex(),
+      lastWonDateIndex: getDateIndex(),
+    }));
+  };
+
+  /**
+   * Record a loss for the given (session, ruleset, wordLength) combination.
+   *
+   * - Increment gamesPlayed.
+   * - Update lastCompletedDateIndex to today.
+   *
+   * @param session - The session key.
+   * @param ruleset - The ruleset key.
+   * @param wordLength - The word length key.
+   */
+  const handleLost = (
+    session: SessionType,
+    ruleset: Ruleset,
+    wordLength: WordLength,
+  ): void => {
+    ensureStats(session, ruleset, wordLength);
+    updateStats(session, ruleset, wordLength, (prev) => ({
+      ...prev,
+      gamesPlayed: prev.gamesPlayed + 1,
+      lastCompletedDateIndex: getDateIndex(),
+    }));
+  };
+
+  /**
+   * Ensure that a stats bucket exists for the given (session, ruleset, wordLength) combination.
+   *
+   * If any level is missing, it will be created with default values.
+   *
+   * @param session - The session key.
+   * @param ruleset - The ruleset key.
+   * @param wordLength - The word length key.
+   * @returns true if a new bucket has to be created, false if it already existed.
+   */
+  const ensureStats = (
+    session: SessionType,
+    ruleset: Ruleset,
+    wordLength: WordLength,
+  ): boolean => {
+    let created = false;
+
+    setPlayerStatsState((prev) => {
+      if (
+        !prev.stats[session] ||
+        !prev.stats[session]?.[ruleset] ||
+        !prev.stats[session]?.[ruleset]?.[wordLength]
+      ) {
+        created = true;
+      }
+
+      return getStatsStateBase(prev, session, ruleset, wordLength);
+    });
+
+    return created;
+  };
+
+  /**
+   * Return a state object that is guaranteed to have
+   * a stats[session][ruleset][wordLength] bucket initialized.
+   *
+   * If the bucket already exists, the original state is returned.
+   * Otherwise, the missing level(s) are created.
+   *
+   * @param prev - The previous player stats state the base on.
+   * @param session - The session key.
+   * @param ruleset - The ruleset key.
+   * @param wordLength - The word length key.
+   * @returns The player state object with the stats[session][ruleset][wordLength] bucket initialized.
+   */
+  const getStatsStateBase = (
+    prev: PlayerStatsState,
+    session: SessionType,
+    ruleset: Ruleset,
+    wordLength: WordLength,
+  ): PlayerStatsState => {
+    const sessionBucket = prev.stats[session];
+    if (!sessionBucket) {
+      return {
+        ...prev,
+        stats: {
+          ...prev.stats,
+          [session]: {
+            [ruleset]: {
+              [wordLength]: initPlayerStats(),
+            },
+          },
+        },
+      };
+    } else if (!sessionBucket[ruleset]) {
+      return {
+        ...prev,
+        stats: {
+          ...prev.stats,
+          [session]: {
+            ...prev.stats[session],
+            [ruleset]: {
+              [wordLength]: initPlayerStats(),
+            },
+          },
+        },
+      };
+    } else if (!sessionBucket[ruleset][wordLength]) {
+      return {
+        ...prev,
+        stats: {
+          ...prev.stats,
+          [session]: {
+            ...prev.stats[session],
+            [ruleset]: {
+              ...prev.stats[session][ruleset],
+              [wordLength]: initPlayerStats(),
+            },
+          },
+        },
+      };
+    } else return prev;
+  };
+
+  /**
+   * Apply a partial update (patch) to a specific stats bucket.
+   *
+   * @param session - The session key.
+   * @param ruleset - The ruleset key.
+   * @param wordLength - The word length key.
+   * @param patch - Partial PlayerStats fields to update.
+   */
+  const updateStats = (
+    session: SessionType,
+    ruleset: Ruleset,
+    wordLength: WordLength,
+    updater: (prev: PlayerStats) => PlayerStats,
+  ): void => {
+    setPlayerStatsState((prev) => {
+      const base = getStatsStateBase(prev, session, ruleset, wordLength);
+      const current = base.stats[session]![ruleset]![wordLength]!;
+
+      return {
+        ...base,
+        stats: {
+          ...base.stats,
+          [session]: {
+            ...base.stats[session],
+            [ruleset]: {
+              ...base.stats[session]![ruleset],
+              [wordLength]: updater(current),
+            },
+          },
+        },
+      };
+    });
+  };
+
+  /**
+   * Retrieve stats for a specific (session, ruleset, wordLength) combination.
+   *
+   * @param session - The session key.
+   * @param ruleset  - The ruleset key.
+   * @param wordLength  - The word length key.
+   * @returns The PlayerStats if present, or null if not initialized.
+   */
+  const getStats = (
+    session: SessionType,
+    ruleset: Ruleset,
+    wordLength: WordLength,
+  ): PlayerStats | null => {
+    const sessionBucket = playerStatsState.stats[session];
+    if (!sessionBucket) return null;
+
+    const rulesetBucket = sessionBucket[ruleset];
+    if (!rulesetBucket) return null;
+
+    const stats = rulesetBucket[wordLength];
+    if (!stats) return null;
+
+    return stats;
+  };
+
+  return { ensureStats, getStats, updateStats, handleWon, handleLost };
+};
