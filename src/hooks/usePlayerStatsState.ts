@@ -18,12 +18,14 @@ import { getDateIndex } from "@/lib/utils";
  * - gamesWon: total wins.
  * - lastCompletedDateIndex: dateIndex of the last completed game (win or loss).
  * - lastWonDateIndex: dateIndex of the last win.
+ * - streak: streaks (in days) of the player winning the game consecutively.
  */
 type PlayerStats = {
   gamesPlayed: number;
   gamesWon: number;
   lastCompletedDateIndex: number | null;
   lastWonDateIndex: number | null;
+  streak: number;
 };
 
 /**
@@ -48,6 +50,7 @@ const initPlayerStats = (): PlayerStats => ({
   gamesWon: 0,
   lastCompletedDateIndex: null,
   lastWonDateIndex: null,
+  streak: 0,
 });
 
 /** Create an empty root stats state. */
@@ -89,13 +92,20 @@ export const usePlayerStatsState = () => {
     wordLength: WordLength,
   ): void => {
     ensureStats(session, ruleset, wordLength);
-    updateStats(session, ruleset, wordLength, (prev) => ({
-      ...prev,
-      gamesPlayed: prev.gamesPlayed + 1,
-      gamesWon: prev.gamesWon + 1,
-      lastCompletedDateIndex: getDateIndex(),
-      lastWonDateIndex: getDateIndex(),
-    }));
+
+    updateStats(session, ruleset, wordLength, (prev) => {
+      const todayIndex = getDateIndex();
+      const nextStats = { ...prev };
+      nextStats.streak =
+        nextStats.lastWonDateIndex !== todayIndex - 1
+          ? 1
+          : nextStats.streak + 1;
+      nextStats.gamesPlayed += 1;
+      nextStats.gamesWon += 1;
+      nextStats.lastCompletedDateIndex = todayIndex;
+      nextStats.lastWonDateIndex = todayIndex;
+      return nextStats;
+    });
   };
 
   /**
@@ -114,11 +124,14 @@ export const usePlayerStatsState = () => {
     wordLength: WordLength,
   ): void => {
     ensureStats(session, ruleset, wordLength);
-    updateStats(session, ruleset, wordLength, (prev) => ({
-      ...prev,
-      gamesPlayed: prev.gamesPlayed + 1,
-      lastCompletedDateIndex: getDateIndex(),
-    }));
+    updateStats(session, ruleset, wordLength, (prev) => {
+      const todayIndex = getDateIndex();
+      const nextStats = { ...prev };
+      nextStats.gamesPlayed += 1;
+      nextStats.lastCompletedDateIndex = todayIndex;
+      nextStats.streak = 0;
+      return nextStats;
+    });
   };
 
   /**
