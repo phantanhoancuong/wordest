@@ -33,6 +33,7 @@ import {
   useTargetWord,
   useToasts,
 } from "@/hooks";
+import { renderGridToDataGrid, renderRowToDataRow } from "@/lib/utils";
 
 /** Matches a single uppercase character, used to validate keyboard letter input. */
 const LETTER_REGEX = /^[A-Z]$/;
@@ -438,9 +439,11 @@ export const useGame = (): UseGameReturn => {
   };
 
   /**
-   * Reveals the target word on the reference grid.
+   * Reveal the target word on the reference grid.
    *
-   * Animates each cell to indicate correctness depending on whether the game was won or lost.
+   * - Compute the final revealed row (CORRECT or WRONG).
+   * - Commit the revealed row to the data grid so it is persisted to snapshots.
+   * - Apply animation to the render grid for visual feedback.
    *
    * @param state - The final game state (WON or LOST).
    */
@@ -453,7 +456,9 @@ export const useGame = (): UseGameReturn => {
       animationDelay: 0,
       animationKey: (cell.animationKey ?? 0) + 1,
     }));
-    referenceGrid.applyRowAnimation(0, revealedRow);
+
+    referenceGrid.applyReferenceGridAnimation(revealedRow);
+    referenceGrid.updateRow(0, renderRowToDataRow(revealedRow));
   };
 
   /**

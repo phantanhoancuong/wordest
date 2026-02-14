@@ -122,3 +122,6 @@ export const renderEmptyGrid = (
     })),
   );
 };
+
+export const renderRowToDataRow = (row: RenderCell[]): DataCell[] =>
+  row.map(({ char, status }) => ({ char, status }));
