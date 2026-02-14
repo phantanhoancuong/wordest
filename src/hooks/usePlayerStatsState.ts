@@ -47,13 +47,13 @@ type PlayerStatsState = {
 };
 
 /** Create a fresh PlayerStats bucket with zeroed counters. */
-const initPlayerStats = (): PlayerStats => ({
-  gamesPlayed: 0,
-  gamesWon: 0,
-  lastCompletedDateIndex: null,
-  lastWonDateIndex: null,
-  streak: 0,
-  maxStreak: 0,
+const initPlayerStats = (stats?: Partial<PlayerStats>): PlayerStats => ({
+  gamesPlayed: stats?.gamesPlayed ?? 0,
+  gamesWon: stats?.gamesWon ?? 0,
+  lastCompletedDateIndex: stats?.lastCompletedDateIndex ?? null,
+  lastWonDateIndex: stats?.lastWonDateIndex ?? null,
+  streak: stats?.streak ?? 0,
+  maxStreak: stats?.maxStreak ?? 0,
 });
 
 /** Create an empty root stats state. */
@@ -146,42 +146,25 @@ export const usePlayerStatsState = () => {
    * @param session - The session key.
    * @param ruleset - The ruleset key.
    * @param wordLength - The word length key.
-   * @returns true if a new bucket has to be created, false if it already existed.
    */
   const ensureStats = (
     session: SessionType,
     ruleset: Ruleset,
     wordLength: WordLength,
-  ): boolean => {
-    let created = false;
-
+  ): void => {
     setPlayerStatsState((prev) => {
-      if (
-        !prev.stats[session] ||
-        !prev.stats[session]?.[ruleset] ||
-        !prev.stats[session]?.[ruleset]?.[wordLength]
-      ) {
-        created = true;
-      }
-
       return getStatsStateBase(prev, session, ruleset, wordLength);
     });
-
-    return created;
   };
 
   /**
-   * Return a state object that is guaranteed to have
-   * a stats[session][ruleset][wordLength] bucket initialized.
+   * Create or normalize a PlayerStats bucket.
    *
-   * If the bucket already exists, the original state is returned.
-   * Otherwise, the missing level(s) are created.
+   * - If called with no argument, return a fresh bucket with default values.
+   * - If called with a partial bucket (e.g. from older storage), fill in any missing or undefined fields with defaults.
    *
-   * @param prev - The previous player stats state the base on.
-   * @param session - The session key.
-   * @param ruleset - The ruleset key.
-   * @param wordLength - The word length key.
-   * @returns The player state object with the stats[session][ruleset][wordLength] bucket initialized.
+   * @param stats - Optional partial PlayerStats (e.g. loaded from older or incomplete persisted storage).
+   * @returns A fully-initialized PlayerStats object.
    */
   const getStatsStateBase = (
     prev: PlayerStatsState,
@@ -189,47 +172,23 @@ export const usePlayerStatsState = () => {
     ruleset: Ruleset,
     wordLength: WordLength,
   ): PlayerStatsState => {
-    const sessionBucket = prev.stats[session];
-    if (!sessionBucket) {
-      return {
-        ...prev,
-        stats: {
-          ...prev.stats,
-          [session]: {
-            [ruleset]: {
-              [wordLength]: initPlayerStats(),
-            },
+    const existing = prev.stats[session]?.[ruleset]?.[wordLength];
+
+    const normalized = initPlayerStats(existing);
+
+    return {
+      ...prev,
+      stats: {
+        ...prev.stats,
+        [session]: {
+          ...(prev.stats[session] ?? {}),
+          [ruleset]: {
+            ...(prev.stats[session]?.[ruleset] ?? {}),
+            [wordLength]: normalized,
           },
         },
-      };
-    } else if (!sessionBucket[ruleset]) {
-      return {
-        ...prev,
-        stats: {
-          ...prev.stats,
-          [session]: {
-            ...prev.stats[session],
-            [ruleset]: {
-              [wordLength]: initPlayerStats(),
-            },
-          },
-        },
-      };
-    } else if (!sessionBucket[ruleset][wordLength]) {
-      return {
-        ...prev,
-        stats: {
-          ...prev.stats,
-          [session]: {
-            ...prev.stats[session],
-            [ruleset]: {
-              ...prev.stats[session][ruleset],
-              [wordLength]: initPlayerStats(),
-            },
-          },
-        },
-      };
-    } else return prev;
+      },
+    };
   };
 
   /**
