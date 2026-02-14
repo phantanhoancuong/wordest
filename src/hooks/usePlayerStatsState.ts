@@ -19,6 +19,7 @@ import { getDateIndex } from "@/lib/utils";
  * - lastCompletedDateIndex: dateIndex of the last completed game (win or loss).
  * - lastWonDateIndex: dateIndex of the last win.
  * - streak: streaks (in days) of the player winning the game consecutively.
+ * - maxStreak: longest streak that a player has gotten.
  */
 type PlayerStats = {
   gamesPlayed: number;
@@ -26,6 +27,7 @@ type PlayerStats = {
   lastCompletedDateIndex: number | null;
   lastWonDateIndex: number | null;
   streak: number;
+  maxStreak: number;
 };
 
 /**
@@ -51,6 +53,7 @@ const initPlayerStats = (): PlayerStats => ({
   lastCompletedDateIndex: null,
   lastWonDateIndex: null,
   streak: 0,
+  maxStreak: 0,
 });
 
 /** Create an empty root stats state. */
@@ -100,6 +103,7 @@ export const usePlayerStatsState = () => {
         nextStats.lastWonDateIndex !== todayIndex - 1
           ? 1
           : nextStats.streak + 1;
+      nextStats.maxStreak = Math.max(nextStats.maxStreak, nextStats.streak);
       nextStats.gamesPlayed += 1;
       nextStats.gamesWon += 1;
       nextStats.lastCompletedDateIndex = todayIndex;
