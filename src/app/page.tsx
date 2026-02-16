@@ -105,6 +105,9 @@ function GameRoot({
                 key="daily"
                 onClick={() => setGameSession(SessionType.DAILY)}
               />,
+              <Link key="stats" href="/stats">
+                <PersonIcon />
+              </Link>,
               <Link key="settings" href="/settings">
                 <SettingsIcon />
               </Link>,
