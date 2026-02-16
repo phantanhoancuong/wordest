@@ -1,8 +1,8 @@
 import Link from "next/link";
 import { ReactNode } from "react";
 
-import Logo from "@/assets/icons/logo.svg";
-import SettingsIcon from "@/assets/icons/settings_24dp_000000_FILL0_wght400_GRAD0_opsz24.svg";
+import { LogoLarge } from "@/assets/logos";
+import { SettingsIcon } from "@/assets/icons";
 
 import styles from "@/styles/components/Banner.module.css";
 
@@ -58,7 +58,7 @@ function Banner({ left, right }: BannerProps) {
         ) : (
           <div className={styles["logo__container"]}>
             <Link href="/">
-              <Logo
+              <LogoLarge
                 className={styles["logo"]}
                 aria-label="Logo / Go to Home page"
               />

@@ -12,9 +12,12 @@ import { useGame } from "@/hooks";
 import { Grid, Keyboard, ToastBar } from "@/components/client";
 import { Banner } from "@/components/server";
 
-import CalendarIcon from "@/assets/icons/calendar_today_24dp_000000_FILL0_wght400_GRAD0_opsz24.svg";
-import InfinityIcon from "@/assets/icons/all_inclusive_24dp_000000_FILL0_wght400_GRAD0_opsz24.svg";
-import SettingsIcon from "@/assets/icons/settings_24dp_000000_FILL0_wght400_GRAD0_opsz24.svg";
+import {
+  CalendarIcon,
+  InfinityIcon,
+  PersonIcon,
+  SettingsIcon,
+} from "@/assets/icons";
 
 import styles from "@/app/page.module.css";
 
@@ -87,6 +90,9 @@ function GameRoot({
                 key="practice"
                 onClick={() => setGameSession(SessionType.PRACTICE)}
               />,
+              <Link key="stats" href="/stats">
+                <PersonIcon />
+              </Link>,
               <Link key="settings" href="/settings">
                 <SettingsIcon />
               </Link>,

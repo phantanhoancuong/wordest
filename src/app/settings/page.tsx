@@ -26,15 +26,18 @@ import { Banner, PreviewGrid, SettingsItem } from "@/components/server";
 import { playVolumePreview } from "@/lib/audio";
 import { getVolumeIcon } from "@/lib/volumeIcons";
 
-import ArrowBackIcon from "@/assets/icons/arrow_back_24dp_000000_FILL0_wght400_GRAD0_opsz24.svg";
-import ContrastIcon from "@/assets/icons/contrast_24dp_000000_FILL0_wght400_GRAD0_opsz24.svg";
-import EyeIcon from "@/assets/icons/visibility_24dp_000000_FILL0_wght400_GRAD0_opsz24.svg";
-import PaletteIcon from "@/assets/icons/palette_24dp_000000_FILL0_wght400_GRAD0_opsz24.svg";
-import ResetSettingsIcon from "@/assets/icons/reset_settings_24dp_000000_FILL0_wght400_GRAD0_opsz24.svg";
-import RulerIcon from "@/assets/icons/straighten_24dp_000000_FILL0_wght400_GRAD0_opsz24.svg";
-import SpeedometerIcon from "@/assets/icons/speed_24dp_000000_FILL0_wght400_GRAD0_opsz24.svg";
-import StarIcon from "@/assets/icons/star_24dp_000000_FILL0_wght400_GRAD0_opsz24.svg";
-import VolumeUpIcon from "@/assets/icons/volume_up_24dp_000000_FILL0_wght400_GRAD0_opsz24.svg";
+import {
+  BackArrowIcon,
+  ContrastIcon,
+  EyeIcon,
+  PaletteIcon,
+  ResetIcon,
+  RulerIcon,
+  SpeedIcon,
+  StarIcon,
+  VolumeUpIcon,
+} from "@/assets/icons";
+
 import styles from "@/app/settings/page.module.css";
 
 /**
@@ -167,7 +170,7 @@ export default function SettingsPage() {
         <Banner
           right={
             <Link href="/">
-              <ArrowBackIcon aria-label="Go back to Game" />
+              <BackArrowIcon aria-label="Go back to Game" />
             </Link>
           }
         />
@@ -230,7 +233,7 @@ export default function SettingsPage() {
           </div>
           <div className={styles["setting__container"]}>
             <SettingsItem
-              Icon={SpeedometerIcon}
+              Icon={SpeedIcon}
               name="animation speed"
               description="Control how fast game animations play."
               control={
@@ -375,7 +378,7 @@ export default function SettingsPage() {
         >
           <div className={styles["setting__container"]}>
             <SettingsItem
-              Icon={ResetSettingsIcon}
+              Icon={ResetIcon}
               name="reset settings"
               description={
                 <>
