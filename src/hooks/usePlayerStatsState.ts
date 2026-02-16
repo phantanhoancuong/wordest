@@ -14,7 +14,7 @@ import { getDateIndex } from "@/lib/utils";
 /**
  * Aggregate stats for a single (session, ruleset, wordLength) combination.
  *
- * - gamesPlay: total completed games.
+ * - gamesCompleted: total completed games.
  * - gamesWon: total wins.
  * - lastCompletedDateIndex: dateIndex of the last completed game (win or loss).
  * - lastWonDateIndex: dateIndex of the last win.
@@ -22,7 +22,7 @@ import { getDateIndex } from "@/lib/utils";
  * - maxStreak: longest streak that a player has gotten.
  */
 type PlayerStats = {
-  gamesPlayed: number;
+  gamesCompleted: number;
   gamesWon: number;
   lastCompletedDateIndex: number | null;
   lastWonDateIndex: number | null;
@@ -48,7 +48,7 @@ type PlayerStatsState = {
 
 /** Create a fresh PlayerStats bucket with zeroed counters. */
 const initPlayerStats = (stats?: Partial<PlayerStats>): PlayerStats => ({
-  gamesPlayed: stats?.gamesPlayed ?? 0,
+  gamesCompleted: stats?.gamesCompleted ?? 0,
   gamesWon: stats?.gamesWon ?? 0,
   lastCompletedDateIndex: stats?.lastCompletedDateIndex ?? null,
   lastWonDateIndex: stats?.lastWonDateIndex ?? null,
@@ -82,7 +82,7 @@ export const usePlayerStatsState = () => {
   /**
    * Record a win for the given (session, ruleset, wordLength) combination.
    *
-   * - Increment gamesPlayed and gamesWon.
+   * - Increment gamesCompleted and gamesWon.
    * - Update lastCompletedDateIndex and lastWonDateIndex to today.
    *
    * @param session - The session key.
@@ -104,7 +104,7 @@ export const usePlayerStatsState = () => {
           ? 1
           : nextStats.streak + 1;
       nextStats.maxStreak = Math.max(nextStats.maxStreak, nextStats.streak);
-      nextStats.gamesPlayed += 1;
+      nextStats.gamesCompleted += 1;
       nextStats.gamesWon += 1;
       nextStats.lastCompletedDateIndex = todayIndex;
       nextStats.lastWonDateIndex = todayIndex;
@@ -115,7 +115,7 @@ export const usePlayerStatsState = () => {
   /**
    * Record a loss for the given (session, ruleset, wordLength) combination.
    *
-   * - Increment gamesPlayed.
+   * - Increment gamesCompleted.
    * - Update lastCompletedDateIndex to today.
    *
    * @param session - The session key.
@@ -131,7 +131,7 @@ export const usePlayerStatsState = () => {
     updateStats(session, ruleset, wordLength, (prev) => {
       const todayIndex = getDateIndex();
       const nextStats = { ...prev };
-      nextStats.gamesPlayed += 1;
+      nextStats.gamesCompleted += 1;
       nextStats.lastCompletedDateIndex = todayIndex;
       nextStats.streak = 0;
       return nextStats;
