@@ -33,11 +33,7 @@ export default function Home() {
   const setActiveSession = useGameStore((s) => s.setActiveSession);
 
   return (
-    <GameRoot
-      key={activeSession}
-      gameSession={activeSession}
-      setGameSession={setActiveSession}
-    />
+    <GameRoot gameSession={activeSession} setGameSession={setActiveSession} />
   );
 }
 
