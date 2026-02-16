@@ -16,7 +16,20 @@ export const DAILY_SNAPSHOT_STATE_KEY = `${DAILY_SNAPSHOT_STATE_PREFIX}:${DAILY_
 export const PLAYER_STATS_STATE_PREFIX = "wordest:playerStats";
 
 /** Current version of the player stats schema. */
-const PLAYER_STATS_STATE_VERSION = "1.0.0";
+const PLAYER_STATS_STATE_VERSION = "1.1.0";
 
 /** Full localStorage key for the current player stats version. */
 export const PLAYER_STATS_STATE_KEY = `${PLAYER_STATS_STATE_PREFIX}:${PLAYER_STATS_STATE_VERSION}`;
+
+/**
+ * Configuration describing a logical localStorage namespace.
+ *
+ * A namespace groups related localStorage entries using a shared 'prefix', combined with a version suffix.
+ *
+ * - 'prefix' is used to identify all keys that belong to the namespace.
+ * - 'activeKeys' defines the currently valid keys that should be preserved.
+ */
+export type StorageNamespaceConfig = {
+  prefix: string;
+  activeKeys: string[];
+};
