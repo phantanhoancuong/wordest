@@ -11,6 +11,7 @@ export { default as RulerIcon } from "./straighten_24dp_000000_FILL0_wght400_GRA
 export { default as SettingsIcon } from "./settings_24dp_000000_FILL0_wght400_GRAD0_opsz24.svg";
 export { default as SpeedIcon } from "./speed_24dp_000000_FILL0_wght400_GRAD0_opsz24.svg";
 export { default as StarIcon } from "./star_24dp_000000_FILL0_wght400_GRAD0_opsz24.svg";
+export { default as TrashCanIcon } from "./delete_24dp_E3E3E3_FILL0_wght400_GRAD0_opsz24.svg";
 export { default as VolumeUpIcon } from "./volume_up_24dp_000000_FILL0_wght400_GRAD0_opsz24.svg";
 export { default as VolumeOffIcon } from "./volume_off_24dp_000000_FILL0_wght400_GRAD0_opsz24.svg";
 export { default as VolumeMuteIcon } from "./volume_mute_24dp_000000_FILL0_wght400_GRAD0_opsz24.svg";
