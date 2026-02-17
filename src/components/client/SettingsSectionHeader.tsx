@@ -1,6 +1,6 @@
 "use client";
 
-import ArrowIcon from "@/assets/icons/keyboard_arrow_right_24dp_000000_FILL0_wght400_GRAD0_opsz24.svg";
+import { AccordionArrowIcon } from "@/assets/icons";
 
 import styles from "@/styles/components/SettingsSectionHeader.module.css";
 
@@ -32,7 +32,7 @@ function SettingsSectionHeader({
       <span
         className={`${styles["icon-wrapper"]} ${isOpen ? styles.open : ""}`}
       >
-        <ArrowIcon
+        <AccordionArrowIcon
           className={styles["icon"]}
           aria-label={isOpen ? "collapse section" : "expand section"}
         />

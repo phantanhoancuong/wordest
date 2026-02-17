@@ -14,16 +14,20 @@ import { getDateIndex } from "@/lib/utils";
 /**
  * Aggregate stats for a single (session, ruleset, wordLength) combination.
  *
- * - gamesPlay: total completed games.
+ * - gamesCompleted: total completed games.
  * - gamesWon: total wins.
  * - lastCompletedDateIndex: dateIndex of the last completed game (win or loss).
  * - lastWonDateIndex: dateIndex of the last win.
+ * - streak: streaks (in days) of the player winning the game consecutively.
+ * - maxStreak: longest streak that a player has gotten.
  */
 type PlayerStats = {
-  gamesPlayed: number;
+  gamesCompleted: number;
   gamesWon: number;
   lastCompletedDateIndex: number | null;
   lastWonDateIndex: number | null;
+  streak: number;
+  maxStreak: number;
 };
 
 /**
@@ -43,11 +47,13 @@ type PlayerStatsState = {
 };
 
 /** Create a fresh PlayerStats bucket with zeroed counters. */
-const initPlayerStats = (): PlayerStats => ({
-  gamesPlayed: 0,
-  gamesWon: 0,
-  lastCompletedDateIndex: null,
-  lastWonDateIndex: null,
+const initPlayerStats = (stats?: Partial<PlayerStats>): PlayerStats => ({
+  gamesCompleted: stats?.gamesCompleted ?? 0,
+  gamesWon: stats?.gamesWon ?? 0,
+  lastCompletedDateIndex: stats?.lastCompletedDateIndex ?? null,
+  lastWonDateIndex: stats?.lastWonDateIndex ?? null,
+  streak: stats?.streak ?? 0,
+  maxStreak: stats?.maxStreak ?? 0,
 });
 
 /** Create an empty root stats state. */
@@ -76,7 +82,7 @@ export const usePlayerStatsState = () => {
   /**
    * Record a win for the given (session, ruleset, wordLength) combination.
    *
-   * - Increment gamesPlayed and gamesWon.
+   * - Increment gamesCompleted and gamesWon.
    * - Update lastCompletedDateIndex and lastWonDateIndex to today.
    *
    * @param session - The session key.
@@ -89,19 +95,27 @@ export const usePlayerStatsState = () => {
     wordLength: WordLength,
   ): void => {
     ensureStats(session, ruleset, wordLength);
-    updateStats(session, ruleset, wordLength, (prev) => ({
-      ...prev,
-      gamesPlayed: prev.gamesPlayed + 1,
-      gamesWon: prev.gamesWon + 1,
-      lastCompletedDateIndex: getDateIndex(),
-      lastWonDateIndex: getDateIndex(),
-    }));
+
+    updateStats(session, ruleset, wordLength, (prev) => {
+      const todayIndex = getDateIndex();
+      const nextStats = { ...prev };
+      nextStats.streak =
+        nextStats.lastWonDateIndex !== todayIndex - 1
+          ? 1
+          : nextStats.streak + 1;
+      nextStats.maxStreak = Math.max(nextStats.maxStreak, nextStats.streak);
+      nextStats.gamesCompleted += 1;
+      nextStats.gamesWon += 1;
+      nextStats.lastCompletedDateIndex = todayIndex;
+      nextStats.lastWonDateIndex = todayIndex;
+      return nextStats;
+    });
   };
 
   /**
    * Record a loss for the given (session, ruleset, wordLength) combination.
    *
-   * - Increment gamesPlayed.
+   * - Increment gamesCompleted.
    * - Update lastCompletedDateIndex to today.
    *
    * @param session - The session key.
@@ -114,11 +128,14 @@ export const usePlayerStatsState = () => {
     wordLength: WordLength,
   ): void => {
     ensureStats(session, ruleset, wordLength);
-    updateStats(session, ruleset, wordLength, (prev) => ({
-      ...prev,
-      gamesPlayed: prev.gamesPlayed + 1,
-      lastCompletedDateIndex: getDateIndex(),
-    }));
+    updateStats(session, ruleset, wordLength, (prev) => {
+      const todayIndex = getDateIndex();
+      const nextStats = { ...prev };
+      nextStats.gamesCompleted += 1;
+      nextStats.lastCompletedDateIndex = todayIndex;
+      nextStats.streak = 0;
+      return nextStats;
+    });
   };
 
   /**
@@ -129,42 +146,25 @@ export const usePlayerStatsState = () => {
    * @param session - The session key.
    * @param ruleset - The ruleset key.
    * @param wordLength - The word length key.
-   * @returns true if a new bucket has to be created, false if it already existed.
    */
   const ensureStats = (
     session: SessionType,
     ruleset: Ruleset,
     wordLength: WordLength,
-  ): boolean => {
-    let created = false;
-
+  ): void => {
     setPlayerStatsState((prev) => {
-      if (
-        !prev.stats[session] ||
-        !prev.stats[session]?.[ruleset] ||
-        !prev.stats[session]?.[ruleset]?.[wordLength]
-      ) {
-        created = true;
-      }
-
       return getStatsStateBase(prev, session, ruleset, wordLength);
     });
-
-    return created;
   };
 
   /**
-   * Return a state object that is guaranteed to have
-   * a stats[session][ruleset][wordLength] bucket initialized.
+   * Create or normalize a PlayerStats bucket.
    *
-   * If the bucket already exists, the original state is returned.
-   * Otherwise, the missing level(s) are created.
+   * - If called with no argument, return a fresh bucket with default values.
+   * - If called with a partial bucket (e.g. from older storage), fill in any missing or undefined fields with defaults.
    *
-   * @param prev - The previous player stats state the base on.
-   * @param session - The session key.
-   * @param ruleset - The ruleset key.
-   * @param wordLength - The word length key.
-   * @returns The player state object with the stats[session][ruleset][wordLength] bucket initialized.
+   * @param stats - Optional partial PlayerStats (e.g. loaded from older or incomplete persisted storage).
+   * @returns A fully-initialized PlayerStats object.
    */
   const getStatsStateBase = (
     prev: PlayerStatsState,
@@ -172,47 +172,23 @@ export const usePlayerStatsState = () => {
     ruleset: Ruleset,
     wordLength: WordLength,
   ): PlayerStatsState => {
-    const sessionBucket = prev.stats[session];
-    if (!sessionBucket) {
-      return {
-        ...prev,
-        stats: {
-          ...prev.stats,
-          [session]: {
-            [ruleset]: {
-              [wordLength]: initPlayerStats(),
-            },
+    const existing = prev.stats[session]?.[ruleset]?.[wordLength];
+
+    const normalized = initPlayerStats(existing);
+
+    return {
+      ...prev,
+      stats: {
+        ...prev.stats,
+        [session]: {
+          ...(prev.stats[session] ?? {}),
+          [ruleset]: {
+            ...(prev.stats[session]?.[ruleset] ?? {}),
+            [wordLength]: normalized,
           },
         },
-      };
-    } else if (!sessionBucket[ruleset]) {
-      return {
-        ...prev,
-        stats: {
-          ...prev.stats,
-          [session]: {
-            ...prev.stats[session],
-            [ruleset]: {
-              [wordLength]: initPlayerStats(),
-            },
-          },
-        },
-      };
-    } else if (!sessionBucket[ruleset][wordLength]) {
-      return {
-        ...prev,
-        stats: {
-          ...prev.stats,
-          [session]: {
-            ...prev.stats[session],
-            [ruleset]: {
-              ...prev.stats[session][ruleset],
-              [wordLength]: initPlayerStats(),
-            },
-          },
-        },
-      };
-    } else return prev;
+      },
+    };
   };
 
   /**

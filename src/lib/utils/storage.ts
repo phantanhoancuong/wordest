@@ -1,30 +1,34 @@
-import {
-  DAILY_SNAPSHOT_STATE_KEY,
-  DAILY_SNAPSHOT_STATE_PREFIX,
-} from "@/lib/constants";
+import { StorageNamespaceConfig } from "@/lib/constants";
 
 /**
- * Remove outdated daily snapshot entries from localStorage.
+ * Remove outdated entries from localStorage namespaces.
  *
  * Iterate through all localStorage keys and deletes any key that:
- * - Starts with 'DAILY_SNAPSHOT_STATE_PREFIX', and
- * - Is NOT the current 'DAILY_SNAPSHOT_STATE_KEY'.
+ * - Start with a namespace 'prefix', and
+ * - Is NOT included in that namespace's 'activeKeys'.
  *
- * This is used to clean up old snapshot versions after a schema or key change.
- * The operation is wrapped in a try/catch to avoid crashing in
- * environments where localStorage is unavailable or access is restricted.
+ * Each namspace represents a logical storage group, where 'activeKeys' define the currently valid keys that should be preserved/
+ * All other matching keys are treated as stale and removed/
+ *
+ * The operation is wrapped in a try/catch to avoid runtime errors
+ * in environment where localStorage is unavailable or access is restricted.
+ *
+ * @param namespaces - Array of storage namespaces configurations.
  */
-export const clearOldDailySnapshotStateVersion = (): void => {
+export const clearOldStorageNamespaces = (
+  namespaces: StorageNamespaceConfig[],
+): void => {
   try {
     for (let i = localStorage.length - 1; i >= 0; i--) {
       const key = localStorage.key(i);
       if (!key) continue;
 
-      if (
-        key.startsWith(DAILY_SNAPSHOT_STATE_PREFIX) &&
-        key !== DAILY_SNAPSHOT_STATE_KEY
-      )
-        localStorage.removeItem(key);
+      for (const { prefix, activeKeys } of namespaces) {
+        if (key.startsWith(prefix) && !activeKeys.includes(key)) {
+          localStorage.removeItem(key);
+          break;
+        }
+      }
     }
   } catch {}
 };

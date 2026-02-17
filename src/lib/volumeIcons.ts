@@ -1,9 +1,11 @@
 import { ComponentType, SVGProps } from "react";
 
-import VolumeOffIcon from "@/assets/icons/volume_off_24dp_000000_FILL0_wght400_GRAD0_opsz24.svg";
-import VolumeMuteIcon from "@/assets/icons/volume_mute_24dp_000000_FILL0_wght400_GRAD0_opsz24.svg";
-import VolumeDownIcon from "@/assets/icons/volume_down_24dp_000000_FILL0_wght400_GRAD0_opsz24.svg";
-import VolumeUpIcon from "@/assets/icons/volume_up_24dp_000000_FILL0_wght400_GRAD0_opsz24.svg";
+import {
+  VolumeDownIcon,
+  VolumeMuteIcon,
+  VolumeOffIcon,
+  VolumeUpIcon,
+} from "@/assets/icons";
 
 /**
  * React component type for SVG-based volume icons.
