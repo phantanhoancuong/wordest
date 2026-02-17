@@ -250,5 +250,17 @@ export const usePlayerStatsState = () => {
     return stats;
   };
 
-  return { ensureStats, getStats, updateStats, handleWon, handleLost };
+  /** */
+  const resetAllStats = (): void => {
+    setPlayerStatsState(() => initPlayerStatsState());
+  };
+
+  return {
+    ensureStats,
+    getStats,
+    updateStats,
+    handleWon,
+    handleLost,
+    resetAllStats,
+  };
 };

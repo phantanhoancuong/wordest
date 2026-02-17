@@ -15,6 +15,8 @@ import {
   WordLength,
 } from "@/lib/constants";
 
+import { usePlayerStatsState } from "@/hooks";
+
 import {
   ActionButton,
   ButtonGroup,
@@ -29,6 +31,7 @@ import { getVolumeIcon } from "@/lib/volumeIcons";
 import {
   BackArrowIcon,
   ContrastIcon,
+  TrashCanIcon,
   EyeIcon,
   PaletteIcon,
   ResetIcon,
@@ -88,9 +91,11 @@ export default function SettingsPage() {
     setHasHydrated(true);
   }, [volume.value]);
 
-  const [openDialog, setOpenDialog] = useState<null | "reset" | "hardcore">(
-    null,
-  );
+  const [openDialog, setOpenDialog] = useState<
+    null | "settings reset" | "stats delete" | "hardcore"
+  >(null);
+
+  const playerStatsState = usePlayerStatsState();
 
   if (!hasHydrated) return null;
 
@@ -352,7 +357,7 @@ export default function SettingsPage() {
           <div className={styles["setting__container"]}>
             <SettingsItem
               Icon={ContrastIcon}
-              name="Accessible color palette"
+              name="accessible color palette"
               description={
                 <>
                   Use an alternative color palette designed to improve color
@@ -392,7 +397,31 @@ export default function SettingsPage() {
                   danger={true}
                   label="reset settings"
                   onClick={() => {
-                    setOpenDialog("reset");
+                    setOpenDialog("settings reset");
+                  }}
+                />
+              }
+            />
+          </div>
+          <div className={styles["setting__container"]}>
+            <SettingsItem
+              Icon={TrashCanIcon}
+              name="delete player statistics"
+              description={
+                <>
+                  Permanently delete all accumulated player statistics (games
+                  won, games completed, win streaks, etc.) across all modes and
+                  sessions.
+                  <br />
+                  This action cannot be undone.
+                </>
+              }
+              control={
+                <ActionButton
+                  danger={true}
+                  label="delete statistics"
+                  onClick={() => {
+                    setOpenDialog("stats delete");
                   }}
                 />
               }
@@ -407,13 +436,24 @@ export default function SettingsPage() {
         Please rotate your device or use a larger display.
       </div>
       <ConfirmDialog
-        isOpen={openDialog === "reset"}
+        isOpen={openDialog === "settings reset"}
         title="Reset settings"
         message="Are you sure you want to reset all your settings?"
         confirmLabel="reset"
         onConfirm={() => {
           setOpenDialog(null);
           resetSettings();
+        }}
+        onCancel={() => setOpenDialog(null)}
+      />
+      <ConfirmDialog
+        isOpen={openDialog === "stats delete"}
+        title="Delete player statistics"
+        message="Are you sure you want to permanently delete all accumulated player statistics across all modes and sessions? This action cannot be undone."
+        confirmLabel="delete"
+        onConfirm={() => {
+          setOpenDialog(null);
+          playerStatsState.resetAllStats();
         }}
         onCancel={() => setOpenDialog(null)}
       />
