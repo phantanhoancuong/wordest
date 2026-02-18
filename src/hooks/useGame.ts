@@ -236,18 +236,6 @@ export const useGame = (): UseGameReturn => {
     settingsContext.wordLength.value,
   );
 
-  useEffect(() => {
-    playerStatsState.ensureStats(
-      activeSessionController.activeSession,
-      settingsContext.ruleset.value,
-      settingsContext.wordLength.value,
-    );
-  }, [
-    activeSessionController.activeSession,
-    settingsContext.ruleset.value,
-    settingsContext.wordLength.value,
-  ]);
-
   /**
    * Ensures that a snapshot exists whenever we are in DAILY mode and the (ruleset, wordLength) combination changes.
    */
