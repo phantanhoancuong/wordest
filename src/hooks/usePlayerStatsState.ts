@@ -1,5 +1,7 @@
 "use client";
 
+import { useEffect } from "react";
+
 import {
   PLAYER_STATS_STATE_KEY,
   Ruleset,
@@ -9,7 +11,7 @@ import {
 
 import { useLocalStorage } from "@/hooks";
 
-import { getDateIndex } from "@/lib/utils";
+import { enumValues, getDateIndex } from "@/lib/utils";
 
 /**
  * Aggregate stats for a single (session, ruleset, wordLength) combination.
@@ -31,22 +33,26 @@ type PlayerStats = {
 };
 
 /**
- * Root persisted player stats state.
+ * Persisted root player stats state,
  *
- * Indexed by: stats[session][ruleset][wordLength] -> PlayerStats.
+ * Indexed by: stats[session][ruleset][wordLength] to PlayerStats.
  *
- * All levels are Partial to allow lazy initialization on demand.
+ * The state is eagerly initialized to a fully populated tree for all enum combinations.
+ *
  */
 type PlayerStatsState = {
-  stats: Partial<
-    Record<
-      SessionType,
-      Partial<Record<Ruleset, Partial<Record<WordLength, PlayerStats>>>>
-    >
-  >;
+  stats: Record<SessionType, Record<Ruleset, Record<WordLength, PlayerStats>>>;
 };
 
-/** Create a fresh PlayerStats bucket with zeroed counters. */
+/**
+ * Create a PlayerStats bucket.
+ *
+ * If a partial stats object is provided, its values are used.
+ * Missing fields are defaulted to zero or null.
+ *
+ * @param stats - A PlayerStats object with values to initialize with.
+ * @returns A fully initialized PlayerStats object.
+ */
 const initPlayerStats = (stats?: Partial<PlayerStats>): PlayerStats => ({
   gamesCompleted: stats?.gamesCompleted ?? 0,
   gamesWon: stats?.gamesWon ?? 0,
@@ -56,16 +62,71 @@ const initPlayerStats = (stats?: Partial<PlayerStats>): PlayerStats => ({
   maxStreak: stats?.maxStreak ?? 0,
 });
 
-/** Create an empty root stats state. */
-const initPlayerStatsState = (): PlayerStatsState => ({
-  stats: {},
-});
+/**
+ * Create a fully initialized PlayerStatsState tree.
+ *
+ * This method eagerly constructs all combinations of [SessionType][Ruleset][WordLength].
+ *
+ * Each leaf node is initialized with a fresh PlayerStats bucket.
+ *
+ * @returns Fully populated PlayerStatsState.
+ */
+const initPlayerStatsState = (): PlayerStatsState => {
+  const sessions = enumValues(SessionType);
+  const rulesets = enumValues(Ruleset);
+  const wordLengths = enumValues(WordLength);
+
+  const stats = {};
+  for (const session of sessions) {
+    stats[session] = {};
+    for (const ruleset of rulesets) {
+      stats[session][ruleset] = {};
+      for (const wordLength of wordLengths) {
+        stats[session][ruleset][wordLength] = initPlayerStats();
+      }
+    }
+  }
+  return { stats } as PlayerStatsState;
+};
+
+/**
+ * Merge persisted stats into a freshly initialized state tree.
+ *
+ * Behavior:
+ * - Starts from a fully initialized state.
+ * - For each enum combination, copies persisted values if present.
+ * - Missing buckets or fields are filled with default values.
+ *
+ * @param persisted - Previously stored PlayerStatsState, or null.
+ * @returns A fully populated PlayerStatsState.
+ */
+const mergeStoredStats = (persisted: PlayerStatsState | null) => {
+  const freshState = initPlayerStatsState();
+
+  if (!persisted?.stats) return freshState;
+
+  for (const session of enumValues(SessionType)) {
+    for (const ruleset of enumValues(Ruleset)) {
+      for (const wordLength of enumValues(WordLength)) {
+        const existing = persisted.stats?.[session]?.[ruleset]?.[wordLength];
+
+        freshState.stats[session][ruleset][wordLength] =
+          initPlayerStats(existing);
+      }
+    }
+  }
+
+  return freshState;
+};
 
 /**
  * React hook that manages persisted player statistics in localStorage.
  *
+ * Model:
+ * - A fully initialized PlayerStatsState tree is created eagerly for all [SessionType][Ruleset][WordLength] combinations.
+ * - During updates, indivia
+ *
  * Responsibilities:
- * - Lazily initialize stats buckets for (session, ruleset, wordLength).
  * - Record wins and losses.
  * - Provide read/write access to stats.
  * - Persist everything via useLocalStorage.
@@ -78,6 +139,13 @@ export const usePlayerStatsState = () => {
       PLAYER_STATS_STATE_KEY,
       initPlayerStatsState(),
     );
+
+  useEffect(() => {
+    const mergedState = mergeStoredStats(playerStatsState);
+
+    if (JSON.stringify(mergedState) !== JSON.stringify(playerStatsState))
+      setPlayerStatsState(mergedState);
+  }, []);
 
   /**
    * Record a win for the given (session, ruleset, wordLength) combination.
@@ -94,8 +162,6 @@ export const usePlayerStatsState = () => {
     ruleset: Ruleset,
     wordLength: WordLength,
   ): void => {
-    ensureStats(session, ruleset, wordLength);
-
     updateStats(session, ruleset, wordLength, (prev) => {
       const todayIndex = getDateIndex();
       const nextStats = { ...prev };
@@ -127,7 +193,6 @@ export const usePlayerStatsState = () => {
     ruleset: Ruleset,
     wordLength: WordLength,
   ): void => {
-    ensureStats(session, ruleset, wordLength);
     updateStats(session, ruleset, wordLength, (prev) => {
       const todayIndex = getDateIndex();
       const nextStats = { ...prev };
@@ -136,59 +201,6 @@ export const usePlayerStatsState = () => {
       nextStats.streak = 0;
       return nextStats;
     });
-  };
-
-  /**
-   * Ensure that a stats bucket exists for the given (session, ruleset, wordLength) combination.
-   *
-   * If any level is missing, it will be created with default values.
-   *
-   * @param session - The session key.
-   * @param ruleset - The ruleset key.
-   * @param wordLength - The word length key.
-   */
-  const ensureStats = (
-    session: SessionType,
-    ruleset: Ruleset,
-    wordLength: WordLength,
-  ): void => {
-    setPlayerStatsState((prev) => {
-      return getStatsStateBase(prev, session, ruleset, wordLength);
-    });
-  };
-
-  /**
-   * Create or normalize a PlayerStats bucket.
-   *
-   * - If called with no argument, return a fresh bucket with default values.
-   * - If called with a partial bucket (e.g. from older storage), fill in any missing or undefined fields with defaults.
-   *
-   * @param stats - Optional partial PlayerStats (e.g. loaded from older or incomplete persisted storage).
-   * @returns A fully-initialized PlayerStats object.
-   */
-  const getStatsStateBase = (
-    prev: PlayerStatsState,
-    session: SessionType,
-    ruleset: Ruleset,
-    wordLength: WordLength,
-  ): PlayerStatsState => {
-    const existing = prev.stats[session]?.[ruleset]?.[wordLength];
-
-    const normalized = initPlayerStats(existing);
-
-    return {
-      ...prev,
-      stats: {
-        ...prev.stats,
-        [session]: {
-          ...(prev.stats[session] ?? {}),
-          [ruleset]: {
-            ...(prev.stats[session]?.[ruleset] ?? {}),
-            [wordLength]: normalized,
-          },
-        },
-      },
-    };
   };
 
   /**
@@ -206,17 +218,16 @@ export const usePlayerStatsState = () => {
     updater: (prev: PlayerStats) => PlayerStats,
   ): void => {
     setPlayerStatsState((prev) => {
-      const base = getStatsStateBase(prev, session, ruleset, wordLength);
-      const current = base.stats[session]![ruleset]![wordLength]!;
+      const current = prev.stats[session]![ruleset]![wordLength]!;
 
       return {
-        ...base,
+        ...prev,
         stats: {
-          ...base.stats,
+          ...prev.stats,
           [session]: {
-            ...base.stats[session],
+            ...prev.stats[session],
             [ruleset]: {
-              ...base.stats[session]![ruleset],
+              ...prev.stats[session]![ruleset],
               [wordLength]: updater(current),
             },
           },
@@ -256,7 +267,6 @@ export const usePlayerStatsState = () => {
   };
 
   return {
-    ensureStats,
     getStats,
     updateStats,
     handleWon,
