@@ -2,6 +2,7 @@ export { default as AccordionArrowIcon } from "./keyboard_arrow_right_24dp_00000
 export { default as BackArrowIcon } from "./arrow_back_24dp_000000_FILL0_wght400_GRAD0_opsz24.svg";
 export { default as CalendarIcon } from "./calendar_today_24dp_000000_FILL0_wght400_GRAD0_opsz24.svg";
 export { default as ContrastIcon } from "./contrast_24dp_000000_FILL0_wght400_GRAD0_opsz24.svg";
+export { default as ControllerIcon } from "./sports_esports_24dp_E3E3E3_FILL0_wght400_GRAD0_opsz24.svg";
 export { default as EyeIcon } from "./visibility_24dp_000000_FILL0_wght400_GRAD0_opsz24.svg";
 export { default as InfinityIcon } from "./all_inclusive_24dp_000000_FILL0_wght400_GRAD0_opsz24.svg";
 export { default as PersonIcon } from "./person_24dp_E3E3E3_FILL0_wght400_GRAD0_opsz24.svg";
