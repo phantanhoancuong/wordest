@@ -11,7 +11,7 @@ import {
 
 import { useLocalStorage } from "@/hooks";
 
-import { enumValues, getDateIndex } from "@/lib/utils";
+import { enumValues, getTodayDateIndex } from "@/lib/utils";
 
 /**
  * Aggregate stats for a single (session, ruleset, wordLength) combination.
@@ -163,7 +163,7 @@ export const usePlayerStatsState = () => {
     wordLength: WordLength,
   ): void => {
     updateStats(session, ruleset, wordLength, (prev) => {
-      const todayIndex = getDateIndex();
+      const todayIndex = getTodayDateIndex();
       const nextStats = { ...prev };
       nextStats.streak =
         nextStats.lastWonDateIndex !== todayIndex - 1
@@ -194,7 +194,7 @@ export const usePlayerStatsState = () => {
     wordLength: WordLength,
   ): void => {
     updateStats(session, ruleset, wordLength, (prev) => {
-      const todayIndex = getDateIndex();
+      const todayIndex = getTodayDateIndex();
       const nextStats = { ...prev };
       nextStats.gamesCompleted += 1;
       nextStats.lastCompletedDateIndex = todayIndex;

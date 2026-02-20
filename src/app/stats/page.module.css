@@ -21,22 +21,30 @@
   overflow-y: auto;
   display: flex;
   flex-direction: column;
-  align-items: center;
-  align-self: center;
+  width: 80%;
   gap: 3dvh;
   padding-bottom: 8dvh;
   scrollbar-gutter: stable;
-  justify-content: center;
+  align-self: center;
 }
 
-.wip-disclaimer {
+.app__options {
   display: flex;
-  width: 80%;
+  flex-direction: column;
+  margin-top: 2dvh;
+  gap: 2dvh;
 }
 
 .landscape-warning {
   display: none;
   text-align: center;
+}
+
+.stats__container {
+  display: flex;
+  flex-direction: column;
+  gap: calc(var(--item-font-scale) * 0.5rem);
+  font-size: calc(var(--item-font-scale) * 1rem);
 }
 
 @media (min-width: 600px) {
