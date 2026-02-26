@@ -62,7 +62,6 @@ export const useGuessSubmission = (
   ): void => {
     setValidationError(message);
     addToast(message);
-    cursor.cancelPendingRowAdvance();
     gameGridAnimationTracker.add(gameGrid.colNum);
     gameGrid.applyInvalidGuessAnimation(row, animationSpeedMultiplier);
   };
@@ -116,7 +115,6 @@ export const useGuessSubmission = (
 
     if (changedCount > 0) {
       referenceGridAnimationTracker.add(changedCount);
-
       referenceGrid.applyReferenceGridAnimation(referenceRow);
     }
 
@@ -126,17 +124,17 @@ export const useGuessSubmission = (
 
     if (guess === targetWord) {
       addToast("You won!");
-      gameState.queueState(GameState.WON);
+      gameState.setGameState(GameState.WON);
       return;
     }
 
     if (row + 1 >= gameGrid.rowNum) {
       addToast(`You lost!`);
-      gameState.queueState(GameState.LOST);
+      gameState.setGameState(GameState.LOST);
       return;
     }
 
-    cursor.queueRowAdvance();
+    cursor.advanceRow();
   };
 
   /**

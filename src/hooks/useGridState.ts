@@ -9,7 +9,7 @@ import { UseGridStateReturn } from "@/types/useGridState.types";
 
 import { useLatest } from "@/hooks";
 
-import { dataGridToRenderGrid } from "@/lib/utils";
+import { dataGridToRenderGrid, renderRowToDataRow } from "@/lib/utils";
 
 /**
  * Manages a 2D grid of cells representing player's guesses.
@@ -36,7 +36,9 @@ export const useGridState = (
   animation: CellAnimation = CellAnimation.NONE,
   animationDelay: number = 0,
   dataGrid: DataCell[][],
-  setDataGrid: (grid: DataCell[][]) => void,
+  setDataGrid: (
+    updater: DataCell[][] | ((prev: DataCell[][]) => DataCell[][]),
+  ) => void,
   resetDataGrid: () => void,
 ): UseGridStateReturn => {
   const rowNum = useRef(row);
@@ -53,9 +55,11 @@ export const useGridState = (
     ),
   );
   const renderGridRef = useLatest(renderGrid);
+  const isAnimating = useRef<boolean>(false);
 
   /** Update the renderGrid with new data from the data grid when the data grid changes. */
   useEffect(() => {
+    if (isAnimating.current) return;
     setRenderGrid(dataGridToRenderGrid(dataGrid, CellAnimation.NONE, 0));
   }, [dataGrid]);
 
@@ -74,12 +78,6 @@ export const useGridState = (
     const newGrid = [...dataGrid];
     newGrid[rowIndex] = newRow;
     setDataGrid(newGrid);
-  };
-
-  const applyReferenceGridAnimation = (newRow: RenderCell[]): void => {
-    const newGrid = [...renderGrid];
-    newGrid[0] = newRow;
-    setRenderGrid(newGrid);
   };
 
   /**
@@ -106,40 +104,9 @@ export const useGridState = (
    * Reset animation data after cell's animation ends.
    * @param finishedCellMap - rowIndex -> array of finished colIndices.
    */
-  const flushAnimation = (finishedCellMap: Record<number, number[]>) => {
-    const finalGrid = renderGridRef.current;
-
-    const nextDataGrid = [...dataGrid];
-    const nextRenderGrid = [...finalGrid];
-
-    for (const rowKey in finishedCellMap) {
-      const rowIndex = Number(rowKey);
-      const cols = finishedCellMap[rowIndex];
-
-      const dataRow = [...nextDataGrid[rowIndex]];
-      const renderRow = [...nextRenderGrid[rowIndex]];
-
-      cols.forEach((colIndex) => {
-        const cell = renderRow[colIndex];
-
-        dataRow[colIndex] = {
-          ...dataRow[colIndex],
-          status: cell.status,
-        };
-
-        renderRow[colIndex] = {
-          ...cell,
-          animation: CellAnimation.NONE,
-          animationDelay: 0,
-        };
-      });
-
-      nextDataGrid[rowIndex] = dataRow;
-      nextRenderGrid[rowIndex] = renderRow;
-    }
-
-    setDataGrid(nextDataGrid);
-    setRenderGrid(nextRenderGrid);
+  const flushAnimation = () => {
+    setRenderGrid(dataGridToRenderGrid(dataGrid, CellAnimation.NONE, 0));
+    isAnimating.current = false;
   };
 
   /**
@@ -154,6 +121,19 @@ export const useGridState = (
     statuses: CellStatus[],
     animationSpeedMultiplier: number,
   ) => {
+    isAnimating.current = true;
+    setDataGrid((prevDataGrid) => {
+      const nextDataRow = prevDataGrid[rowIndex].map(
+        (cell: DataCell, index: number) => ({
+          ...cell,
+          status: statuses[index],
+        }),
+      );
+      const nextDataGrid = [...prevDataGrid];
+      nextDataGrid[rowIndex] = nextDataRow;
+      return nextDataGrid;
+    });
+
     setRenderGrid((prevRenderGrid) => {
       const animatedRow = prevRenderGrid[rowIndex].map(
         (cell: RenderCell, i: number) => ({
@@ -167,6 +147,27 @@ export const useGridState = (
       const nextRenderGrid = [...prevRenderGrid];
       nextRenderGrid[rowIndex] = animatedRow;
       return nextRenderGrid;
+    });
+  };
+
+  useEffect(() => {
+    console.log(dataGrid);
+  }, [dataGrid]);
+
+  const applyReferenceGridAnimation = (newRow: RenderCell[]): void => {
+    console.log("apply reference grid animation!");
+    console.log(newRow);
+    isAnimating.current = true;
+    setDataGrid((prevDataGrid) => {
+      const newDataGrid = [...prevDataGrid];
+      newDataGrid[0] = renderRowToDataRow(newRow);
+      return newDataGrid;
+    });
+
+    setRenderGrid((prevRenderGrid) => {
+      const newRenderGrid = [...prevRenderGrid];
+      newRenderGrid[0] = newRow;
+      return newRenderGrid;
     });
   };
 
