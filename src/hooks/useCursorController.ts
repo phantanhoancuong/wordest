@@ -22,16 +22,6 @@ export const useCursorController = (): UseCursorControllerReturn => {
 
   const rowRef = useLatest(rowState);
   const colRef = useLatest(colState);
-  const pendingRowAdvance = useRef(false);
-
-  /**
-   * Cancels any pending row advancement in the cursor.
-   *
-   * Used when an invalid guess prevents the row from advancing.
-   */
-  const cancelPendingRowAdvance = () => {
-    pendingRowAdvance.current = false;
-  };
 
   /**
    * Resets the cursor index to its initial position.
@@ -39,14 +29,12 @@ export const useCursorController = (): UseCursorControllerReturn => {
   const resetCursor = (): void => {
     setRowState(0);
     setColState(0);
-    pendingRowAdvance.current = false;
   };
 
   /**
    * Advances the cursor to the next row and resets the column index to 0.
    */
   const advanceRow = (): void => {
-    pendingRowAdvance.current = false;
     setColState(0);
     incrementRowState();
   };
@@ -76,32 +64,12 @@ export const useCursorController = (): UseCursorControllerReturn => {
     return newCol;
   };
 
-  /**
-   * Queue a row advancement to be committed later (for animation syncing purposes).
-   * Called after a valid guess to move the cursor to the next row.
-   */
-  const queueRowAdvance = (): void => {
-    pendingRowAdvance.current = true;
-  };
-
-  /**
-   * Commits a previously queued row advancement.
-   * Does nothing if no advance is queued.
-   */
-  const commitPendingRowAdvance = (): void => {
-    if (pendingRowAdvance.current) advanceRow();
-  };
-
   return {
     row: rowRef,
     col: colRef,
-    pendingRowAdvance,
     advanceRow,
     advanceCol,
     retreatCol,
-    queueRowAdvance,
-    commitPendingRowAdvance,
     resetCursor,
-    cancelPendingRowAdvance,
   };
 };

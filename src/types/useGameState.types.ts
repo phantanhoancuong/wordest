@@ -3,7 +3,6 @@ import { GameState } from "@/lib/constants";
 export interface UseGameStateReturn {
   state: GameState;
   pendingState: GameState;
-  queueState: (newState: GameState) => void;
-  commitState: () => boolean;
+  setGameState: (gameState: GameState) => void;
   resetState: () => void;
 }

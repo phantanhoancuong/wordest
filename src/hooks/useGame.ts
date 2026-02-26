@@ -131,14 +131,33 @@ export const useGame = (): UseGameReturn => {
    * - When all animations in a batch finish, we unlock input and commit any pending game state.
    */
   const gameGridAnimationTracker = useAnimationTracker(
-    (finishedMap: Record<number, number[]>): void => {
+    (finishedMap) => {
       gameGrid.flushAnimation(finishedMap);
     },
     () => {
-      isInputLocked.current = false;
-      if (gameState.pendingState != null) {
-        updateGameState();
+      const state = activeSessionController.gameState; // canonical
+
+      if (state === GameState.WON || state === GameState.LOST) {
+        revealReferenceGrid(state);
       }
+
+      if (state === GameState.WON) {
+        playerStatsState.handleWon(
+          activeSessionController.activeSession,
+          settingsContext.ruleset.value,
+          settingsContext.wordLength.value,
+        );
+      }
+
+      if (state === GameState.LOST) {
+        playerStatsState.handleLost(
+          activeSessionController.activeSession,
+          settingsContext.ruleset.value,
+          settingsContext.wordLength.value,
+        );
+      }
+
+      isInputLocked.current = false;
     },
   );
 
@@ -375,8 +394,6 @@ export const useGame = (): UseGameReturn => {
     colIndex: number,
   ): void => {
     gameGridAnimationTracker.markEnd(rowIndex, colIndex);
-    if (gameGridAnimationTracker.getCount() === 0)
-      cursor.commitPendingRowAdvance();
   };
 
   /**
@@ -393,37 +410,6 @@ export const useGame = (): UseGameReturn => {
   ): void => {
     rowIndex = 0;
     referenceGridAnimationTracker.markEnd(rowIndex, colIndex);
-  };
-
-  /**
-   * Applies the pending game state if one exists.
-   *
-   * Called after animations finish. Commits the pending game state and, if the game has ended. triggers revealing the reference grid.
-   */
-  const updateGameState = (): void => {
-    const nextState = gameState.pendingState;
-    const committed = gameState.commitState();
-    if (!committed) return;
-
-    if (nextState !== GameState.PLAYING) {
-      revealReferenceGrid(nextState);
-    }
-
-    if (nextState === GameState.WON)
-      playerStatsState.handleWon(
-        activeSessionController.activeSession,
-        settingsContext.ruleset.value,
-        settingsContext.wordLength.value,
-      );
-
-    if (nextState === GameState.LOST)
-      playerStatsState.handleLost(
-        activeSessionController.activeSession,
-        settingsContext.ruleset.value,
-        settingsContext.wordLength.value,
-      );
-
-    isInputLocked.current = false;
   };
 
   /**

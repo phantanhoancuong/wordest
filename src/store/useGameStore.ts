@@ -73,8 +73,12 @@ type GameStore = {
   setCol: (col: number) => void;
 
   /** Replace the entire reference or game grid. */
-  setReferenceGrid: (referenceGrid: DataCell[][]) => void;
-  setGameGrid: (gameGrid: DataCell[][]) => void;
+  setReferenceGrid: (
+    updater: DataCell[][] | ((prev: DataCell[][]) => DataCell[][]),
+  ) => void;
+  setGameGrid: (
+    updater: DataCell[][] | ((prev: DataCell[][]) => DataCell[][]),
+  ) => void;
 
   /**
    * Update keyboard key statuses.
@@ -215,10 +219,30 @@ export const useGameStore = create<GameStore>((set) => {
     setCol: (col: number) => updateSession((prev) => ({ ...prev, col })),
 
     /** Grid setters. */
-    setReferenceGrid: (referenceGrid: DataCell[][]) =>
-      updateSession((prev) => ({ ...prev, referenceGrid })),
-    setGameGrid: (gameGrid: DataCell[][]) =>
-      updateSession((prev) => ({ ...prev, gameGrid })),
+    setReferenceGrid: (
+      updater: DataCell[][] | ((prev: DataCell[][]) => DataCell[][]),
+    ) =>
+      updateSession((prev) => {
+        const nextRenfereceGrid =
+          typeof updater === "function" ? updater(prev.referenceGrid) : updater;
+
+        return {
+          ...prev,
+          referenceGrid: nextRenfereceGrid,
+        };
+      }),
+    setGameGrid: (
+      updater: DataCell[][] | ((prev: DataCell[][]) => DataCell[][]),
+    ) =>
+      updateSession((prev) => {
+        const nextGameGrid =
+          typeof updater === "function" ? updater(prev.gameGrid) : updater;
+
+        return {
+          ...prev,
+          gameGrid: nextGameGrid,
+        };
+      }),
 
     /** Set or clear the target word. */
     setTargetWord: (targetWord: string | null) =>

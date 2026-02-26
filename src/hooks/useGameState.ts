@@ -22,30 +22,14 @@ export const useGameState = (): UseGameStateReturn => {
   const { gameState, setGameState } = useActiveSession();
   const pendingGameState = useRef<GameState | null>(null);
 
-  const queueState = (newState: GameState): void => {
-    pendingGameState.current = newState;
-  };
-
-  const commitState = (): boolean => {
-    const nextGameState = pendingGameState.current;
-    if (!nextGameState || nextGameState === gameState) {
-      return false;
-    }
-    setGameState(nextGameState);
-    pendingGameState.current = null;
-    return true;
-  };
-
   const resetState = (): void => {
     setGameState(GameState.PLAYING);
-    pendingGameState.current = null;
   };
 
   return {
     state: gameState,
     pendingState: pendingGameState.current,
-    queueState,
-    commitState,
+    setGameState,
     resetState,
   };
 };
