@@ -67,7 +67,7 @@ export const useSettings = (): UseSettingsReturn => {
     },
     showKeyStatuses: {
       value: settings.showKeyStatuses,
-      setValue: (v: boolean) => set("showReferenceGrid", v),
+      setValue: (v: boolean) => set("showKeyStatuses", v),
     },
     colorAccess: {
       value: settings.colorAccess,
