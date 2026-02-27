@@ -7,6 +7,7 @@ export { default as EyeIcon } from "./visibility_24dp_000000_FILL0_wght400_GRAD0
 export { default as InfinityIcon } from "./all_inclusive_24dp_000000_FILL0_wght400_GRAD0_opsz24.svg";
 export { default as PersonIcon } from "./person_24dp_E3E3E3_FILL0_wght400_GRAD0_opsz24.svg";
 export { default as PaletteIcon } from "./palette_24dp_000000_FILL0_wght400_GRAD0_opsz24.svg";
+export { default as ReplayIcon } from "./replay_24dp_E3E3E3_FILL0_wght400_GRAD0_opsz24.svg";
 export { default as ResetIcon } from "./reset_settings_24dp_000000_FILL0_wght400_GRAD0_opsz24.svg";
 export { default as RulerIcon } from "./straighten_24dp_000000_FILL0_wght400_GRAD0_opsz24.svg";
 export { default as SettingsIcon } from "./settings_24dp_000000_FILL0_wght400_GRAD0_opsz24.svg";
