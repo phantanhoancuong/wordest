@@ -4,6 +4,14 @@
   display: grid;
   grid-template-rows: 70% 30%;
   overflow: hidden;
+  opacity: 0;
+  animation: fadeIn 500ms ease forwards;
+}
+
+@keyframes fadeIn {
+  to {
+    opacity: 1;
+  }
 }
 
 .game__error {

@@ -8,6 +8,14 @@
   align-items: center;
   align-self: center;
   gap: 3dvh;
+  opacity: 0;
+  animation: sessionFadeIn 500ms ease forwards;
+}
+
+@keyframes sessionFadeIn {
+  to {
+    opacity: 1;
+  }
 }
 
 .volume-control {
