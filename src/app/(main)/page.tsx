@@ -1,22 +1,12 @@
 "use client";
 
-import Link from "next/link";
-
 import { useSettingsContext } from "@/app/contexts/SettingsContext";
-import { useGameStore } from "@/store/useGameStore";
 
 import { Ruleset, SessionType } from "@/lib/constants";
 
-import { useGame } from "@/hooks";
+import { useActiveSession, useGame } from "@/hooks";
 
-import { Banner, Grid, Keyboard, ToastBar } from "@/components/client";
-
-import {
-  CalendarIcon,
-  InfinityIcon,
-  PersonIcon,
-  SettingsIcon,
-} from "@/assets/icons";
+import { Grid, Keyboard, ToastBar } from "@/components/client";
 
 import styles from "@/app/(main)/page.module.css";
 
@@ -28,16 +18,9 @@ import styles from "@/app/(main)/page.module.css";
  * - Forces a full remount of the game tree when the session changes.
  */
 export default function Home() {
-  const activeSession = useGameStore((s) => s.activeSession);
-  const setActiveSession = useGameStore((s) => s.setActiveSession);
+  const { activeSession } = useActiveSession();
 
-  return (
-    <GameRoot
-      key={activeSession}
-      gameSession={activeSession}
-      setGameSession={setActiveSession}
-    />
-  );
+  return <GameRoot key={activeSession} gameSession={activeSession} />;
 }
 
 /**
@@ -55,16 +38,9 @@ export default function Home() {
  * Game behavior, validation, animations, and persistence are handled entirely by {@link useGame}.
  *
  * @param gameSession - The active game session type.
- * @param setGameSession - State setter provided to switch between sessions.
  * @returns
  */
-function GameRoot({
-  gameSession,
-  setGameSession,
-}: {
-  gameSession: SessionType;
-  setGameSession: (gameSession: SessionType) => void;
-}) {
+function GameRoot({ gameSession }: { gameSession: SessionType }) {
   const { gameGrid, referenceGrid, keyboard, game, toasts, input, render } =
     useGame();
 
@@ -80,111 +56,71 @@ function GameRoot({
 
   if (!render.hasHydrated) return null;
   return (
-    <div className={styles["app"]}>
-      <header className={`${styles["app__banner"]} flex-center`}>
-        {gameSession === SessionType.DAILY ? (
-          <Banner
-            right={[
-              <InfinityIcon
-                key="practice"
-                onClick={() => setGameSession(SessionType.PRACTICE)}
-              />,
-              <Link key="stats" href="/stats">
-                <PersonIcon />
-              </Link>,
-              <Link key="settings" href="/settings">
-                <SettingsIcon />
-              </Link>,
-            ]}
-          />
-        ) : (
-          <Banner
-            right={[
-              <CalendarIcon
-                key="daily"
-                onClick={() => setGameSession(SessionType.DAILY)}
-              />,
-              <Link key="stats" href="/stats">
-                <PersonIcon />
-              </Link>,
-              <Link key="settings" href="/settings">
-                <SettingsIcon />
-              </Link>,
-            ]}
-          />
-        )}
-      </header>
-
-      <main className={styles["app__content"]}>
-        {game.wordFetchError ? (
-          <p className={styles["game__error"]}>{game.wordFetchError}</p>
-        ) : (
-          <section className={styles["game-board__container"]}>
-            <div className={styles["game-board__info"]}>
-              <div className={styles["game-board__date"]}>
-                {gameSession === SessionType.DAILY
-                  ? "daily mode (" + date + ")"
-                  : "practice mode"}
-              </div>
-              <div className={styles["game-board__ruleset"]}>
-                {ruleset.value + " " + wordLength.value + "-letter"}
-              </div>
+    <div className={styles["home-page__content"]}>
+      {game.wordFetchError ? (
+        <p className={styles["game__error"]}>{game.wordFetchError}</p>
+      ) : (
+        <section className={styles["game-board__container"]}>
+          <div className={styles["game-board__info"]}>
+            <div className={styles["game-board__date"]}>
+              {gameSession === SessionType.DAILY
+                ? "daily mode (" + date + ")"
+                : "practice mode"}
             </div>
-            <div className={`${styles["game-board"]}`}>
-              <div className={styles["game-board__stack"]}>
-                <div className={styles["game-board__grid"]}>
+            <div className={styles["game-board__ruleset"]}>
+              {ruleset.value + " " + wordLength.value + "-letter"}
+            </div>
+          </div>
+          <div className={`${styles["game-board"]}`}>
+            <div className={styles["game-board__stack"]}>
+              <div className={styles["game-board__grid"]}>
+                <Grid
+                  grid={gameGrid.renderGrid}
+                  onAnimationEnd={gameGrid.handleAnimationEnd}
+                  layoutRows={gameGrid.rowNum}
+                  layoutCols={gameGrid.colNum}
+                />
+              </div>
+
+              <div className={styles["game-board__controls"]}>
+                {renderReferenceGrid ? (
                   <Grid
-                    grid={gameGrid.renderGrid}
-                    onAnimationEnd={gameGrid.handleAnimationEnd}
+                    grid={referenceGrid.renderGrid}
+                    onAnimationEnd={referenceGrid.handleAnimationEnd}
                     layoutRows={gameGrid.rowNum}
                     layoutCols={gameGrid.colNum}
                   />
-                </div>
-
-                <div className={styles["game-board__controls"]}>
-                  {renderReferenceGrid ? (
-                    <Grid
-                      grid={referenceGrid.renderGrid}
-                      onAnimationEnd={referenceGrid.handleAnimationEnd}
-                      layoutRows={gameGrid.rowNum}
-                      layoutCols={gameGrid.colNum}
-                    />
-                  ) : null}
-                  {gameSession === SessionType.PRACTICE ? (
-                    <button
-                      className={styles["game-board__button"]}
-                      onClick={(e) => {
-                        // Typing while the cursor is ontop of the restart button
-                        // introduces unexpected behavior.
-                        e.currentTarget.blur();
-                        game.restartGame();
-                      }}
-                    >
-                      restart
-                    </button>
-                  ) : null}
-                </div>
+                ) : null}
+                {gameSession === SessionType.PRACTICE ? (
+                  <button
+                    className={styles["game-board__button"]}
+                    onClick={(e) => {
+                      // Typing while the cursor is ontop of the restart button
+                      // introduces unexpected behavior.
+                      e.currentTarget.blur();
+                      game.restartGame();
+                    }}
+                  >
+                    restart
+                  </button>
+                ) : null}
               </div>
-
-              <ToastBar toasts={toasts.list} removeToast={toasts.removeToast} />
             </div>
-          </section>
-        )}
-      </main>
 
-      <footer className={styles["app__keyboard"]}>
-        <Keyboard
-          renderKeyStatuses={renderKeyStatuses}
-          keyStatuses={keyboard.statuses}
-          onKeyClick={input.handle}
-        />
-      </footer>
+            <ToastBar toasts={toasts.list} removeToast={toasts.removeToast} />
+          </div>
+        </section>
+      )}
 
-      <div className={styles["landscape-warning"]}>
-        The game does not fit on your screen.
-        <br />
-        Please rotate your device or use a larger display.
-      </div>
+      {!game.wordFetchError && (
+        <footer className={styles["app__keyboard"]}>
+          <Keyboard
+            renderKeyStatuses={renderKeyStatuses}
+            keyStatuses={keyboard.statuses}
+            onKeyClick={input.handle}
+          />
+        </footer>
+      )}
     </div>
   );
 }

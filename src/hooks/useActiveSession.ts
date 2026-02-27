@@ -4,6 +4,7 @@ import { useGameStore } from "@/store/useGameStore";
 
 export const useActiveSession = () => {
   const activeSession = useGameStore((s) => s.activeSession);
+  const setActiveSession = useGameStore((s) => s.setActiveSession);
   const hydrateFromSnapshot = useGameStore((s) => s.hydrateFromSnapshot);
   const gameState = useGameStore((s) => s.sessions[activeSession]!.gameState);
 
@@ -51,6 +52,7 @@ export const useActiveSession = () => {
 
   return {
     activeSession,
+    setActiveSession,
     hydrateFromSnapshot,
     gameState,
     setGameState,

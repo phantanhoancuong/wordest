@@ -4,7 +4,7 @@
   width: 100%;
   max-width: 1024px;
 
-  align-self: center;
+  align-self: flex-end;
 
   display: grid;
   gap: calc(var(--font-size-scale) * 0.2rem);

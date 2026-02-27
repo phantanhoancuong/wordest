@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Link from "next/link";
 
 import { useSettingsContext } from "@/app/contexts/SettingsContext";
 import { useSettingsUIStore } from "@/store/useSettingsUIStore";
@@ -19,7 +18,6 @@ import { usePlayerStatsState } from "@/hooks";
 
 import {
   ActionButton,
-  Banner,
   ButtonGroup,
   ConfirmDialog,
   SettingsSection,
@@ -30,7 +28,6 @@ import { playVolumePreview } from "@/lib/audio";
 import { getVolumeIcon } from "@/lib/volumeIcons";
 
 import {
-  BackArrowIcon,
   ContrastIcon,
   TrashCanIcon,
   EyeIcon,
@@ -171,271 +168,255 @@ export default function SettingsPage() {
   const VolumeIcon = getVolumeIcon(isMuted.value ? 0 : draftVolume);
 
   return (
-    <div className={styles["app"]}>
-      <header className={`${styles["app__banner"]} flex-center`}>
-        <Banner
-          right={
-            <Link href="/">
-              <BackArrowIcon aria-label="Go back to Game" />
-            </Link>
-          }
-        />
-      </header>
-      <div className={styles["app__content"]}>
-        <SettingsSection
-          title="general"
-          isOpen={isGeneralOpen}
-          setIsOpen={setIsGeneralOpen}
-        >
-          <div className={styles["setting__container"]}>
-            <SettingsItem
-              Icon={VolumeUpIcon}
-              name="volume"
-              description="Adjust the volume of game sound effects."
-              control={
-                <div className={styles["volume-control"]}>
-                  <VolumeIcon
-                    className={styles["volume-icon"]}
-                    aria-hidden="true"
-                    onClick={handleVolumeIconClick}
-                  />
-                  <input
-                    type="range"
-                    min="0"
-                    max="100"
-                    step="11"
-                    list="volume-ticks"
-                    value={draftVolume}
-                    onChange={(e) => {
-                      const value = Number(e.target.value);
-                      setDraftVolume(value);
-
-                      // Slider interaction always implies unmute intent
-                      if (isMuted.value) isMuted.setValue(false);
-                    }}
-                    onPointerUp={() => {
-                      const newVolume = draftVolume / 100;
-
-                      // Persist volume once on release
-                      volume.setValue(newVolume);
-
-                      const shouldMute = newVolume === 0;
-                      isMuted.setValue(shouldMute);
-
-                      if (!shouldMute) {
-                        playVolumePreview(newVolume);
-                      }
-                    }}
-                  />
-                  <datalist id="volume-ticks">
-                    <option value="0" />
-                    <option value="33" />
-                    <option value="66" />
-                    <option value="100" />
-                  </datalist>
-                </div>
-              }
-            />
-          </div>
-          <div className={styles["setting__container"]}>
-            <SettingsItem
-              Icon={SpeedIcon}
-              name="animation speed"
-              description="Control how fast game animations play."
-              control={
-                <ButtonGroup
-                  options={animationSpeedOptions}
-                  selected={animationSpeed.value}
-                  onSelect={animationSpeed.setValue}
+    <div className={styles["settings-page__content"]}>
+      <SettingsSection
+        title="general"
+        isOpen={isGeneralOpen}
+        setIsOpen={setIsGeneralOpen}
+      >
+        <div className={styles["setting__container"]}>
+          <SettingsItem
+            Icon={VolumeUpIcon}
+            name="volume"
+            description="Adjust the volume of game sound effects."
+            control={
+              <div className={styles["volume-control"]}>
+                <VolumeIcon
+                  className={styles["volume-icon"]}
+                  aria-hidden="true"
+                  onClick={handleVolumeIconClick}
                 />
-              }
-            />
-          </div>
-          <div className={styles["setting__container"]}>
-            <SettingsItem
-              Icon={PaletteIcon}
-              name="theme"
-              description="Choose the visual theme for the game."
-              control={
-                <ButtonGroup
-                  options={themeOptions}
-                  selected={theme.value}
-                  onSelect={theme.setValue}
-                />
-              }
-            />
-          </div>
-        </SettingsSection>
-        <SettingsSection
-          title="gameplay"
-          isOpen={isGameplayOpen}
-          setIsOpen={setIsGameplayOpen}
-        >
-          <div className={styles["setting__container"]}>
-            <SettingsItem
-              Icon={StarIcon}
-              name="ruleset"
-              description={
-                <>
-                  <p>
-                    <b>Normal</b> is the classic WORDest experience.
-                  </p>
-                  <p>
-                    <b>Strict</b> adds constraints based on earlier guesses:
-                    confirmed letters must stay fixed, and revealed letters must
-                    be reused in future guesses.
-                  </p>
-                  <p>
-                    <b>Hardcore</b> keeps Strict constraints while disabling all
-                    visual aids, including the reference grid and keyboard
-                    feedback.
-                  </p>
-                </>
-              }
-              control={
-                <ButtonGroup
-                  options={rulesetOptions}
-                  selected={ruleset.value}
-                  onSelect={(value) => {
-                    if (value === Ruleset.HARDCORE) {
-                      setOpenDialog("hardcore");
-                    } else {
-                      ruleset.setValue(value);
+                <input
+                  type="range"
+                  min="0"
+                  max="100"
+                  step="11"
+                  list="volume-ticks"
+                  value={draftVolume}
+                  onChange={(e) => {
+                    const value = Number(e.target.value);
+                    setDraftVolume(value);
+
+                    // Slider interaction always implies unmute intent
+                    if (isMuted.value) isMuted.setValue(false);
+                  }}
+                  onPointerUp={() => {
+                    const newVolume = draftVolume / 100;
+
+                    // Persist volume once on release
+                    volume.setValue(newVolume);
+
+                    const shouldMute = newVolume === 0;
+                    isMuted.setValue(shouldMute);
+
+                    if (!shouldMute) {
+                      playVolumePreview(newVolume);
                     }
                   }}
                 />
-              }
-            />
-          </div>
-          <div className={styles["setting__container"]}>
-            <SettingsItem
-              Icon={EyeIcon}
-              name="show reference grid"
-              description="Display a reference grid showing all confirmed correct letter positions."
-              control={
-                <ButtonGroup
-                  options={showReferenceGridOptions}
-                  selected={showReferenceGrid.value}
-                  onSelect={showReferenceGrid.setValue}
-                />
-              }
-            />
-          </div>
-          <div className={styles["setting__container"]}>
-            <SettingsItem
-              Icon={EyeIcon}
-              name="show keyboard letter statuses"
-              description="Display letter status feedback on the keyboard."
-              control={
-                <ButtonGroup
-                  options={showKeyStatusesOptions}
-                  selected={showKeyStatuses.value}
-                  onSelect={showKeyStatuses.setValue}
-                />
-              }
-            />
-          </div>
-          <div className={styles["setting__container"]}>
-            <SettingsItem
-              Icon={RulerIcon}
-              name="word length"
-              description="Set how many letters each word contains."
-              control={
-                <ButtonGroup
-                  options={wordLengthOptions}
-                  selected={wordLength.value}
-                  onSelect={wordLength.setValue}
-                />
-              }
-            />
-          </div>
-        </SettingsSection>
-        <SettingsSection
-          title="accessibility"
-          isOpen={isAccessOpen}
-          setIsOpen={setIsAccessOpen}
-        >
-          <div className={styles["setting__container"]}>
-            <SettingsItem
-              Icon={ContrastIcon}
-              name="accessible color palette"
-              description={
-                <>
-                  Use an alternative color palette designed to improve color
-                  distinction across the interface for some players with
-                  specific color-vision deficiencies.
-                  <PreviewGrid />
-                </>
-              }
-              control={
-                <ButtonGroup
-                  options={colorAccessOptions}
-                  selected={colorAccess.value}
-                  onSelect={colorAccess.setValue}
-                />
-              }
-            />
-          </div>
-        </SettingsSection>
-        <SettingsSection
-          title="danger zone"
-          isOpen={isDangerZoneOpen}
-          setIsOpen={setIsDangerZoneOpen}
-        >
-          <div className={styles["setting__container"]}>
-            <SettingsItem
-              Icon={ResetIcon}
-              name="reset settings"
-              description={
-                <>
-                  Restore all settings to their default values.
-                  <br />
-                  This action cannot be undone.
-                </>
-              }
-              control={
-                <ActionButton
-                  danger={true}
-                  label="reset settings"
-                  onClick={() => {
-                    setOpenDialog("settings reset");
-                  }}
-                />
-              }
-            />
-          </div>
-          <div className={styles["setting__container"]}>
-            <SettingsItem
-              Icon={TrashCanIcon}
-              name="delete player statistics"
-              description={
-                <>
-                  Permanently delete all accumulated player statistics (games
-                  won, games completed, win streaks, etc.) across all modes and
-                  sessions.
-                  <br />
-                  This action cannot be undone.
-                </>
-              }
-              control={
-                <ActionButton
-                  danger={true}
-                  label="delete statistics"
-                  onClick={() => {
-                    setOpenDialog("stats delete");
-                  }}
-                />
-              }
-            />
-          </div>
-        </SettingsSection>
-      </div>
+                <datalist id="volume-ticks">
+                  <option value="0" />
+                  <option value="33" />
+                  <option value="66" />
+                  <option value="100" />
+                </datalist>
+              </div>
+            }
+          />
+        </div>
+        <div className={styles["setting__container"]}>
+          <SettingsItem
+            Icon={SpeedIcon}
+            name="animation speed"
+            description="Control how fast game animations play."
+            control={
+              <ButtonGroup
+                options={animationSpeedOptions}
+                selected={animationSpeed.value}
+                onSelect={animationSpeed.setValue}
+              />
+            }
+          />
+        </div>
+        <div className={styles["setting__container"]}>
+          <SettingsItem
+            Icon={PaletteIcon}
+            name="theme"
+            description="Choose the visual theme for the game."
+            control={
+              <ButtonGroup
+                options={themeOptions}
+                selected={theme.value}
+                onSelect={theme.setValue}
+              />
+            }
+          />
+        </div>
+      </SettingsSection>
+      <SettingsSection
+        title="gameplay"
+        isOpen={isGameplayOpen}
+        setIsOpen={setIsGameplayOpen}
+      >
+        <div className={styles["setting__container"]}>
+          <SettingsItem
+            Icon={StarIcon}
+            name="ruleset"
+            description={
+              <>
+                <p>
+                  <b>Normal</b> is the classic WORDest experience.
+                </p>
+                <p>
+                  <b>Strict</b> adds constraints based on earlier guesses:
+                  confirmed letters must stay fixed, and revealed letters must
+                  be reused in future guesses.
+                </p>
+                <p>
+                  <b>Hardcore</b> keeps Strict constraints while disabling all
+                  visual aids, including the reference grid and keyboard
+                  feedback.
+                </p>
+              </>
+            }
+            control={
+              <ButtonGroup
+                options={rulesetOptions}
+                selected={ruleset.value}
+                onSelect={(value) => {
+                  if (value === Ruleset.HARDCORE) {
+                    setOpenDialog("hardcore");
+                  } else {
+                    ruleset.setValue(value);
+                  }
+                }}
+              />
+            }
+          />
+        </div>
+        <div className={styles["setting__container"]}>
+          <SettingsItem
+            Icon={EyeIcon}
+            name="show reference grid"
+            description="Display a reference grid showing all confirmed correct letter positions."
+            control={
+              <ButtonGroup
+                options={showReferenceGridOptions}
+                selected={showReferenceGrid.value}
+                onSelect={showReferenceGrid.setValue}
+              />
+            }
+          />
+        </div>
+        <div className={styles["setting__container"]}>
+          <SettingsItem
+            Icon={EyeIcon}
+            name="show keyboard letter statuses"
+            description="Display letter status feedback on the keyboard."
+            control={
+              <ButtonGroup
+                options={showKeyStatusesOptions}
+                selected={showKeyStatuses.value}
+                onSelect={showKeyStatuses.setValue}
+              />
+            }
+          />
+        </div>
+        <div className={styles["setting__container"]}>
+          <SettingsItem
+            Icon={RulerIcon}
+            name="word length"
+            description="Set how many letters each word contains."
+            control={
+              <ButtonGroup
+                options={wordLengthOptions}
+                selected={wordLength.value}
+                onSelect={wordLength.setValue}
+              />
+            }
+          />
+        </div>
+      </SettingsSection>
+      <SettingsSection
+        title="accessibility"
+        isOpen={isAccessOpen}
+        setIsOpen={setIsAccessOpen}
+      >
+        <div className={styles["setting__container"]}>
+          <SettingsItem
+            Icon={ContrastIcon}
+            name="accessible color palette"
+            description={
+              <>
+                Use an alternative color palette designed to improve color
+                distinction across the interface for some players with specific
+                color-vision deficiencies.
+                <PreviewGrid />
+              </>
+            }
+            control={
+              <ButtonGroup
+                options={colorAccessOptions}
+                selected={colorAccess.value}
+                onSelect={colorAccess.setValue}
+              />
+            }
+          />
+        </div>
+      </SettingsSection>
+      <SettingsSection
+        title="danger zone"
+        isOpen={isDangerZoneOpen}
+        setIsOpen={setIsDangerZoneOpen}
+      >
+        <div className={styles["setting__container"]}>
+          <SettingsItem
+            Icon={ResetIcon}
+            name="reset settings"
+            description={
+              <>
+                Restore all settings to their default values.
+                <br />
+                This action cannot be undone.
+              </>
+            }
+            control={
+              <ActionButton
+                danger={true}
+                label="reset settings"
+                onClick={() => {
+                  setOpenDialog("settings reset");
+                }}
+              />
+            }
+          />
+        </div>
+        <div className={styles["setting__container"]}>
+          <SettingsItem
+            Icon={TrashCanIcon}
+            name="delete player statistics"
+            description={
+              <>
+                Permanently delete all accumulated player statistics (games won,
+                games completed, win streaks, etc.) across all modes and
+                sessions.
+                <br />
+                This action cannot be undone.
+              </>
+            }
+            control={
+              <ActionButton
+                danger={true}
+                label="delete statistics"
+                onClick={() => {
+                  setOpenDialog("stats delete");
+                }}
+              />
+            }
+          />
+        </div>
+      </SettingsSection>
 
-      <div className={styles["landscape-warning"]}>
-        The game does not fit on your screen.
-        <br />
-        Please rotate your device or use a larger display.
-      </div>
       <ConfirmDialog
         isOpen={openDialog === "settings reset"}
         title="Reset settings"
