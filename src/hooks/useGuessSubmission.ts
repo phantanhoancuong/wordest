@@ -76,7 +76,7 @@ export const useGuessSubmission = (
    * - Reveals newly confirmed correct letters in the reference grid.
    * - Applies flip/bounce animations to the guess row.
    * - Updates keyboard key statuses based on the evaluation.
-   * - Queues game state transitions (win/lose) when applicable.
+   * - Updates game state transitions (win/lose) when applicable.
    *
    * @param guess - The submitted guess string.
    * @param row - Index of the current guess row.
