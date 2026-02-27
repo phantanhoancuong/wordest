@@ -9,8 +9,7 @@ import { Ruleset, SessionType } from "@/lib/constants";
 
 import { useGame } from "@/hooks";
 
-import { Grid, Keyboard, ToastBar } from "@/components/client";
-import { Banner } from "@/components/server";
+import { Banner, Grid, Keyboard, ToastBar } from "@/components/client";
 
 import {
   CalendarIcon,
@@ -19,7 +18,7 @@ import {
   SettingsIcon,
 } from "@/assets/icons";
 
-import styles from "@/app/page.module.css";
+import styles from "@/app/(main)/page.module.css";
 
 /**
  * Main game page component.

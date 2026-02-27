@@ -9,8 +9,8 @@ import { useSettingsContext } from "@/app/contexts";
 
 import { useActiveSession, usePlayerStatsState } from "@/hooks";
 
-import { ButtonGroup } from "@/components/client";
-import { Banner, OptionsItem } from "@/components/server";
+import { Banner, ButtonGroup } from "@/components/client";
+import { OptionsItem } from "@/components/server";
 
 import {
   BackArrowIcon,
@@ -19,7 +19,7 @@ import {
   StarIcon,
 } from "@/assets/icons";
 
-import styles from "@/app/stats/page.module.css";
+import styles from "@/app/(main)/stats/page.module.css";
 import { SettingsButtonVariant } from "@/lib/constants";
 
 import { dateIndexToDateString } from "@/lib/utils";

@@ -19,11 +19,12 @@ import { usePlayerStatsState } from "@/hooks";
 
 import {
   ActionButton,
+  Banner,
   ButtonGroup,
   ConfirmDialog,
   SettingsSection,
 } from "@/components/client";
-import { Banner, PreviewGrid, SettingsItem } from "@/components/server";
+import { PreviewGrid, SettingsItem } from "@/components/server";
 
 import { playVolumePreview } from "@/lib/audio";
 import { getVolumeIcon } from "@/lib/volumeIcons";
@@ -41,7 +42,7 @@ import {
   VolumeUpIcon,
 } from "@/assets/icons";
 
-import styles from "@/app/settings/page.module.css";
+import styles from "@/app/(main)/settings/page.module.css";
 
 /**
  * Settings page component.
