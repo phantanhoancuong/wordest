@@ -65,8 +65,8 @@ export default function StatsPage() {
   );
 
   return (
-    <div className={styles["app__content"]}>
-      <div className={styles["app__options"]}>
+    <div className={styles["stats-page__content"]}>
+      <div className={styles["stats-page__options"]}>
         <OptionsItem
           Icon={ControllerIcon}
           name="session"

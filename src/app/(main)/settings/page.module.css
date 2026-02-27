@@ -1,6 +1,6 @@
 .settings-page__content {
   height: 100%;
-  width: 100%;
+  padding: 0 10%;
   min-height: 0;
   overflow: auto;
   display: flex;
