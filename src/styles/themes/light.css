@@ -35,4 +35,7 @@
   --action-button-text-default-color: #e5e5e5;
   --action-button-background-danger-color: #c0392b;
   --action-button-text-danger-color: white;
+
+  --scrollbar-track-color: #f7f7f8;
+  --scrollbar-thumb-color: #59a21f;
 }

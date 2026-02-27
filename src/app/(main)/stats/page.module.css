@@ -1,0 +1,23 @@
+.stats-page__content {
+  height: 100%;
+  width: 100%;
+  padding: 0 10%;
+  display: grid;
+  grid-template-rows: 50% 50%;
+}
+
+.stats-page__options {
+  width: 100%;
+
+  display: flex;
+  flex-direction: column;
+  margin-top: 2dvh;
+  gap: 2dvh;
+}
+
+.stats__container {
+  display: flex;
+  flex-direction: column;
+  gap: calc(var(--item-font-scale) * 0.5rem);
+  font-size: calc(var(--item-font-scale) * 1rem);
+}

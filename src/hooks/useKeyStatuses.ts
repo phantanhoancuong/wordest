@@ -19,6 +19,9 @@ export const useKeyStatuses = (): UseKeyStatusesReturn => {
   /**
    * Updates key statuses based on the latest guess.
    * Keeps the "strongest" status (e.g., `correct` overrides `present`).
+   *
+   * @param guess - The guess string.
+   * @param statuses - Array of CellStatus to be applied.
    */
   const updateKeyStatuses = (
     guess: string,

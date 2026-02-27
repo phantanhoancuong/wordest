@@ -1,10 +1,12 @@
 export { default as ActionButton } from "./ActionButton";
+export { default as Banner } from "./Banner";
 export { default as ButtonGroup } from "./ButtonGroup";
 export { default as Cell } from "./Cell";
 export { default as ConfirmDialog } from "./ConfirmDialog";
 export { default as StorageNamespaceVersionGuard } from "./StorageNamespaceVersionGuard";
 export { default as Grid } from "./Grid";
 export { default as Keyboard } from "./Keyboard";
+export { default as NavBar } from "./NavBar";
 export { default as SettingsSection } from "./SettingsSection";
 export { default as SettingsSectionHeader } from "./SettingsSectionHeader";
 export { default as ThemeProvider } from "./ThemeProvider";

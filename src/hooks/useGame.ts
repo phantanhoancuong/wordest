@@ -33,7 +33,7 @@ import {
   useTargetWord,
   useToasts,
 } from "@/hooks";
-import { renderGridToDataGrid, renderRowToDataRow } from "@/lib/utils";
+import { renderRowToDataRow } from "@/lib/utils";
 
 /** Matches a single uppercase character, used to validate keyboard letter input. */
 const LETTER_REGEX = /^[A-Z]$/;
@@ -248,12 +248,6 @@ export const useGame = (): UseGameReturn => {
 
   /** Player stats persistence controller (localStorage-backed). */
   const playerStatsState = usePlayerStatsState();
-  /** Current player stats for a given (ruleset, wordLength) combination if there's any. */
-  const playerStats = playerStatsState.getStats(
-    activeSessionController.activeSession,
-    settingsContext.ruleset.value,
-    settingsContext.wordLength.value,
-  );
 
   /**
    * Ensures that a snapshot exists whenever we are in DAILY mode and the (ruleset, wordLength) combination changes.

@@ -1,0 +1,71 @@
+.home-page__content {
+  height: 100%;
+  width: 100%;
+  display: grid;
+  grid-template-rows: 70% 30%;
+  overflow: hidden;
+}
+
+.game__error {
+  color: red;
+  text-align: center;
+  font-size: 3rem;
+}
+
+.game-board__container {
+  height: 100%;
+  display: grid;
+  grid-template-rows: 13% 87%;
+}
+
+.game-board__info {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-size: calc(var(--item-font-scale) * 1.25rem);
+  color: var(--app-text-color);
+  user-select: none;
+}
+
+.game-board {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+
+  justify-content: center;
+  container-type: size;
+}
+
+.game-board__stack {
+  width: fit-content;
+  margin-top: 0px;
+}
+
+.game-board__controls {
+  width: 100%;
+}
+
+.game-board__controls {
+  display: grid;
+  margin-top: calc(var(--item-font-scale) * 1rem);
+  grid-template-rows: 1fr 0.5fr;
+  gap: calc(var(--item-font-scale) * 0.5rem);
+}
+
+.game-board__button {
+  font-size: calc(var(--item-font-scale) * 0.8rem);
+  height: calc(var(--item-font-scale) * 1.8rem);
+  background-color: var(--cell-background-color-absent);
+  color: var(--cell-text-color-absent);
+  border: 1px solid var(--cell-border-color-absent);
+  cursor: pointer;
+  font-weight: bold;
+  user-select: none;
+}
+
+.app__keyboard {
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+}

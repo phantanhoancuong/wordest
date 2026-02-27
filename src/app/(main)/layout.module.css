@@ -1,66 +1,23 @@
 .app {
   height: 100dvh;
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
   padding-top: 1dvh;
+  overflow: hidden;
   max-width: 1920px;
   margin: 0 auto;
 
   --item-font-scale: 1;
-}
-
-.app__banner {
-  flex: 0 0 7%;
-  width: 100%;
+  display: grid;
+  grid-template-rows: 7% 90%;
 }
 
 .app__content {
-  flex: 1;
-  min-height: 0;
-  overflow-y: auto;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  align-self: center;
-  gap: 3dvh;
-  padding-bottom: 8dvh;
-  scrollbar-gutter: stable;
+  height: 100%;
+  width: 100%;
 }
 
 .landscape-warning {
   display: none;
   text-align: center;
-}
-
-.volume-control {
-  display: flex;
-  width: 100%;
-  gap: 1dvw;
-  align-items: center;
-}
-
-.volume-icon {
-  width: 8%;
-  height: 8%;
-  color: var(--app-text-color);
-  cursor: pointer;
-}
-
-@media (min-width: 600px) {
-  .app {
-    --item-font-scale: 1.3;
-  }
-  .volume-icon {
-    width: 6%;
-    height: 6%;
-  }
-}
-
-@media (min-width: 1024px) {
-  .app {
-    --item-font-scale: 1.5;
-  }
 }
 
 @media (max-height: 600px) and (orientation: landscape) {
@@ -79,10 +36,9 @@
   }
 }
 
-@media (max-height: 560px), (max-width: 300px) {
+@media (max-height: 560px), (max-width: 340px) {
   .app__banner,
-  .app__content,
-  .app__keyboard {
+  .app__content {
     display: none;
   }
 
