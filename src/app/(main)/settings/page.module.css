@@ -9,10 +9,10 @@
   align-self: center;
   gap: 3dvh;
   opacity: 0;
-  animation: sessionFadeIn 500ms ease forwards;
+  animation: fadeIn 500ms ease forwards;
 }
 
-@keyframes sessionFadeIn {
+@keyframes fadeIn {
   to {
     opacity: 1;
   }
