@@ -8,6 +8,8 @@ import { useActiveSession, useGame } from "@/hooks";
 
 import { Grid, Keyboard, ToastBar } from "@/components/client";
 
+import { ReplayIcon } from "@/assets/icons";
+
 import styles from "@/app/(main)/page.module.css";
 
 /**
@@ -46,14 +48,13 @@ function GameRoot({ gameSession }: { gameSession: SessionType }) {
 
   const { ruleset, showReferenceGrid, showKeyStatuses, wordLength } =
     useSettingsContext();
-  const current = new Date();
-  const date = `${current.getDate()}/${current.getMonth() + 1}/${current.getFullYear()}`;
 
   const renderReferenceGrid =
     ruleset.value !== Ruleset.HARDCORE && showReferenceGrid.value;
   const renderKeyStatuses =
     ruleset.value !== Ruleset.HARDCORE && showKeyStatuses.value;
-
+  const modeSummmaryString =
+    gameSession + "." + ruleset.value + "." + wordLength.value;
   if (!render.hasHydrated) return null;
   return (
     <div className={styles["home-page__content"]}>
@@ -61,49 +62,48 @@ function GameRoot({ gameSession }: { gameSession: SessionType }) {
         <p className={styles["game__error"]}>{game.wordFetchError}</p>
       ) : (
         <section className={styles["game-board__container"]}>
-          <div className={styles["game-board__info"]}>
-            <div className={styles["game-board__date"]}>
-              {gameSession === SessionType.DAILY
-                ? "daily mode (" + date + ")"
-                : "practice mode"}
-            </div>
-            <div className={styles["game-board__ruleset"]}>
-              {ruleset.value + " " + wordLength.value + "-letter"}
-            </div>
-          </div>
           <div className={`${styles["game-board"]}`}>
             <div className={styles["game-board__stack"]}>
-              <div className={styles["game-board__grid"]}>
-                <Grid
-                  grid={gameGrid.renderGrid}
-                  onAnimationEnd={gameGrid.handleAnimationEnd}
-                  layoutRows={gameGrid.rowNum}
-                  layoutCols={gameGrid.colNum}
-                />
-              </div>
-
               <div className={styles["game-board__controls"]}>
-                {renderReferenceGrid ? (
-                  <Grid
-                    grid={referenceGrid.renderGrid}
-                    onAnimationEnd={referenceGrid.handleAnimationEnd}
-                    layoutRows={gameGrid.rowNum}
-                    layoutCols={gameGrid.colNum}
-                  />
-                ) : null}
+                <button className={styles["game-board__summary"]}>
+                  {modeSummmaryString}
+                </button>
+
                 {gameSession === SessionType.PRACTICE ? (
                   <button
-                    className={styles["game-board__button"]}
+                    type="button"
+                    className={styles["game-board__restart"]}
                     onClick={(e) => {
-                      // Typing while the cursor is ontop of the restart button
-                      // introduces unexpected behavior.
                       e.currentTarget.blur();
                       game.restartGame();
                     }}
+                    aria-label="Restart game"
                   >
-                    restart
+                    <ReplayIcon />
                   </button>
                 ) : null}
+              </div>
+
+              <div className={styles["game-board__grids"]}>
+                <div className={styles["game-board__game-grid"]}>
+                  <Grid
+                    grid={gameGrid.renderGrid}
+                    onAnimationEnd={gameGrid.handleAnimationEnd}
+                    layoutRows={gameGrid.rowNum}
+                    layoutCols={gameGrid.colNum}
+                  />
+                </div>
+
+                <div className={styles["game-board__reference-grid"]}>
+                  {renderReferenceGrid ? (
+                    <Grid
+                      grid={referenceGrid.renderGrid}
+                      onAnimationEnd={referenceGrid.handleAnimationEnd}
+                      layoutRows={gameGrid.rowNum}
+                      layoutCols={gameGrid.colNum}
+                    />
+                  ) : null}
+                </div>
               </div>
             </div>
 
