@@ -1,5 +1,6 @@
 .app {
   height: 100dvh;
+  width: 100dvw;
   padding-top: 1dvh;
   overflow: hidden;
   max-width: 1920px;
@@ -12,7 +13,7 @@
 
 .app__content {
   height: 100%;
-  width: 100%;
+  width: 100dvw;
 }
 
 .landscape-warning {

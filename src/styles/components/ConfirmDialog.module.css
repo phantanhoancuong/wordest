@@ -1,7 +1,6 @@
 .confirm-dialog__overlay {
   position: fixed;
-  width: 100dvw;
-  height: 100dvh;
+  inset: 0;
   background-color: rgba(0, 0, 0, 0.5);
   display: flex;
   align-items: center;
