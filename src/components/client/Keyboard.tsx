@@ -99,11 +99,11 @@ function Keyboard({
   }));
 
   return (
-    <div className={styles.keyboard}>
+    <div className={styles["keyboard"]}>
       {rows.map((row, rowIndex) => (
         <div
           key={rowIndex}
-          className={styles.keyboard__row}
+          className={styles["keyboard__row"]}
           style={{ "--columns": row.columns } as React.CSSProperties}
         >
           {row.keys.map((key) => {
@@ -116,7 +116,7 @@ function Keyboard({
                 key={key.label}
                 data-unit={key.unit ?? 1}
                 onClick={() => onKeyClick(key.label)}
-                className={`${styles.keyboard__key} ${styles[`keyboard__key--${status}`]}`}
+                className={`${styles["keyboard__key"]} ${styles[`keyboard__key--${status}`]}`}
               >
                 {key.label === "Backspace" ? "\u232B" : key.label}
               </button>

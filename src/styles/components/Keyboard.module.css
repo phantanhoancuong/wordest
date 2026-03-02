@@ -9,6 +9,7 @@
   display: grid;
   gap: calc(var(--font-size-scale) * 0.2rem);
   grid-auto-rows: max-content;
+  z-index: 0;
 }
 
 .keyboard__row {
