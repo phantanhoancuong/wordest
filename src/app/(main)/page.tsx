@@ -6,7 +6,7 @@ import { Ruleset, SessionType } from "@/lib/constants";
 
 import { useActiveSession, useGame } from "@/hooks";
 
-import { Grid, Keyboard, ToastBar } from "@/components/client";
+import { Grid, Keyboard, ModeControls, ToastBar } from "@/components/client";
 
 import { ReplayIcon } from "@/assets/icons";
 
@@ -22,7 +22,74 @@ import styles from "@/app/(main)/page.module.css";
 export default function Home() {
   const { activeSession } = useActiveSession();
 
-  return <GameRoot key={activeSession} gameSession={activeSession} />;
+  const { gameGrid, referenceGrid, keyboard, game, toasts, input, render } =
+    useGame();
+
+  const { ruleset, showReferenceGrid, showKeyStatuses, wordLength } =
+    useSettingsContext();
+
+  const renderReferenceGrid =
+    ruleset.value !== Ruleset.HARDCORE && showReferenceGrid.value;
+  const renderKeyStatuses =
+    ruleset.value !== Ruleset.HARDCORE && showKeyStatuses.value;
+
+  if (!render.hasHydrated) return null;
+  if (game.wordFetchError)
+    return <p className={styles["game__error"]}>{game.wordFetchError}</p>;
+  return (
+    <div className={styles["home-page__content"]}>
+      <div className={styles["game-board"]}>
+        <div className={styles["game-board__controls"]}>
+          <ModeControls />
+          {activeSession === SessionType.PRACTICE ? (
+            <button
+              type="button"
+              className={styles["game-board__restart"]}
+              key={activeSession}
+              onClick={(e) => {
+                e.currentTarget.blur();
+                game.restartGame();
+              }}
+              aria-label="Restart game"
+            >
+              <ReplayIcon />
+            </button>
+          ) : null}
+        </div>
+        <div key={activeSession} className={styles["game-board__grids"]}>
+          <div className={styles["game-board__game-grid"]}>
+            <Grid
+              grid={gameGrid.renderGrid}
+              onAnimationEnd={gameGrid.handleAnimationEnd}
+              layoutRows={gameGrid.rowNum}
+              layoutCols={gameGrid.colNum}
+            />
+          </div>
+
+          <div className={styles["game-board__reference-grid"]}>
+            {renderReferenceGrid ? (
+              <Grid
+                grid={referenceGrid.renderGrid}
+                onAnimationEnd={referenceGrid.handleAnimationEnd}
+                layoutRows={gameGrid.rowNum}
+                layoutCols={gameGrid.colNum}
+              />
+            ) : null}
+          </div>
+        </div>
+      </div>
+      <footer className={styles["app__keyboard"]} key={activeSession}>
+        <Keyboard
+          renderKeyStatuses={renderKeyStatuses}
+          keyStatuses={keyboard.statuses}
+          onKeyClick={input.handle}
+        />
+      </footer>
+      <div className={styles["app__toast-bar"]}>
+        <ToastBar toasts={toasts.list} removeToast={toasts.removeToast} />
+      </div>
+    </div>
+  );
 }
 
 /**
@@ -42,85 +109,3 @@ export default function Home() {
  * @param gameSession - The active game session type.
  * @returns
  */
-function GameRoot({ gameSession }: { gameSession: SessionType }) {
-  const { gameGrid, referenceGrid, keyboard, game, toasts, input, render } =
-    useGame();
-
-  const { ruleset, showReferenceGrid, showKeyStatuses, wordLength } =
-    useSettingsContext();
-
-  const renderReferenceGrid =
-    ruleset.value !== Ruleset.HARDCORE && showReferenceGrid.value;
-  const renderKeyStatuses =
-    ruleset.value !== Ruleset.HARDCORE && showKeyStatuses.value;
-  const modeSummmaryString =
-    gameSession + "." + ruleset.value + "." + wordLength.value;
-  if (!render.hasHydrated) return null;
-  return (
-    <div className={styles["home-page__content"]}>
-      {game.wordFetchError ? (
-        <p className={styles["game__error"]}>{game.wordFetchError}</p>
-      ) : (
-        <section className={styles["game-board__container"]}>
-          <div className={`${styles["game-board"]}`}>
-            <div className={styles["game-board__stack"]}>
-              <div className={styles["game-board__controls"]}>
-                <button className={styles["game-board__summary"]}>
-                  {modeSummmaryString}
-                </button>
-
-                {gameSession === SessionType.PRACTICE ? (
-                  <button
-                    type="button"
-                    className={styles["game-board__restart"]}
-                    onClick={(e) => {
-                      e.currentTarget.blur();
-                      game.restartGame();
-                    }}
-                    aria-label="Restart game"
-                  >
-                    <ReplayIcon />
-                  </button>
-                ) : null}
-              </div>
-
-              <div className={styles["game-board__grids"]}>
-                <div className={styles["game-board__game-grid"]}>
-                  <Grid
-                    grid={gameGrid.renderGrid}
-                    onAnimationEnd={gameGrid.handleAnimationEnd}
-                    layoutRows={gameGrid.rowNum}
-                    layoutCols={gameGrid.colNum}
-                  />
-                </div>
-
-                <div className={styles["game-board__reference-grid"]}>
-                  {renderReferenceGrid ? (
-                    <Grid
-                      grid={referenceGrid.renderGrid}
-                      onAnimationEnd={referenceGrid.handleAnimationEnd}
-                      layoutRows={gameGrid.rowNum}
-                      layoutCols={gameGrid.colNum}
-                    />
-                  ) : null}
-                </div>
-              </div>
-            </div>
-
-            <ToastBar toasts={toasts.list} removeToast={toasts.removeToast} />
-          </div>
-        </section>
-      )}
-
-      {!game.wordFetchError && (
-        <footer className={styles["app__keyboard"]}>
-          <Keyboard
-            renderKeyStatuses={renderKeyStatuses}
-            keyStatuses={keyboard.statuses}
-            onKeyClick={input.handle}
-          />
-        </footer>
-      )}
-    </div>
-  );
-}

@@ -1,0 +1,97 @@
+.mode-controls__button {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  background-color: var(--cell-background-color-default);
+  border-color: var(--cell-border-color-default);
+  color: var(--cell-text-color-default);
+}
+
+.mode-controls__button svg {
+  transition: transform 0.3s ease;
+  font-size: 2em;
+}
+
+.icon--open {
+  transform: rotate(90deg);
+}
+
+.mode-controls__overlay {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: opacity 500ms ease;
+
+  z-index: 9999;
+}
+
+.mode-controls--open {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.mode-controls--closed {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.mode-controls__menu {
+  width: min(80dvw, 420px);
+  max-height: min(80dvh, 640px);
+
+  padding: 1.2rem;
+  padding-left: 1.5rem;
+  padding-right: 1.5rem;
+  border-radius: 0.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: calc(var(--item-font-scale) * 1rem);
+
+  z-index: 10000;
+  background-color: var(--app-background-color);
+  color: var(--app-text-color);
+}
+
+.mode-controls__menu-section {
+  display: flex;
+  flex-direction: row;
+  gap: 0.5rem;
+}
+
+.animate {
+  animation: fadeIn 500ms ease;
+}
+
+.mode-controls__menu-button {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  font-size: calc(var(--item-font-scale) * 0.8rem);
+  height: calc(var(--item-font-scale) * 1.8rem);
+  border-radius: calc(var(--item-font-scale) * 0.3rem);
+  background-color: var(--button-background-color-inactive);
+  color: var(--cell-text-color-wrong);
+  border: 0px;
+  cursor: pointer;
+  border-radius: 0.5rem;
+}
+
+.mode-controls__menu-button--selected {
+  background-color: var(--button-background-color-active);
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}

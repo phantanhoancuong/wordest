@@ -277,7 +277,6 @@ export const useGame = (): UseGameReturn => {
 
     (async () => {
       isInputLocked.current = true;
-      setHasHydrated(false);
 
       // Load target word for DAILY (should be stable for the day).
       const word = await targetWordController.loadTargetWord(

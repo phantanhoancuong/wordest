@@ -50,18 +50,20 @@ function Grid({
   };
 
   return (
-    <div className={styles.grid} style={style}>
-      {grid.map((row: Array<RenderCell>, rowIndex: number) =>
-        row.map((cell: RenderCell, colIndex: number) => (
-          <Cell
-            key={`${rowIndex}-${colIndex}-${cell.animationKey}`}
-            cell={cell}
-            row={rowIndex}
-            col={colIndex}
-            onAnimationEnd={onAnimationEnd}
-          />
-        )),
-      )}
+    <div className={styles["grid__container"]}>
+      <div className={styles["grid"]} style={style}>
+        {grid.map((row: Array<RenderCell>, rowIndex: number) =>
+          row.map((cell: RenderCell, colIndex: number) => (
+            <Cell
+              key={`${rowIndex}-${colIndex}-${cell.animationKey}`}
+              cell={cell}
+              row={rowIndex}
+              col={colIndex}
+              onAnimationEnd={onAnimationEnd}
+            />
+          )),
+        )}
+      </div>
     </div>
   );
 }
