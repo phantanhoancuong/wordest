@@ -38,6 +38,13 @@
   aspect-ratio: 1;
   opacity: 0;
   animation: fadeIn 500ms ease forwards;
+  background-color: var(--cell-background-color-default);
+  border-color: var(--cell-border-color-default);
+  color: var(--cell-text-color-default);
+}
+
+.game-board__restart svg {
+  font-size: 1.5em;
 }
 
 .game-board {
@@ -61,6 +68,8 @@
 }
 
 .app__keyboard {
+  position: relative;
+  z-index: -1;
   display: flex;
   justify-content: center;
   opacity: 0;
