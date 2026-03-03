@@ -1,11 +1,9 @@
 .home-page__content {
   height: 100%;
   width: 100%;
-
   display: grid;
   grid-template-rows: 75% 25%;
   align-items: center;
-
   overflow: hidden;
 
   opacity: 0;
@@ -26,34 +24,37 @@
 
 .game-board__controls {
   display: flex;
-  font-size: calc(var(--item-font-scale) * 0.5rem);
   width: 100%;
   height: 100%;
   gap: 5%;
   text-overflow: hidden;
+
+  container-type: inline-size;
+  --controls-scale: 4cqw;
 }
 
 .game-board__restart {
   font-size: 0.8em;
   aspect-ratio: 1;
   opacity: 0;
-  animation: fadeIn 500ms ease forwards;
   background-color: var(--cell-background-color-default);
   border-color: var(--cell-border-color-default);
   color: var(--cell-text-color-default);
+
+  animation: fadeIn 500ms ease forwards;
 }
 
 .game-board__restart svg {
-  font-size: 1.5em;
+  font-size: calc(var(--controls-scale) * 1.3);
 }
 
 .game-board {
   height: 80%;
   display: grid;
-  grid-template-rows: 8% 90%;
-
+  grid-template-rows: 10% 90%;
   justify-content: center;
   align-items: center;
+
   container-type: size;
   animation: fadeIn 500ms ease forwards;
 }
@@ -63,8 +64,9 @@
   opacity: 0;
   grid-template-rows: 6fr 1fr;
   row-gap: 5%;
-  animation: fadeIn 500ms ease forwards;
   z-index: 0;
+
+  animation: fadeIn 500ms ease forwards;
 }
 
 .app__keyboard {
@@ -72,6 +74,7 @@
   z-index: -1;
   display: flex;
   justify-content: center;
+
   opacity: 0;
   animation: fadeIn 500ms ease forwards;
 }
@@ -82,6 +85,7 @@
   display: flex;
   justify-content: center;
   align-items: flex-start;
+
   pointer-events: none;
   z-index: 0;
 }

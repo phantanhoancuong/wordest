@@ -33,6 +33,7 @@ export interface UseGameReturn {
 
   toasts: {
     list: UseToastsReturn["toastList"];
+    addToast: UseToastsReturn["addToast"];
     removeToast: UseToastsReturn["removeToast"];
   };
 

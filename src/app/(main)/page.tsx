@@ -15,9 +15,21 @@ import styles from "@/app/(main)/page.module.css";
 /**
  * Main game page component.
  *
+ * Renders a complete game including:
+ * - Mode states management (session, ruleset, and word length).
+ * - Game board with controls and grids.
+ * - On-screen keyboard.
+ * - Toast notifications.
+ *
  * Responsibilities:
- * - Holds the current {@link GameSession} (e.g. DAILY or PRACTICE).
- * - Forces a full remount of the game tree when the session changes.
+ * - Subscribes to the active game session.
+ * - Retrieves game state, grid data, keyboard state, and actions through {@link useGame}.
+ * - Renders controls for mode switching and game restarting.
+ * - Conditionally renders reference grid and key status UI based on settings.
+ *
+ * Game logic, validation, animations, and persistence are handled inside {@link useGame}.
+ *
+ * @returns The main game UI for the current mode.
  */
 export default function Home() {
   const { activeSession } = useActiveSession();
@@ -25,8 +37,7 @@ export default function Home() {
   const { gameGrid, referenceGrid, keyboard, game, toasts, input, render } =
     useGame();
 
-  const { ruleset, showReferenceGrid, showKeyStatuses, wordLength } =
-    useSettingsContext();
+  const { ruleset, showReferenceGrid, showKeyStatuses } = useSettingsContext();
 
   const renderReferenceGrid =
     ruleset.value !== Ruleset.HARDCORE && showReferenceGrid.value;
@@ -48,6 +59,7 @@ export default function Home() {
               key={activeSession}
               onClick={(e) => {
                 e.currentTarget.blur();
+                toasts.addToast("Game restarted!");
                 game.restartGame();
               }}
               aria-label="Restart game"
@@ -91,21 +103,3 @@ export default function Home() {
     </div>
   );
 }
-
-/**
- * Main game UI container.
- *
- * This component renders a game session.
- *
- * Responsibilities:
- * - Invokes {@link useGame} to obtain game statea, input handlers, and render data.
- * - Renders the game grid, optional reference grid, keyboard, toasts, and banner.
- * - Displays session-specific UI.
- * - Provides controls for restarting the game and switching sessions.
- * - Defers rendering until client hydration is complete.
- *
- * Game behavior, validation, animations, and persistence are handled entirely by {@link useGame}.
- *
- * @param gameSession - The active game session type.
- * @returns
- */
