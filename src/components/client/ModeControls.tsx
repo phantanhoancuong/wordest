@@ -65,7 +65,7 @@ function ModeControls() {
     activeSession + " · " + ruleset.value + " · " + wordLength.value;
 
   return (
-    <>
+    <div className={styles["mode-controls"]}>
       <button
         className={styles["mode-controls__button"]}
         onClick={() => setIsOpen((prev) => !prev)}
@@ -124,7 +124,7 @@ function ModeControls() {
           </div>
         </div>
       </div>
-    </>
+    </div>
   );
 }
 

@@ -560,6 +560,7 @@ export const useGame = (): UseGameReturn => {
 
     toasts: {
       list: toastsController.toastList,
+      addToast: toastsController.addToast,
       removeToast: toastsController.removeToast,
     },
 
