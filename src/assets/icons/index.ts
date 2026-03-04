@@ -5,7 +5,9 @@ export { default as ContrastIcon } from "./contrast_24dp_000000_FILL0_wght400_GR
 export { default as ControllerIcon } from "./sports_esports_24dp_E3E3E3_FILL0_wght400_GRAD0_opsz24.svg";
 export { default as EyeIcon } from "./visibility_24dp_000000_FILL0_wght400_GRAD0_opsz24.svg";
 export { default as InfinityIcon } from "./all_inclusive_24dp_000000_FILL0_wght400_GRAD0_opsz24.svg";
-export { default as PersonIcon } from "./person_24dp_E3E3E3_FILL0_wght400_GRAD0_opsz24.svg";
+export { default as PersonIconFill } from "./person_24dp_E3E3E3_FILL1_wght400_GRAD0_opsz24.svg";
+export { default as PersonIconOutline } from "./person_24dp_E3E3E3_FILL0_wght400_GRAD0_opsz24.svg";
+export { default as QueryStatsIcon } from "./query_stats_24dp_E3E3E3_FILL0_wght400_GRAD0_opsz24.svg";
 export { default as PaletteIcon } from "./palette_24dp_000000_FILL0_wght400_GRAD0_opsz24.svg";
 export { default as ReplayIcon } from "./replay_24dp_E3E3E3_FILL0_wght400_GRAD0_opsz24.svg";
 export { default as ResetIcon } from "./reset_settings_24dp_000000_FILL0_wght400_GRAD0_opsz24.svg";
