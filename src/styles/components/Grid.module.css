@@ -1,5 +1,5 @@
 .grid {
-  --short-side: min(75cqw, 60cqh);
+  --short-side: min(100cqw, 65cqh);
   --grid-cell-size: calc(
     var(--short-side) / max(var(--layout-rows), var(--layout-cols))
   );
