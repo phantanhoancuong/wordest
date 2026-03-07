@@ -12,36 +12,54 @@ import {
 } from "@/assets/icons";
 import { useSession } from "@/lib/auth/auth-client";
 
+function NavIcon({
+  href,
+  disabled,
+  children,
+}: {
+  href: string;
+  disabled?: boolean;
+  children: React.ReactNode;
+}) {
+  if (disabled) {
+    return <span>{children}</span>;
+  }
+
+  return <Link href={href}>{children}</Link>;
+}
+
 function NavBar() {
   const pathname = usePathname();
   const { data: session } = useSession();
 
-  const isHomePage = pathname === "/";
   const isLoggedIn = Boolean(session);
+  const accountPath = isLoggedIn ? "/account" : "/sign-in";
 
-  const rightIcons = [];
-
-  if (!isHomePage) {
-    rightIcons.push(
-      <Link href="/">
+  const icons = [
+    pathname !== "/" && (
+      <NavIcon key="back" href="/">
         <BackArrowIcon />
-      </Link>,
-    );
-  }
+      </NavIcon>
+    ),
 
-  rightIcons.push(
-    <Link href={isLoggedIn ? "/account" : "/sign-in"}>
+    <NavIcon
+      key="account"
+      href={accountPath}
+      disabled={pathname === accountPath}
+    >
       {isLoggedIn ? <PersonIconFill /> : <PersonIconOutline />}
-    </Link>,
-  );
+    </NavIcon>,
 
-  rightIcons.push(
-    <Link href="/settings">
+    <NavIcon
+      key="settings"
+      href="/settings"
+      disabled={pathname === "/settings"}
+    >
       <SettingsIcon />
-    </Link>,
-  );
+    </NavIcon>,
+  ].filter(Boolean);
 
-  return <Banner right={rightIcons} />;
+  return <Banner right={icons} />;
 }
 
 export default NavBar;

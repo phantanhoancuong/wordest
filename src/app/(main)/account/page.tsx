@@ -87,7 +87,7 @@ export default function AccountPage() {
   const [hasHydrated, setHasHydrated] = useState(false);
   useEffect(() => {
     setHasHydrated(true);
-  });
+  }, []);
 
   useEffect(() => {
     if (hasHydrated && !data) router.push("/sign-in");
