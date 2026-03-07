@@ -1,11 +1,22 @@
-.stats-page__content {
+.account-page__content {
   height: 100%;
   width: 100%;
   padding: 0 10%;
-  display: grid;
-  grid-template-rows: 50% 50%;
+  overflow: auto;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  align-self: center;
   opacity: 0;
   animation: fadeIn 500ms ease forwards;
+  padding-bottom: 10%;
+}
+
+.account-page__header {
+  text-overflow: ellipsis;
+  overflow: hidden;
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 
 @keyframes fadeIn {
@@ -14,7 +25,7 @@
   }
 }
 
-.stats-page__options {
+.account-page__options {
   width: 100%;
 
   display: flex;

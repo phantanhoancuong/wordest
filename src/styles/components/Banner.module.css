@@ -1,13 +1,13 @@
 .banner {
   height: 100%;
   width: 100%;
-  display: flex;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
   align-items: center;
 }
 
 .banner__left {
   height: 100%;
-  width: 50%;
   display: flex;
   align-items: center;
   justify-content: flex-start;
@@ -17,17 +17,24 @@
 
 .banner__right {
   height: 100%;
-  width: 50%;
   display: flex;
   align-items: center;
   justify-content: flex-end;
   gap: 1rem;
   padding-right: 5dvw;
+  border: 1px;
 }
 
 .logo__container {
-  height: 100%;
-  aspect-ratio: 3;
+  height: 50%;
+  aspect-ratio: 433/77;
+
+  cursor: pointer;
+}
+
+.icon__container {
+  height: 50%;
+  aspect-ratio: 1;
   cursor: pointer;
 }
 
@@ -35,12 +42,6 @@
   height: 100%;
   width: 100%;
   color: var(--app-text-color);
-}
-
-.icon__container {
-  height: 60%;
-  aspect-ratio: 1;
-  cursor: pointer;
 }
 
 .icon__container svg {
