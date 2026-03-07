@@ -1,9 +1,21 @@
 "use client";
-import { signIn } from "@/lib/auth/auth-client";
+
+import { useEffect } from "react";
+import { useRouter } from "next/router";
+
+import { signIn, useSession } from "@/lib/auth/auth-client";
 
 import styles from "@/app/(main)/sign-in/page.module.css";
 
 export default function SignInPage() {
+  const router = useRouter();
+
+  const { data } = useSession();
+
+  useEffect(() => {
+    if (data) router.push("./account");
+  }, [data, router]);
+
   return (
     <div className={styles["sign-in-page__content"]}>
       <button
