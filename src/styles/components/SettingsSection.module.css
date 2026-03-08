@@ -4,7 +4,7 @@
   flex-direction: column;
 
   margin-top: 2dvh;
-  gap: 2dvh;
+  gap: 1dvh;
 }
 
 .settings-section__content {
@@ -18,5 +18,5 @@
   overflow: hidden;
   display: flex;
   flex-direction: column;
-  gap: 3dvh;
+  gap: 1dvh;
 }

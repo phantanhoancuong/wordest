@@ -1,39 +1,34 @@
 .account-page__content {
+  width: 100%;
+  opacity: 0;
+  animation: fadeIn 500ms ease forwards;
+  margin-bottom: 3dvh;
+}
+.account-page__scrollbar-wrapper {
   height: 100%;
   width: 100%;
   padding: 0 10%;
-  overflow: auto;
-  display: flex;
-  flex-direction: column;
-  align-items: stretch;
-  align-self: center;
-  opacity: 0;
-  animation: fadeIn 500ms ease forwards;
-  padding-bottom: 10%;
+  overflow-y: auto;
+  overflow-x: hidden;
 }
-
 .account-page__header {
   text-overflow: ellipsis;
   overflow: hidden;
   white-space: nowrap;
   flex-shrink: 0;
 }
-
 @keyframes fadeIn {
   to {
     opacity: 1;
   }
 }
-
 .account-page__options {
   width: 100%;
-
   display: flex;
   flex-direction: column;
   margin-top: 2dvh;
   gap: 2dvh;
 }
-
 .stats__container {
   display: flex;
   flex-direction: column;
