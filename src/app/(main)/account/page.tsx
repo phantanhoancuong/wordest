@@ -96,91 +96,93 @@ export default function AccountPage() {
   if (!hasHydrated || !data) return null;
 
   return (
-    <div className={styles["account-page__content"]}>
-      <h1 className={styles["account-page__header"]}>
-        {"Hello, " + data.user.name + "!"}
-      </h1>
-      <SettingsSection
-        title="stats"
-        isOpen={isStatsOpen}
-        setIsOpen={setIsStatsOpen}
-      >
-        <div className={styles["stats__container"]}>
-          <SettingsItem
-            Icon={ControllerIcon}
-            name="session"
-            description={"Filter stats by session."}
-            control={
-              <ButtonGroup
-                options={sessionOptions}
-                selected={session}
-                onSelect={(value: SessionType) => setSession(value)}
-              />
-            }
+    <div className={styles["account-page__scrollbar-wrapper"]}>
+      <div className={styles["account-page__content"]}>
+        <h1 className={styles["account-page__header"]}>
+          {"Hello, " + data.user.name + "!"}
+        </h1>
+        <SettingsSection
+          title="stats"
+          isOpen={isStatsOpen}
+          setIsOpen={setIsStatsOpen}
+        >
+          <div className={styles["stats__container"]}>
+            <SettingsItem
+              Icon={ControllerIcon}
+              name="session"
+              description={"Filter stats by session."}
+              control={
+                <ButtonGroup
+                  options={sessionOptions}
+                  selected={session}
+                  onSelect={(value: SessionType) => setSession(value)}
+                />
+              }
+            />
+          </div>
+          <div className={styles["stats__container"]}>
+            <SettingsItem
+              Icon={StarIcon}
+              name="ruleset"
+              description={"Filter stats by ruleset."}
+              control={
+                <ButtonGroup
+                  options={rulesetOptions}
+                  selected={ruleset}
+                  onSelect={(value: Ruleset) => setRuleset(value)}
+                />
+              }
+            />
+          </div>
+          <div className={styles["stats__container"]}>
+            <SettingsItem
+              Icon={RulerIcon}
+              name="word length"
+              description="Filter stats by word length."
+              control={
+                <ButtonGroup
+                  options={wordLengthOptions}
+                  selected={wordLength}
+                  onSelect={(value: WordLength) => setWordLength(value)}
+                />
+              }
+            />
+          </div>
+          <div className={styles["stats__container"]}>
+            <div className={styles["stats__content"]}>
+              Games completed: {displayedStats.gamesCompleted}
+            </div>
+            <div className={styles["stats__content"]}>
+              Games won: {displayedStats.gamesWon}
+            </div>
+            <div className={styles["stats__content"]}>
+              Current win streak: {displayedStats.streak}
+            </div>
+            <div className={styles["stats__content"]}>
+              Longest win streak: {displayedStats.maxStreak}
+            </div>
+            <div className={styles["stats__content"]}>
+              Last completed date:{" "}
+              {dateIndexToDateString(displayedStats.lastCompletedDateIndex)}
+            </div>
+            <div className={styles["stats__content"]}>
+              Last won date:{" "}
+              {dateIndexToDateString(displayedStats.lastWonDateIndex)}
+            </div>
+          </div>
+        </SettingsSection>
+        <SettingsSection
+          title="account actions"
+          isOpen={isAccountActionsOpen}
+          setIsOpen={setIsAccountActionsOpen}
+        >
+          <ActionButton
+            danger={true}
+            label="sign out"
+            onClick={() => handleSignOut()}
           />
-        </div>
-        <div className={styles["stats__container"]}>
-          <SettingsItem
-            Icon={StarIcon}
-            name="ruleset"
-            description={"Filter stats by ruleset."}
-            control={
-              <ButtonGroup
-                options={rulesetOptions}
-                selected={ruleset}
-                onSelect={(value: Ruleset) => setRuleset(value)}
-              />
-            }
-          />
-        </div>
-        <div className={styles["stats__container"]}>
-          <SettingsItem
-            Icon={RulerIcon}
-            name="word length"
-            description="Filter stats by word length."
-            control={
-              <ButtonGroup
-                options={wordLengthOptions}
-                selected={wordLength}
-                onSelect={(value: WordLength) => setWordLength(value)}
-              />
-            }
-          />
-        </div>
-        <div className={styles["stats__container"]}>
-          <div className={styles["stats__content"]}>
-            Games completed: {displayedStats.gamesCompleted}
-          </div>
-          <div className={styles["stats__content"]}>
-            Games won: {displayedStats.gamesWon}
-          </div>
-          <div className={styles["stats__content"]}>
-            Current win streak: {displayedStats.streak}
-          </div>
-          <div className={styles["stats__content"]}>
-            Longest win streak: {displayedStats.maxStreak}
-          </div>
-          <div className={styles["stats__content"]}>
-            Last completed date:{" "}
-            {dateIndexToDateString(displayedStats.lastCompletedDateIndex)}
-          </div>
-          <div className={styles["stats__content"]}>
-            Last won date:{" "}
-            {dateIndexToDateString(displayedStats.lastWonDateIndex)}
-          </div>
-        </div>
-      </SettingsSection>
-      <SettingsSection
-        title="account actions"
-        isOpen={isAccountActionsOpen}
-        setIsOpen={setIsAccountActionsOpen}
-      >
-        <ActionButton
-          danger={true}
-          label="sign out"
-          onClick={() => handleSignOut()}
-        />
-      </SettingsSection>
+        </SettingsSection>
+      </div>
     </div>
   );
 }
