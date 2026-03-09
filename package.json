@@ -9,7 +9,8 @@
     "start": "next start"
   },
   "dependencies": {
-    "@neondatabase/serverless": "^1.0.2",
+    "@libsql/client": "^0.17.0",
+    "@tursodatabase/serverless": "^0.2.3",
     "better-auth": "^1.5.3",
     "drizzle-orm": "^0.45.1",
     "next": "^15.5.9",
