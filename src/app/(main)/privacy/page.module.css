@@ -1,10 +1,13 @@
 .privacy-page__content {
-  height: 100%;
   width: 100%;
-  padding: 0 10%;
   opacity: 0;
   animation: fadeIn 500ms ease forwards;
   margin-bottom: 3dvh;
+}
+.privacy-page__scrollbar-wrapper {
+  height: 100%;
+  width: 100%;
+  padding: 0 10%;
   overflow-y: auto;
   overflow-x: hidden;
 }
