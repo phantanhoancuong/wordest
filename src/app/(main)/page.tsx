@@ -90,12 +90,16 @@ export default function Home() {
           </div>
         </div>
       </div>
-      <footer className={styles["app__keyboard"]} key={activeSession}>
+      <div className={styles["app__keyboard"]} key={activeSession}>
         <Keyboard
           renderKeyStatuses={renderKeyStatuses}
           keyStatuses={keyboard.statuses}
           onKeyClick={input.handle}
         />
+      </div>
+      <footer className={styles["app__footer"]}>
+        <a href="/privacy">Privacy Policy</a>
+        <a href="/terms">Terms of Service</a>
       </footer>
       <div className={styles["app__toast-bar"]}>
         <ToastBar toasts={toasts.list} removeToast={toasts.removeToast} />

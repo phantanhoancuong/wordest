@@ -1,5 +1,12 @@
 import { relations, sql } from "drizzle-orm";
-import { sqliteTable, text, integer, index } from "drizzle-orm/sqlite-core";
+
+import {
+  sqliteTable,
+  text,
+  integer,
+  index,
+  primaryKey,
+} from "drizzle-orm/sqlite-core";
 
 export const user = sqliteTable("user", {
   id: text("id").primaryKey(),
@@ -87,9 +94,28 @@ export const verification = sqliteTable(
   (table) => [index("verification_identifier_idx").on(table.identifier)],
 );
 
+export const practiceGames = sqliteTable(
+  "practice_games",
+  {
+    userId: text("user_id")
+      .notNull()
+      .references(() => user.id, { onDelete: "cascade" }),
+
+    ruleset: text("ruleset").notNull(),
+    wordLength: integer("word_length").notNull(),
+  },
+  (table) => ({
+    pk: primaryKey({
+      columns: [table.userId, table.ruleset, table.wordLength],
+    }),
+    userIdx: index("practice_games_user_idx").on(table.userId),
+  }),
+);
+
 export const userRelations = relations(user, ({ many }) => ({
   sessions: many(session),
   accounts: many(account),
+  practiceGames: many(practiceGames),
 }));
 
 export const sessionRelations = relations(session, ({ one }) => ({
@@ -102,6 +128,13 @@ export const sessionRelations = relations(session, ({ one }) => ({
 export const accountRelations = relations(account, ({ one }) => ({
   user: one(user, {
     fields: [account.userId],
+    references: [user.id],
+  }),
+}));
+
+export const practiceGamesRelations = relations(practiceGames, ({ one }) => ({
+  user: one(user, {
+    fields: [practiceGames.userId],
     references: [user.id],
   }),
 }));

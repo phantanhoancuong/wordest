@@ -10,10 +10,12 @@ type SettingsUIStore = {
   isGameplayOpen: boolean;
   isDangerZoneOpen: boolean;
   isAccessOpen: boolean;
+  isAboutOpen: boolean;
   setIsGeneralOpen: (isOpen: boolean) => void;
   setIsGameplayOpen: (isOpen: boolean) => void;
   setIsDangerZoneOpen: (isOpen: boolean) => void;
   setIsAccessOpen: (isOpen: boolean) => void;
+  setIsAboutOpen: (isOpen: boolean) => void;
 };
 
 /**
@@ -26,8 +28,10 @@ export const useSettingsUIStore = create<SettingsUIStore>((set) => ({
   isGameplayOpen: true,
   isDangerZoneOpen: true,
   isAccessOpen: true,
+  isAboutOpen: true,
   setIsGeneralOpen: (isOpen) => set({ isGeneralOpen: isOpen }),
   setIsGameplayOpen: (isOpen) => set({ isGameplayOpen: isOpen }),
   setIsDangerZoneOpen: (isOpen) => set({ isDangerZoneOpen: isOpen }),
   setIsAccessOpen: (isOpen) => set({ isAccessOpen: isOpen }),
+  setIsAboutOpen: (isOpen) => set({ isAboutOpen: isOpen }),
 }));

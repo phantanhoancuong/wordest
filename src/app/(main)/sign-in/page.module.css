@@ -1,0 +1,26 @@
+.sign-in-page__content {
+  height: 100%;
+  padding: 0 10%;
+  min-height: 0;
+  overflow: auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+
+  justify-content: center;
+  gap: 3dvh;
+  opacity: 0;
+  animation: fadeIn 500ms ease forwards;
+  margin-bottom: 3dvh;
+}
+
+@keyframes fadeIn {
+  to {
+    opacity: 1;
+  }
+}
+
+.sign-in-buttons {
+  display: flex;
+  flex-direction: column;
+}

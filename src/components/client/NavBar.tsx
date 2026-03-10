@@ -5,7 +5,7 @@ import { usePathname } from "next/navigation";
 
 import { Banner } from "@/components/client";
 import {
-  BackArrowIcon,
+  HomeIcon,
   PersonIconFill,
   PersonIconOutline,
   SettingsIcon,
@@ -38,7 +38,7 @@ function NavBar() {
   const icons = [
     pathname !== "/" && (
       <NavIcon key="back" href="/">
-        <BackArrowIcon />
+        <HomeIcon />
       </NavIcon>
     ),
 
