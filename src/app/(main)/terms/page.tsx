@@ -87,7 +87,7 @@ export default function TermsPage() {
         </SettingsSection>
 
         <SettingsSection
-          title="Service Availability & Liability"
+          title="Liability"
           isOpen={isLiabilityOpen}
           setIsOpen={setIsLiabilityOpen}
         >
