@@ -1,21 +1,24 @@
 import { GameState } from "@/lib/constants";
 
-import { UseGridStateReturn } from "@/types/useGridState.types";
+import { useGameGridReturn } from "@/types/useGameGrid.types";
 import { UseKeyStatusesReturn } from "@/types/useKeyStatuses.types";
-import { UseTargetWordReturn } from "@/types/useTargetWord.types";
+import { useReferenceRowReturn } from "@/types/useReferenceRow.types";
 import { UseToastsReturn } from "@/types/useToasts";
 
-type GameGridSection = {
-  renderGrid: UseGridStateReturn["renderGrid"];
-  rowNum: UseGridStateReturn["rowNum"];
-  colNum: UseGridStateReturn["colNum"];
-  handleAnimationEnd: (rowIndex: number, colIndex: number) => void;
-};
-
 export interface UseGameReturn {
-  gameGrid: GameGridSection;
+  gameGrid: {
+    grid: useGameGridReturn["grid"];
+    rowNum: useGameGridReturn["rowNum"];
+    colNum: useGameGridReturn["colNum"];
+    handleAnimationEnd: (rowIndex: number, colIndex: number) => void;
+  };
 
-  referenceGrid: GameGridSection;
+  referenceRow: {
+    row: useReferenceRowReturn["row"];
+    colNum: useReferenceRowReturn["colNum"];
+    handleAnimationEnd: (colIndex: number) => void;
+    isRevealing: boolean;
+  };
 
   keyboard: {
     statuses: UseKeyStatusesReturn["keyStatuses"];
@@ -25,9 +28,6 @@ export interface UseGameReturn {
 
   game: {
     gameState: GameState;
-    validationError: string;
-    wordFetchError: string;
-    targetWord: UseTargetWordReturn["targetWord"];
     restartGame: () => void;
   };
 

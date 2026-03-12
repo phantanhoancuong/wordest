@@ -1,7 +1,9 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
+
+import { authClient } from "@/lib/auth/auth-client";
 
 import {
   Ruleset,
@@ -14,8 +16,6 @@ import { useSettingsContext } from "@/app/contexts";
 
 import { useActiveSession, usePlayerStatsState } from "@/hooks";
 
-import { signOut, useSession } from "@/lib/auth/auth-client";
-
 import {
   ActionButton,
   ButtonGroup,
@@ -26,7 +26,6 @@ import { SettingsItem } from "@/components/server";
 import { dateIndexToDateString } from "@/lib/utils";
 
 import { ControllerIcon, RulerIcon, StarIcon } from "@/assets/icons";
-
 import styles from "@/app/(main)/account/page.module.css";
 
 const sessionOptions = [
@@ -36,10 +35,7 @@ const sessionOptions = [
 
 const rulesetOptions = [
   { label: "normal", value: Ruleset.NORMAL },
-  {
-    label: "strict",
-    value: Ruleset.STRICT,
-  },
+  { label: "strict", value: Ruleset.STRICT },
   {
     label: "hardcore",
     value: Ruleset.HARDCORE,
@@ -66,13 +62,21 @@ export default function AccountPage() {
     settingsContext.wordLength.value,
   );
 
+  const { data, isPending } = authClient.useSession();
+  const isAnonymous = !data || data.user.isAnonymous;
+
   const router = useRouter();
   const handleSignOut = async () => {
-    await signOut();
+    await authClient.signOut();
     router.push("/");
   };
-
-  const { data } = useSession();
+  const handleSignIn = () => {
+    authClient.signIn.social({
+      provider: "google",
+      callbackURL: "/account",
+      errorCallbackURL: "/account",
+    });
+  };
 
   const playerStatsState = usePlayerStatsState();
   const displayedStats = playerStatsState.getStats(
@@ -84,23 +88,30 @@ export default function AccountPage() {
   const [isStatsOpen, setIsStatsOpen] = useState(true);
   const [isAccountActionsOpen, setIsAccountActionsOpen] = useState(true);
 
-  const [hasHydrated, setHasHydrated] = useState(false);
-  useEffect(() => {
-    setHasHydrated(true);
-  }, []);
-
-  useEffect(() => {
-    if (hasHydrated && !data) router.push("/sign-in");
-  }, [hasHydrated, data, router]);
-
-  if (!hasHydrated || !data) return null;
+  if (isPending) return null;
 
   return (
     <div className={styles["account-page__scrollbar-wrapper"]}>
       <div className={styles["account-page__content"]}>
-        <h1 className={styles["account-page__header"]}>
-          {"Hello, " + data.user.name + "!"}
-        </h1>
+        {isAnonymous ? (
+          <div className={styles["account-page__sign-in"]}>
+            <h1 className={styles["account-page__header"]}>Hello, stranger!</h1>
+            <p className={styles["account-page__subheader"]}>
+              Sign in to persist your progress and stats across devices.
+            </p>
+            <button
+              className={styles["account-page__sign-in-button"]}
+              onClick={handleSignIn}
+            >
+              Continue with Google
+            </button>
+          </div>
+        ) : (
+          <h1 className={styles["account-page__header"]}>
+            Hello, {data.user.name}!
+          </h1>
+        )}
+
         <SettingsSection
           title="stats"
           isOpen={isStatsOpen}
@@ -110,7 +121,7 @@ export default function AccountPage() {
             <SettingsItem
               Icon={ControllerIcon}
               name="session"
-              description={"Filter stats by session."}
+              description="Filter stats by session."
               control={
                 <ButtonGroup
                   options={sessionOptions}
@@ -124,7 +135,7 @@ export default function AccountPage() {
             <SettingsItem
               Icon={StarIcon}
               name="ruleset"
-              description={"Filter stats by ruleset."}
+              description="Filter stats by ruleset."
               control={
                 <ButtonGroup
                   options={rulesetOptions}
@@ -171,17 +182,20 @@ export default function AccountPage() {
             </div>
           </div>
         </SettingsSection>
-        <SettingsSection
-          title="account actions"
-          isOpen={isAccountActionsOpen}
-          setIsOpen={setIsAccountActionsOpen}
-        >
-          <ActionButton
-            danger={true}
-            label="sign out"
-            onClick={() => handleSignOut()}
-          />
-        </SettingsSection>
+
+        {!isAnonymous && (
+          <SettingsSection
+            title="account actions"
+            isOpen={isAccountActionsOpen}
+            setIsOpen={setIsAccountActionsOpen}
+          >
+            <ActionButton
+              danger={true}
+              label="sign out"
+              onClick={handleSignOut}
+            />
+          </SettingsSection>
+        )}
       </div>
     </div>
   );

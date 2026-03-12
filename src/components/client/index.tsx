@@ -1,4 +1,5 @@
 export { default as ActionButton } from "./ActionButton";
+export { default as AuthProvider } from "./AuthProvider";
 export { default as Banner } from "./Banner";
 export { default as ButtonGroup } from "./ButtonGroup";
 export { default as Cell } from "./Cell";
@@ -6,7 +7,7 @@ export { default as ConfirmDialog } from "./ConfirmDialog";
 export { default as StorageNamespaceVersionGuard } from "./StorageNamespaceVersionGuard";
 export { default as Grid } from "./Grid";
 export { default as Keyboard } from "./Keyboard";
-export { default as ModeControls } from "./ModeControls";
+export { ModeControlsButton, ModeControlsOverlay } from "./ModeControls";
 export { default as NavBar } from "./NavBar";
 export { default as SettingsSection } from "./SettingsSection";
 export { default as SettingsSectionHeader } from "./SettingsSectionHeader";

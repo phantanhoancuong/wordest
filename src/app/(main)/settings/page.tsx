@@ -88,9 +88,7 @@ export default function SettingsPage() {
 
   const router = useRouter();
 
-  /**
-   * Sync the draft slider value with the persisted volume once hydrated.
-   */
+  // Sync the draft slider value with the persisted volume once hydrated.
   useEffect(() => {
     setDraftVolume(volume.value * 100);
     setHasHydrated(true);

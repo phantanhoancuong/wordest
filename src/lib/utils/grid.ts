@@ -98,6 +98,20 @@ export const initEmptyRenderGrid = (
   );
 };
 
+export const initEmptyRenderRow = (
+  colNum: number,
+  defaultStatus: CellStatusType = CellStatus.DEFAULT,
+  defaultAnimation: CellAnimationType = CellAnimation.NONE,
+  animationDelay = 0,
+) => {
+  return Array.from({ length: colNum }, () => ({
+    char: "",
+    status: defaultStatus,
+    animation: defaultAnimation,
+    animationDelay,
+  }));
+};
+
 /**
  * Generates an empty grid of DataCells.
  *

@@ -3,3 +3,4 @@ export * from "./enum";
 export * from "./evaluation";
 export * from "./grid";
 export * from "./storage";
+export * from "./strictConstraints";

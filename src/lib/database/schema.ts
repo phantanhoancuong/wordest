@@ -1,3 +1,4 @@
+import { GameState, Ruleset, WordLength } from "@/lib/constants";
 import { relations, sql } from "drizzle-orm";
 
 import {
@@ -23,6 +24,7 @@ export const user = sqliteTable("user", {
     .default(sql`(cast(unixepoch('subsecond') * 1000 as integer))`)
     .$onUpdate(() => /* @__PURE__ */ new Date())
     .notNull(),
+  isAnonymous: integer("is_anonymous", { mode: "boolean" }).default(false),
 });
 
 export const session = sqliteTable(
@@ -101,8 +103,28 @@ export const practiceGames = sqliteTable(
       .notNull()
       .references(() => user.id, { onDelete: "cascade" }),
 
-    ruleset: text("ruleset").notNull(),
-    wordLength: integer("word_length").notNull(),
+    ruleset: text("ruleset", {
+      enum: Object.values(Ruleset) as [string, ...string[]],
+    }).notNull(),
+    wordLength: integer("word_length").$type<WordLength>().notNull(),
+    targetWord: text("target_word").notNull(),
+    gameState: text("game_state", {
+      enum: Object.values(GameState) as [string, ...string[]],
+    })
+      .notNull()
+      .default(GameState.PLAYING),
+    lockedPositions: text("locked_positions", { mode: "json" })
+      .$type<Record<number, string>>()
+      .notNull()
+      .default({}),
+    minimumLetterCounts: text("minimum_letter_counts", { mode: "json" })
+      .$type<Record<string, number>>()
+      .notNull()
+      .default({}),
+    guesses: text("guesses", { mode: "json" })
+      .$type<string[]>()
+      .notNull()
+      .default([]),
   },
   (table) => ({
     pk: primaryKey({

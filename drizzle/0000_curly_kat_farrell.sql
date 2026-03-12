@@ -16,6 +16,20 @@ CREATE TABLE `account` (
 );
 --> statement-breakpoint
 CREATE INDEX `account_userId_idx` ON `account` (`user_id`);--> statement-breakpoint
+CREATE TABLE `practice_games` (
+	`user_id` text NOT NULL,
+	`ruleset` text NOT NULL,
+	`word_length` integer NOT NULL,
+	`target_word` text NOT NULL,
+	`game_state` text DEFAULT 'playing' NOT NULL,
+	`locked_positions` text DEFAULT '{}' NOT NULL,
+	`minimum_letter_counts` text DEFAULT '{}' NOT NULL,
+	`guesses` text DEFAULT '[]' NOT NULL,
+	PRIMARY KEY(`user_id`, `ruleset`, `word_length`),
+	FOREIGN KEY (`user_id`) REFERENCES `user`(`id`) ON UPDATE no action ON DELETE cascade
+);
+--> statement-breakpoint
+CREATE INDEX `practice_games_user_idx` ON `practice_games` (`user_id`);--> statement-breakpoint
 CREATE TABLE `session` (
 	`id` text PRIMARY KEY NOT NULL,
 	`expires_at` integer NOT NULL,
@@ -37,7 +51,8 @@ CREATE TABLE `user` (
 	`email_verified` integer DEFAULT false NOT NULL,
 	`image` text,
 	`created_at` integer DEFAULT (cast(unixepoch('subsecond') * 1000 as integer)) NOT NULL,
-	`updated_at` integer DEFAULT (cast(unixepoch('subsecond') * 1000 as integer)) NOT NULL
+	`updated_at` integer DEFAULT (cast(unixepoch('subsecond') * 1000 as integer)) NOT NULL,
+	`is_anonymous` integer DEFAULT false
 );
 --> statement-breakpoint
 CREATE UNIQUE INDEX `user_email_unique` ON `user` (`email`);--> statement-breakpoint

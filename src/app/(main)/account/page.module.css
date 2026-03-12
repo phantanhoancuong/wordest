@@ -4,24 +4,43 @@
   animation: fadeIn 500ms ease forwards;
   margin-bottom: 3dvh;
 }
+
 .account-page__scrollbar-wrapper {
   height: 100%;
   width: 100%;
   padding: 0 10%;
-  overflow-y: auto;
+  overflow-y: scroll;
   overflow-x: hidden;
+  scrollbar-gutter: stable;
 }
+
 .account-page__header {
   text-overflow: ellipsis;
   overflow: hidden;
   white-space: nowrap;
   flex-shrink: 0;
+  font-size: calc(var(--item-font-scale) * 1.5rem);
+  margin-bottom: 2dvh;
 }
-@keyframes fadeIn {
-  to {
-    opacity: 1;
-  }
+
+.account-page__sign-in {
+  display: flex;
+  flex-direction: column;
+  gap: calc(var(--item-font-scale) * 0.5rem);
+  margin-bottom: 2dvh;
 }
+
+.account-page__subheader {
+  font-size: calc(var(--item-font-scale) * 1rem);
+  opacity: 0.7;
+}
+
+.account-page__sign-in-button {
+  font-size: calc(var(--item-font-scale) * 1rem);
+  margin-top: calc(var(--item-font-scale) * 0.5rem);
+  align-self: flex-start;
+}
+
 .account-page__options {
   width: 100%;
   display: flex;
@@ -29,9 +48,16 @@
   margin-top: 2dvh;
   gap: 2dvh;
 }
+
 .stats__container {
   display: flex;
   flex-direction: column;
   gap: calc(var(--item-font-scale) * 0.5rem);
   font-size: calc(var(--item-font-scale) * 1rem);
+}
+
+@keyframes fadeIn {
+  to {
+    opacity: 1;
+  }
 }

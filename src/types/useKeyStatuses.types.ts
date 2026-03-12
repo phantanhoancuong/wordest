@@ -1,7 +1,8 @@
-import { CellStatusType } from "@/types/cell";
+import { CellStatus } from "@/lib/constants";
 
 export interface UseKeyStatusesReturn {
-  keyStatuses: Partial<Record<string, CellStatusType>>;
-  updateKeyStatuses: (guess: string, statuses: Array<CellStatusType>) => void;
+  keyStatuses: Partial<Record<string, CellStatus>>;
+  hydrateKeyStatuses: (guesses: string[], allStatuses: CellStatus[][]) => void;
+  updateKeyStatuses: (guess: string, statuses: CellStatus[]) => void;
   resetKeyStatuses: () => void;
 }

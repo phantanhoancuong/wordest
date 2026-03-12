@@ -1,8 +1,11 @@
 .grid {
-  --short-side: min(100cqw, 65cqh);
-  --grid-cell-size: calc(
-    var(--short-side) / max(var(--layout-rows), var(--layout-cols))
+  --cell-size-from-width: calc(100cqw / var(--layout-cols));
+  --cell-size-from-height: calc(65cqh / var(--layout-rows));
+  --grid-cell-size: min(
+    var(--cell-size-from-width),
+    var(--cell-size-from-height)
   );
+
   --cell-font-scale: 0.5;
   --cell-gap-scale: 0.15;
   --cell-border-scale: 0.035;

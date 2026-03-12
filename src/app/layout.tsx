@@ -1,6 +1,7 @@
 import { SettingsProvider } from "@/app/contexts/SettingsContext";
 
 import {
+  AuthProvider,
   StorageNamespaceVersionGuard,
   ThemeProvider,
 } from "@/components/client";
@@ -30,11 +31,13 @@ export default function RootLayout({ children }) {
         <script dangerouslySetInnerHTML={{ __html: themeInitScript }} />
       </head>
       <body>
-        <SettingsProvider>
-          <ThemeProvider />
-          <StorageNamespaceVersionGuard />
-          {children}
-        </SettingsProvider>
+        <AuthProvider>
+          <SettingsProvider>
+            <ThemeProvider />
+            <StorageNamespaceVersionGuard />
+            {children}
+          </SettingsProvider>
+        </AuthProvider>
       </body>
     </html>
   );

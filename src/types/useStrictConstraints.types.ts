@@ -1,10 +1,7 @@
-import { CellStatusType } from "@/types/cell";
-
 export interface UseStrictConstraintsReturn {
-  checkValidStrictGuess: (guess: string) => {
-    isValid: boolean;
-    message: string;
-  };
-  updateStrictConstraints: (guess: string, statuses: CellStatusType[]) => void;
+  syncStrictConstraints: (
+    lockedPositions: Record<number, string>,
+    minimumLetterCounts: Record<string, number>,
+  ) => void;
   resetStrictConstraints: () => void;
 }
