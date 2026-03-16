@@ -1,37 +1,21 @@
 import { headers } from "next/headers";
-
-import { and, eq } from "drizzle-orm";
-
 import { auth } from "@/lib/auth/auth";
-import { database } from "@/lib/database/client";
-
+import { WORD_LISTS } from "@/types/wordList.types";
 import { ATTEMPTS, GameState, Ruleset, WordLength } from "@/lib/constants";
-
+import { getDailyGame } from "@/lib/database/queries/dailyGames";
 import {
   checkValidStrictGuess,
-  evaluateGuess,
-  updateStrictConstraints,
+  getDateString,
+  getDaysSinceEpoch,
 } from "@/lib/utils";
-import { getPracticeGame } from "@/lib/database/queries/practiceGames";
-import { practiceGames } from "@/lib/database/schema";
+import { generateDailyWord } from "@/lib/words/generateWord";
 
-import { WORD_LISTS } from "@/types/wordList.types";
+import { evaluateGuess } from "@/lib/utils";
+import { updateStrictConstraints } from "@/lib/utils";
+import { database } from "@/lib/database/client";
+import { dailyGames } from "@/lib/database/schema";
+import { eq, and } from "drizzle-orm";
 
-/**
- * Validate a guess and update the practice game state in the database.
- *
- * With strict constraints enabled, the guess is first checked against locked positions and minimum letter counts before evaluation.
- * If the strict check fails, the game state is not updated.
- *
- * When the game ends (win or loss), returns the target word so the client can reveal it in the reference row.
- *
- * @param userId - The ID of the user submitting the guess.
- * @param ruleset - The ruleset of the active game.
- * @param wordLength - The word length of the active game.
- * @param guess - The guessed word.
- * @param isStrict - Whether strict constraints should be enforced.
- * @returns An object containing 'isValid', 'message', and evaluated 'statuses'.
- */
 async function validateAndUpdate(
   userId: string,
   ruleset: Ruleset,
@@ -39,9 +23,19 @@ async function validateAndUpdate(
   guess: string,
   isStrict: boolean,
 ) {
-  const game = await getPracticeGame(userId, ruleset, wordLength);
+  const { game, isNewGame, wasIncomplete } = await getDailyGame(
+    userId,
+    ruleset,
+    wordLength,
+  );
 
-  /** If strict validation fails, 'isValid' is false, 'message' contains the violation reason, and 'statuses' is null.*/
+  if (isNewGame) {
+    let message = null;
+    if (wasIncomplete)
+      message = `New game fetched for ${getDateString({ format: "display" })}`;
+    return { isValid: false, message, data: null };
+  }
+
   if (isStrict) {
     const { isValid, message } = checkValidStrictGuess(
       guess,
@@ -51,10 +45,12 @@ async function validateAndUpdate(
     if (!isValid) return { isValid: false, message, data: null };
   }
 
-  const statuses = evaluateGuess(guess, game.targetWord);
+  const targetWord = generateDailyWord(ruleset, wordLength);
+
+  const statuses = evaluateGuess(guess, targetWord);
   const updatedGuesses = [...game.guesses, guess];
 
-  const isWon = guess === game.targetWord;
+  const isWon = guess === targetWord;
   const isLost = !isWon && updatedGuesses.length >= ATTEMPTS;
   const updatedGameState = isWon
     ? GameState.WON
@@ -62,7 +58,6 @@ async function validateAndUpdate(
       ? GameState.LOST
       : GameState.PLAYING;
 
-  // Spreading an empty object is a no-op, so we avoid duplicating the database update logic.
   const strictUpdates = isStrict
     ? updateStrictConstraints(
         guess,
@@ -71,8 +66,9 @@ async function validateAndUpdate(
         game.lockedPositions,
       )
     : null;
+
   await database
-    .update(practiceGames)
+    .update(dailyGames)
     .set({
       guesses: updatedGuesses,
       gameState: updatedGameState,
@@ -80,9 +76,9 @@ async function validateAndUpdate(
     })
     .where(
       and(
-        eq(practiceGames.userId, userId),
-        eq(practiceGames.ruleset, ruleset),
-        eq(practiceGames.wordLength, wordLength),
+        eq(dailyGames.userId, userId),
+        eq(dailyGames.ruleset, ruleset),
+        eq(dailyGames.wordLength, wordLength),
       ),
     );
 
@@ -94,27 +90,11 @@ async function validateAndUpdate(
       gameState: updatedGameState,
       lockedPositions: strictUpdates?.lockedPositions ?? null,
       minimumLetterCounts: strictUpdates?.minimumLetterCounts ?? null,
-      targetWord: isWon || isLost ? game.targetWord : null,
+      targetWord: isWon || isLost ? targetWord : null,
     },
   };
 }
 
-/**
- * POST /api/practice/validate
- *
- * Validate a practice game guess and update the game state.
- *
- * Steps:
- * 1. Authenticate the session.
- * 2. Validate the guess exists in the word list for the given length.
- * 3. If strict mode, additionally validate against locked positions and mininum letter counts before updating.
- * 4. Persist the updated game state and return evaluated cell statuses.
- *
- * Player-facing errors (NOT_IN_WORD_LIST and STRICT_VIOLATION) are returned with a human-readable message
- * for dipslay in the UI. Server errors are logged and returned without exposing internal details.
- *
- * @returns '{ statuses } on success, or '{ error } with an a status code on failure.
- */
 export async function POST(req: Request) {
   try {
     const session = await auth.api.getSession({ headers: await headers() });
@@ -129,13 +109,6 @@ export async function POST(req: Request) {
     const { ruleset, wordLength, guess, isStrict } = await req.json();
 
     // Checking for a malformed request from the client.
-    if (!ruleset || !wordLength || !guess || isStrict === undefined) {
-      console.error("Malformed request.");
-      return Response.json({ error: "BAD_REQUEST" }, { status: 400 });
-    }
-
-    // Look up the word list for the given guess length.
-    // If none exists, the client sent an unsupported word length.
     const { answers, allowed } = WORD_LISTS[guess.length];
     if (!answers || !allowed) {
       console.error(`Invalid word length received: ${guess.length}`);
@@ -155,11 +128,9 @@ export async function POST(req: Request) {
       isStrict,
     );
 
-    // Strict constraints violation.
     if (!result.isValid)
       return Response.json({ message: result.message }, { status: 422 });
 
-    // Return the processed data so the client can update the grid and animations.
     return Response.json({ data: result.data });
   } catch (err) {
     console.error(err);

@@ -1,7 +1,9 @@
-import { Ruleset, SessionType, WordLength } from "@/lib/constants";
-import { WORD_LISTS, SupportedWordLength } from "@/types/wordList.types";
+import "server-only";
 
-import { getTodayDateIndex } from "@/lib/utils";
+import { Ruleset, WordLength } from "@/lib/constants";
+import { WORD_LISTS } from "@/types/wordList.types";
+
+import { getDaysSinceEpoch } from "@/lib/utils";
 
 /**
  * Creates a seeded PRNG using the Mulberry32 algorithm.
@@ -20,6 +22,33 @@ function mulberry32(seed: number) {
     r ^= r + Math.imul(r ^ (r >>> 7), r | 61);
     return ((r ^ (r >>> 14)) >>> 0) / 4294967296;
   };
+}
+
+export function generateDailyWord(ruleset: Ruleset, wordLength: WordLength) {
+  const list = WORD_LISTS[wordLength];
+
+  if (!list || list.answers.length === 0)
+    throw new Error(`Invalid word length: ${wordLength}`);
+
+  const dateIndex = getDaysSinceEpoch();
+  const answersLength = list.answers.length;
+  const cycleIndex = Math.floor(dateIndex / answersLength);
+  const wordIndex = dateIndex % answersLength;
+
+  const seedBase = `${cycleIndex} ${ruleset} ${wordLength}`;
+  let seed = 0;
+  for (let i = 0; i < seedBase.length; i++)
+    seed = (seed * 31 + seedBase.charCodeAt(i)) >>> 0;
+
+  const rng = mulberry32(seed);
+  const shuffledList = [...list.answers];
+
+  for (let i = shuffledList.length - 1; i > 0; --i) {
+    const j = Math.floor(rng() * (i + 1));
+    [shuffledList[i], shuffledList[j]] = [shuffledList[j], shuffledList[i]];
+  }
+
+  return shuffledList[wordIndex];
 }
 
 export function generatePracticeWord(wordLength: WordLength) {

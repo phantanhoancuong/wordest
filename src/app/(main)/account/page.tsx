@@ -23,7 +23,7 @@ import {
 } from "@/components/client";
 import { SettingsItem } from "@/components/server";
 
-import { dateIndexToDateString } from "@/lib/utils";
+import { getDateString } from "@/lib/utils";
 
 import { ControllerIcon, RulerIcon, StarIcon } from "@/assets/icons";
 import styles from "@/app/(main)/account/page.module.css";
@@ -174,11 +174,17 @@ export default function AccountPage() {
             </div>
             <div className={styles["stats__content"]}>
               Last completed date:{" "}
-              {dateIndexToDateString(displayedStats.lastCompletedDateIndex)}
+              {getDateString({
+                daysSinceEpoch: displayedStats.lastCompletedDateIndex,
+                format: "display",
+              })}
             </div>
             <div className={styles["stats__content"]}>
               Last won date:{" "}
-              {dateIndexToDateString(displayedStats.lastWonDateIndex)}
+              {getDateString({
+                daysSinceEpoch: displayedStats.lastWonDateIndex,
+                format: "display",
+              })}
             </div>
           </div>
         </SettingsSection>

@@ -1,3 +1,5 @@
+import "server-only";
+
 import { and, eq } from "drizzle-orm";
 
 import { generatePracticeWord } from "@/lib/words/generateWord";

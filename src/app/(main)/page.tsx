@@ -88,15 +88,16 @@ export default function Home() {
               layoutCols={gameGrid.colNum}
             />
           </div>
-          <div className={styles["game-board__reference-grid"]}>
-            {renderReferenceGrid ? (
-              <Grid
-                grid={referenceRow.row}
-                onAnimationEnd={referenceRow.handleAnimationEnd}
-                layoutRows={gameGrid.rowNum}
-                layoutCols={gameGrid.colNum}
-              />
-            ) : null}
+          <div
+            className={styles["game-board__reference-grid"]}
+            style={{ visibility: renderReferenceGrid ? "visible" : "hidden" }}
+          >
+            <Grid
+              grid={referenceRow.row}
+              onAnimationEnd={referenceRow.handleAnimationEnd}
+              layoutRows={gameGrid.rowNum}
+              layoutCols={gameGrid.colNum}
+            />
           </div>
         </div>
       </div>

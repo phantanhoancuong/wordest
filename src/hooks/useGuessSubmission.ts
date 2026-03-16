@@ -5,6 +5,7 @@ import {
   CellAnimation,
   CellStatus,
   GameState,
+  SessionType,
 } from "@/lib/constants";
 
 import { CellStatusType, RenderCell } from "@/types/cell";
@@ -15,7 +16,7 @@ import { UseGameStateReturn } from "@/types/useGameState.types";
 import { useGameGridReturn } from "@/types/useGameGrid.types";
 import { useReferenceRowReturn } from "@/types/useReferenceRow.types";
 import { Ruleset, WordLength } from "@/lib/constants";
-import { MutableRefObject, RefObject } from "react";
+import { RefObject } from "react";
 
 /**
  * Hook that handles guess submission, validation, and post-submission updates.
@@ -47,6 +48,7 @@ import { MutableRefObject, RefObject } from "react";
  */
 export const useGuessSubmission = (
   isStrict: boolean,
+  activeSession: SessionType,
   ruleset: Ruleset,
   wordLength: WordLength,
   animationSpeedMultiplier: number,
@@ -192,7 +194,12 @@ export const useGuessSubmission = (
       .map((cell: RenderCell) => cell.char)
       .join("");
 
-    const validationResult = await fetch("/api/practice/validate", {
+    const endPoint =
+      activeSession === SessionType.DAILY
+        ? "/api/daily/validate"
+        : "/api/practice/validate";
+
+    const validationResult = await fetch(endPoint, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ guess, ruleset, wordLength, isStrict }),

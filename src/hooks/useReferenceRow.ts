@@ -8,6 +8,7 @@ import { useReferenceRowReturn } from "@/types/useReferenceRow.types";
 import { useLatest } from "./useLatest";
 
 import { initEmptyRenderRow } from "@/lib/utils";
+import { GameState } from "@/lib/constants";
 
 /**
  * Manage the reference row state, displaying correctly guessed letters.
@@ -72,23 +73,51 @@ export const useReferenceRow = (
    * Scan all previous guesses and populate the reference row with any letters that were marked CORRECT.
    * Once a position shows CORRECT, it won't be overwritten by later guesses.
    *
+   * If targetWord and gameState are provided (game is complete), reveal the full target word instead.
+   *
    * Used during game initialization to restore the reference row's accumulated statuses.
    *
    * @param guesses - Array of previously submitted guess strings.
    * @param allStatuses - 2D array of cell statuses for each guess.
    * @param wordLength - Length of each word (column count).
+   * @param targetWord - Optional target word to reveal (for completed games).
+   * @param gameState - Optional game state (to determine if won or lost).
    */
   const hydrateRow = (
     guesses: string[],
     allStatuses: CellStatus[][],
     wordLength: WordLength,
+    targetWord?: string | null,
+    gameState?: GameState,
   ) => {
+    // If game is complete and we have the target word, reveal it
+    if (
+      targetWord &&
+      (gameState === GameState.WON || gameState === GameState.LOST)
+    ) {
+      const status =
+        gameState === GameState.WON ? CellStatus.CORRECT : CellStatus.WRONG;
+
+      const revealedRow = targetWord.split("").map((char) => ({
+        char,
+        status,
+        animation: defaultAnimation.current,
+        animationDelay: defaultAnimationDelay.current,
+        animationKey: 0,
+      }));
+
+      setRow(revealedRow);
+      return;
+    }
+
+    // Otherwise, hydrate from guesses as before
     const hydratedRow = initEmptyRenderRow(
       colNum,
       defaultStatus.current,
       defaultAnimation.current,
       defaultAnimationDelay.current,
     );
+
     for (let i = 0; i < guesses.length; ++i) {
       for (let j = 0; j < wordLength; ++j) {
         if (hydratedRow[j].status === CellStatus.CORRECT) continue;
@@ -171,6 +200,7 @@ export const useReferenceRow = (
           ...cell,
           animation: defaultAnimation.current,
           animationDelay: defaultAnimationDelay.current,
+          animationKey: 0,
         };
       });
     });

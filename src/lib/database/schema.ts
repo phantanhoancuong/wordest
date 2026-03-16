@@ -134,10 +134,49 @@ export const practiceGames = sqliteTable(
   }),
 );
 
+export const dailyGames = sqliteTable(
+  "daily_games",
+  {
+    userId: text("user_id")
+      .notNull()
+      .references(() => user.id, { onDelete: "cascade" }),
+
+    ruleset: text("ruleset", {
+      enum: Object.values(Ruleset) as [string, ...string[]],
+    }).notNull(),
+    wordLength: integer("word_length").$type<WordLength>().notNull(),
+    date: text("date").notNull(),
+    gameState: text("game_state", {
+      enum: Object.values(GameState) as [string, ...string[]],
+    })
+      .notNull()
+      .default(GameState.PLAYING),
+    lockedPositions: text("locked_positions", { mode: "json" })
+      .$type<Record<number, string>>()
+      .notNull()
+      .default({}),
+    minimumLetterCounts: text("minimum_letter_counts", { mode: "json" })
+      .$type<Record<string, number>>()
+      .notNull()
+      .default({}),
+    guesses: text("guesses", { mode: "json" })
+      .$type<string[]>()
+      .notNull()
+      .default([]),
+  },
+  (table) => ({
+    pk: primaryKey({
+      columns: [table.userId, table.ruleset, table.wordLength],
+    }),
+    userIdx: index("daily_games_user_idx").on(table.userId),
+  }),
+);
+
 export const userRelations = relations(user, ({ many }) => ({
   sessions: many(session),
   accounts: many(account),
   practiceGames: many(practiceGames),
+  dailyGames: many(dailyGames),
 }));
 
 export const sessionRelations = relations(session, ({ one }) => ({
@@ -157,6 +196,13 @@ export const accountRelations = relations(account, ({ one }) => ({
 export const practiceGamesRelations = relations(practiceGames, ({ one }) => ({
   user: one(user, {
     fields: [practiceGames.userId],
+    references: [user.id],
+  }),
+}));
+
+export const dailyGamesRelations = relations(dailyGames, ({ one }) => ({
+  user: one(user, {
+    fields: [dailyGames.userId],
     references: [user.id],
   }),
 }));

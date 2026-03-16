@@ -1,6 +1,6 @@
 import { RefObject } from "react";
 
-import { CellStatus, WordLength } from "@/lib/constants";
+import { CellStatus, GameState, WordLength } from "@/lib/constants";
 
 import { RenderCell } from "@/types/cell";
 
@@ -12,6 +12,8 @@ export interface useReferenceRowReturn {
     guesses: string[],
     allStatuses: CellStatus[][],
     wordLegth: WordLength,
+    targetWord?: string | null,
+    gameState?: GameState,
   ) => void;
   updateRow: (newRow: Partial<RenderCell[]>) => void;
   resetRow: () => void;

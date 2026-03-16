@@ -5,7 +5,6 @@ import {
   getPracticeGame,
   restartPracticeGame,
 } from "@/lib/database/queries/practiceGames";
-import { evaluateGuess } from "@/lib/utils";
 import { GameState } from "@/lib/constants";
 
 export async function POST(req: Request) {

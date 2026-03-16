@@ -13,6 +13,7 @@ import {
   CellStatus,
   GameState,
   Ruleset,
+  SessionType,
 } from "@/lib/constants";
 
 import { UseGameReturn } from "@/types/useGame.types";
@@ -32,16 +33,14 @@ import {
   useStrictConstraints,
   useToasts,
 } from "@/hooks";
-import { set } from "better-auth/*";
-import strict from "assert/strict";
 
 const LETTER_REGEX = /^[A-Z]$/;
 
 /**
- * Core game hook that orchestrates all game logic and statae management.
+ * Core game hook that orchestrates all game logic and state management.
  *
- * Coordinate the game grid, reference row, keyboard input, animations, sound effects, and game state transitions.
- * Handle initialization, hydration from the server, input validation, guess submission, and game restart flow.
+ * Coordinates the game grid, reference row, keyboard input, animations, sound effects, and game state transitions.
+ * Handles initialization, hydration from the server, input validation, guess submission, and game restart flow.
  *
  * On mount, fetch the current game state from the server
  * and hydrate all subsystems (grid, cursor, key statuses) before unlocking input.
@@ -130,7 +129,7 @@ export const useGame = (): UseGameReturn => {
    * The reference row is always a single row so rowIndex is normalized to 0.
    *
    * @param rowIndex - Always 0 (ignored).
-   * @param colIndex - Index of the column on the animated cell.
+   * @param colIndex - Index of the column of the animated cell.
    */
   const handleReferenceRowAnimationEnd = (colIndex: number): void => {
     const rowIndex = 0;
@@ -189,26 +188,25 @@ export const useGame = (): UseGameReturn => {
   );
 
   /**
-   * Initialize game state on mount by fetching current session from the server.
+   * Initialize practice game state on mount by fetching current session from the server.
    *
-   * Lock input, request game data, hydrate grid/cursor/keyboard state, etc.
+   * Lock input, request game data, hydrate grid/cursor/keyboard state,
    * then unlock input. Re-run when session type, ruleset, or word length changes.
-   *
-   * TODO:
-   * Currently, only the practice mode is implemented, I will implement the daily mode soon.
    */
   useEffect(() => {
-    // if (activeSessionController.activeSession !== SessionType.PRACTICE) return;
+    if (activeSessionController.activeSession !== SessionType.PRACTICE) return;
     if (isPending || !session?.user) return;
 
     const initPracticeGame = async () => {
+      setIsReferenceRowRevealing(false);
+      targetWordRef.current = null;
       isInputLocked.current = true;
       try {
         const initGameResult = await fetch("/api/practice/start", {
           method: "POST",
+          headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             ruleset: settingsContextController.ruleset.value,
-            headers: { "Content-Type": "application/json" },
             wordLength: settingsContextController.wordLength.value,
           }),
         });
@@ -218,6 +216,7 @@ export const useGame = (): UseGameReturn => {
           return;
         }
         const initGameData = await initGameResult.json();
+
         gameGrid.hydrateGrid(
           initGameData.guesses,
           initGameData.allStatuses,
@@ -227,6 +226,8 @@ export const useGame = (): UseGameReturn => {
           initGameData.guesses,
           initGameData.allStatuses,
           settingsContextController.wordLength.value,
+          initGameData.targetWord,
+          initGameData.gameState,
         );
         cursorController.hydrateCursor(initGameData.guesses.length);
         keyStatusesController.hydrateKeyStatuses(
@@ -237,11 +238,22 @@ export const useGame = (): UseGameReturn => {
           initGameData.lockedPositions,
           initGameData.minimumLetterCounts,
         );
+        gameStateController.setGameState(initGameData.gameState);
+
+        // If game is complete, set up reference row reveal state
+        if (
+          initGameData.targetWord &&
+          (initGameData.gameState === GameState.WON ||
+            initGameData.gameState === GameState.LOST)
+        ) {
+          setIsReferenceRowRevealing(true);
+          targetWordRef.current = initGameData.targetWord;
+        }
 
         isInputLocked.current = false;
         setHasHydrated(true);
       } catch (err) {
-        console.error("Network error during game initialization", err);
+        console.error("Network error during game initialization.", err);
         isInputLocked.current = false;
       }
     };
@@ -255,9 +267,95 @@ export const useGame = (): UseGameReturn => {
     settingsContextController.wordLength.value,
   ]);
 
+  /**
+   * Initialize daily game state on mount by fetching current session from the server.
+   *
+   * Lock input, request game data, hydrate grid/cursor/keyboard state,
+   * then unlock input. Re-run when session type, ruleset, or word length changes.
+   */
+  useEffect(() => {
+    if (activeSessionController.activeSession !== SessionType.DAILY) return;
+    if (isPending || !session?.user) return;
+
+    const initDailyGame = async () => {
+      setIsReferenceRowRevealing(false);
+      targetWordRef.current = null;
+      isInputLocked.current = true;
+      try {
+        const initGameResult = await fetch("/api/daily/start", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            ruleset: settingsContextController.ruleset.value,
+            wordLength: settingsContextController.wordLength.value,
+          }),
+        });
+
+        if (!initGameResult.ok) {
+          isInputLocked.current = false;
+          return;
+        }
+        const initGameData = await initGameResult.json();
+
+        gameGrid.hydrateGrid(
+          initGameData.guesses,
+          initGameData.allStatuses,
+          settingsContextController.wordLength.value,
+        );
+        referenceRow.hydrateRow(
+          initGameData.guesses,
+          initGameData.allStatuses,
+          settingsContextController.wordLength.value,
+          initGameData.targetWord,
+          initGameData.gameState,
+        );
+        cursorController.hydrateCursor(initGameData.guesses.length);
+        keyStatusesController.hydrateKeyStatuses(
+          initGameData.guesses,
+          initGameData.allStatuses,
+        );
+        strictConstraintsController.syncStrictConstraints(
+          initGameData.lockedPositions,
+          initGameData.minimumLetterCounts,
+        );
+        gameStateController.setGameState(initGameData.gameState);
+
+        // If game is complete, set up reference row reveal state
+        if (
+          initGameData.targetWord &&
+          (initGameData.gameState === GameState.WON ||
+            initGameData.gameState === GameState.LOST)
+        ) {
+          setIsReferenceRowRevealing(true);
+          targetWordRef.current = initGameData.targetWord;
+        }
+
+        // Show new game message if applicable
+        if (initGameData.message) {
+          toastsController.addToast(initGameData.message);
+        }
+
+        isInputLocked.current = false;
+        setHasHydrated(true);
+      } catch (err) {
+        console.error("Network error during game initialization.", err);
+        isInputLocked.current = false;
+      }
+    };
+
+    initDailyGame();
+  }, [
+    session?.user?.id,
+    isPending,
+    activeSessionController.activeSession,
+    settingsContextController.ruleset.value,
+    settingsContextController.wordLength.value,
+  ]);
+
   const submitGuess = useGuessSubmission(
     settingsContextController.ruleset.value === Ruleset.STRICT ||
       settingsContextController.ruleset.value === Ruleset.HARDCORE,
+    activeSessionController.activeSession,
     settingsContextController.ruleset.value,
     settingsContextController.wordLength.value,
     animationSpeedMultiplier,
@@ -269,7 +367,6 @@ export const useGame = (): UseGameReturn => {
     gameStateController,
     strictConstraintsController,
     toastsController.addToast,
-
     keyStatusesController.updateKeyStatuses,
     targetWordRef,
   );
@@ -338,7 +435,7 @@ export const useGame = (): UseGameReturn => {
    * Restart the current game by fetching a new word from the server.
    *
    * Only allowed when the game is not in PLAYING state.
-   * Lock input, requests a new game, reset all subsystems (grid, cursor, keyboard, constraints, toasts), then unlock input.
+   * Lock input, request a new game, reset all subsystems (grid, cursor, keyboard, constraints, toasts), then unlock input.
    */
   const restartGame = async () => {
     if (gameStateController.state === GameState.PLAYING) {
