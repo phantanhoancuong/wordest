@@ -1,6 +1,6 @@
 "use client";
 
-import { RenderCell } from "@/types/cell";
+import { RenderCell } from "@/types/cell.types";
 import { UseGameReturn } from "@/types/useGame.types";
 
 import Cell from "@/components/client/Cell";

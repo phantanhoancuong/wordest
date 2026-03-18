@@ -7,7 +7,7 @@ import {
   WordLength,
 } from "@/lib/constants";
 
-import { RenderCell } from "@/types/cell";
+import { RenderCell } from "@/types/cell.types";
 import { useGameGridReturn } from "@/types/useGameGrid.types";
 
 import { useLatest } from "@/hooks/useLatest";

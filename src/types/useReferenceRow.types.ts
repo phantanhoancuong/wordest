@@ -2,7 +2,7 @@ import { RefObject } from "react";
 
 import { CellStatus, GameState, WordLength } from "@/lib/constants";
 
-import { RenderCell } from "@/types/cell";
+import { RenderCell } from "@/types/cell.types";
 
 export interface useReferenceRowReturn {
   colNum: number;

@@ -5,6 +5,14 @@ import { getPracticeGame } from "@/lib/database/queries/practiceGames";
 import { evaluateGuess } from "@/lib/utils";
 import { GameState } from "@/lib/constants";
 
+/**
+ * POST /api/practice/hydrate
+ *
+ * Hydrate the game states when a new user/ruleset/word length combination is selected by fetching a stored game from the database.
+ *
+ * @returns '{ error }' with the appropriate status code if failed internally. If it failed because of the player's action,
+ * a message will also be included. Return '{ data }' containing game states to hydrate, if no existing game is found 'data' is null.
+ */
 export async function POST(req: Request) {
   try {
     const session = await auth.api.getSession({ headers: await headers() });
@@ -26,17 +34,23 @@ export async function POST(req: Request) {
 
     const game = await getPracticeGame(session.user.id, ruleset, wordLength);
 
+    // If no game is found, return null.
+    if (game === null) return Response.json({ data: null });
+
     const allStatuses = game.guesses.map((guess: string) =>
       evaluateGuess(guess, game.targetWord),
     );
 
     return Response.json({
-      allStatuses,
-      guesses: game.guesses,
-      gameState: game.gameState,
-      lockedPositions: game.lockedPositions,
-      minimumLetterCounts: game.minimumLetterCounts,
-      targetWord: game.gameState !== GameState.PLAYING ? game.targetWord : null,
+      data: {
+        allStatuses,
+        guesses: game.guesses,
+        gameState: GameState,
+        lockedPositions: game.lockedPositions,
+        minimumLetterCounts: game.minimumLetterCounts,
+        targetWord:
+          game.gameState !== GameState.PLAYING ? game.targetWord : null,
+      },
     });
   } catch (err) {
     console.error(err);

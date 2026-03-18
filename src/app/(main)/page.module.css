@@ -89,6 +89,15 @@
   margin: 0 10px;
 }
 
+.home-page__error {
+  font-size: 3em;
+  display: flex;
+  text-align: center;
+  justify-self: center;
+  width: 80%;
+  color: red;
+}
+
 @keyframes fadeIn {
   to {
     opacity: 1;

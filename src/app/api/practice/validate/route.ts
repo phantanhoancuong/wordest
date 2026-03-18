@@ -12,7 +12,10 @@ import {
   evaluateGuess,
   updateStrictConstraints,
 } from "@/lib/utils";
-import { getPracticeGame } from "@/lib/database/queries/practiceGames";
+import {
+  getOrCreatePracticeGame,
+  getPracticeGame,
+} from "@/lib/database/queries/practiceGames";
 import { practiceGames } from "@/lib/database/schema";
 
 import { WORD_LISTS } from "@/types/wordList.types";
@@ -39,7 +42,7 @@ async function validateAndUpdate(
   guess: string,
   isStrict: boolean,
 ) {
-  const game = await getPracticeGame(userId, ruleset, wordLength);
+  const game = await getOrCreatePracticeGame(userId, ruleset, wordLength);
 
   /** If strict validation fails, 'isValid' is false, 'message' contains the violation reason, and 'statuses' is null.*/
   if (isStrict) {
@@ -102,7 +105,7 @@ async function validateAndUpdate(
 /**
  * POST /api/practice/validate
  *
- * Validate a practice game guess and update the game state.
+ * Validate a practice game guess and update the game state (create the game if necessary).
  *
  * Steps:
  * 1. Authenticate the session.

@@ -5,7 +5,7 @@ import {
   CellStatusType,
   DataCell,
   RenderCell,
-} from "@/types/cell";
+} from "@/types/cell.types";
 
 /**
  * Convert a 2D grid of DataCell to a 2d grid of RenderCell[][].

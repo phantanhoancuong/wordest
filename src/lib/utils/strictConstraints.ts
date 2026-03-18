@@ -1,6 +1,6 @@
 import { CellStatus } from "@/lib/constants";
 
-import { CellStatusType } from "@/types/cell";
+import { CellStatusType } from "@/types/cell.types";
 
 import { countLetter } from "@/lib/utils/evaluation";
 

@@ -2,7 +2,7 @@ import { useRef, useState } from "react";
 
 import { CellAnimation, CellStatus, WordLength } from "@/lib/constants";
 
-import { RenderCell } from "@/types/cell";
+import { RenderCell } from "@/types/cell.types";
 import { useReferenceRowReturn } from "@/types/useReferenceRow.types";
 
 import { useLatest } from "./useLatest";

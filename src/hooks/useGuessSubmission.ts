@@ -8,7 +8,7 @@ import {
   SessionType,
 } from "@/lib/constants";
 
-import { CellStatusType, RenderCell } from "@/types/cell";
+import { CellStatusType, RenderCell } from "@/types/cell.types";
 import { UseAnimationTrackerReturn } from "@/types/useAnimationTracker.types";
 import { UseCursorControllerReturn } from "@/types/useCursorController.types";
 import { UseStrictConstraintsReturn } from "@/types/useStrictConstraints.types";
@@ -62,7 +62,7 @@ export const useGuessSubmission = (
   addToast: (message: string) => void,
   updateKeyStatuses: (guess: string, statuses: CellStatusType[]) => void,
   targetWordRef: RefObject<string | null>,
-): (() => void) => {
+): (() => Promise<{ isServerError: boolean; message: string | null }>) => {
   /**
    * Handle an invalid guess by showing an error and triggering shake animation.
    *
@@ -184,10 +184,13 @@ export const useGuessSubmission = (
    *
    * @returns Promise that resolves after submission completes.
    */
-  const submitGuess = async (): Promise<void> => {
+  const submitGuess = async (): Promise<{
+    isServerError: boolean;
+    message: string | null;
+  }> => {
     if (cursorController.col.current !== gameGrid.colNum) {
       handleInvalidGuess(cursorController.row.current, "Incomplete guess.");
-      return;
+      return { isServerError: false, message: null };
     }
 
     const guess = gameGrid.gridRef.current[cursorController.row.current]
@@ -199,29 +202,56 @@ export const useGuessSubmission = (
         ? "/api/daily/validate"
         : "/api/practice/validate";
 
-    const validationResult = await fetch(endPoint, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ guess, ruleset, wordLength, isStrict }),
-    });
-    const validationData = await validationResult.json();
+    try {
+      const response = await fetch(endPoint, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ guess, ruleset, wordLength, isStrict }),
+      });
+      if (response.status === 500)
+        return {
+          isServerError: true,
+          message: "Server error. Please reload or try again later.",
+        };
 
-    if (validationResult.status >= 500) return;
+      if (response.status === 400)
+        return {
+          isServerError: true,
+          message: "Bad request. Please reload or try again later",
+        };
 
-    if (validationResult.status === 422 || validationResult.status === 400) {
-      handleInvalidGuess(cursorController.row.current, validationData.message);
-      return;
+      const { data, message } = await response.json();
+
+      if (response.status === 422) {
+        handleInvalidGuess(cursorController.row.current, message);
+        return { isServerError: false, message: null };
+      }
+
+      if (!response.ok) {
+        console.error("Unexpected error during validation:", response.status);
+        return {
+          isServerError: true,
+          message: `Unexpected error (${response.status}). Please reload or try again later.`,
+        };
+      }
+
+      handleValidGuess(
+        data.statuses,
+        data.gameState,
+        data.lockedPositions,
+        data.minimumLetterCounts,
+        data.targetWord,
+        guess,
+        cursorController.row.current,
+      );
+      return { isServerError: false, message: null };
+    } catch (err) {
+      console.error("Network error during validation:", err);
+      return {
+        isServerError: true,
+        message: "Network error. Please check your connection and reload.",
+      };
     }
-
-    handleValidGuess(
-      validationData.data.statuses,
-      validationData.data.gameState,
-      validationData.data.lockedPositions,
-      validationData.data.minimumLetterCounts,
-      validationData.data.targetWord,
-      guess,
-      cursorController.row.current,
-    );
   };
 
   return submitGuess;

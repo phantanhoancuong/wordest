@@ -2,7 +2,7 @@ import { RefObject } from "react";
 
 import { CellStatus, WordLength } from "@/lib/constants";
 
-import { RenderCell } from "@/types/cell";
+import { RenderCell } from "@/types/cell.types";
 
 export interface useGameGridReturn {
   rowNum: number;

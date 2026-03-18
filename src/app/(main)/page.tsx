@@ -60,6 +60,13 @@ export default function Home() {
   if (!render.hasHydrated)
     return <div className={styles["home-page__content"]} />;
 
+  if (render.serverError !== null)
+    return (
+      <div className={styles["home-page__content"]}>
+        <div className={styles["home-page__error"]}>{render.serverError}</div>
+      </div>
+    );
+
   return (
     <div className={styles["home-page__content"]}>
       <div className={styles["game-board"]}>

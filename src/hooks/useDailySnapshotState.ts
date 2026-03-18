@@ -9,7 +9,7 @@ import {
   WordLength,
 } from "@/lib/constants";
 
-import { CellStatusType, DataCell } from "@/types/cell";
+import { CellStatusType, DataCell } from "@/types/cell.types";
 
 import { useLocalStorage } from "@/hooks";
 

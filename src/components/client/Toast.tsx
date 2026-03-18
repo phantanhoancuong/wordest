@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 
-import { Toast as ToastType } from "@/types/toast";
+import { Toast as ToastType } from "@/types/toast.types";
 
 import styles from "@/styles/components/Toast.module.css";
 

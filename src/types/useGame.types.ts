@@ -43,5 +43,6 @@ export interface UseGameReturn {
 
   render: {
     hasHydrated: boolean;
+    serverError: string;
   };
 }

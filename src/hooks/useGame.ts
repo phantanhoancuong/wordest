@@ -56,6 +56,8 @@ export const useGame = (): UseGameReturn => {
   const strictConstraintsController = useStrictConstraints();
   const toastsController = useToasts();
 
+  const [serverError, setServerError] = useState<string>(null);
+
   const { data: session, isPending } = authClient.useSession();
 
   const gameGrid = useGameGrid(
@@ -202,7 +204,7 @@ export const useGame = (): UseGameReturn => {
       targetWordRef.current = null;
       isInputLocked.current = true;
       try {
-        const initGameResult = await fetch("/api/practice/start", {
+        const response = await fetch("/api/practice/hydrate", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
@@ -211,50 +213,78 @@ export const useGame = (): UseGameReturn => {
           }),
         });
 
-        if (!initGameResult.ok) {
-          isInputLocked.current = false;
+        if (response.status === 500) {
+          setServerError("Server error. Please reload or try again later.");
           return;
         }
-        const initGameData = await initGameResult.json();
+
+        if (response.status === 400) {
+          setServerError("Bad request. Please reload or try again later.");
+          return;
+        }
+
+        if (!response.ok) {
+          console.error("Unexpected error during restart:", response.status);
+          setServerError(
+            `Unexpected error (${response.status}). Please reload or try again later.`,
+          );
+        }
+
+        const { data } = await response.json();
+        // If no game is found, reset states to defaults.
+        if (data === null) {
+          gameGrid.resetGrid();
+          referenceRow.resetRow();
+          cursorController.resetCursor();
+          keyStatusesController.resetKeyStatuses();
+          strictConstraintsController.resetStrictConstraints();
+          gameStateController.resetState();
+
+          isInputLocked.current = false;
+          setHasHydrated(true);
+          return;
+        }
 
         gameGrid.hydrateGrid(
-          initGameData.guesses,
-          initGameData.allStatuses,
+          data.guesses,
+          data.allStatuses,
           settingsContextController.wordLength.value,
         );
         referenceRow.hydrateRow(
-          initGameData.guesses,
-          initGameData.allStatuses,
+          data.guesses,
+          data.allStatuses,
           settingsContextController.wordLength.value,
-          initGameData.targetWord,
-          initGameData.gameState,
+          data.targetWord,
+          data.gameState,
         );
-        cursorController.hydrateCursor(initGameData.guesses.length);
+        cursorController.hydrateCursor(data.guesses.length);
         keyStatusesController.hydrateKeyStatuses(
-          initGameData.guesses,
-          initGameData.allStatuses,
+          data.guesses,
+          data.allStatuses,
         );
         strictConstraintsController.syncStrictConstraints(
-          initGameData.lockedPositions,
-          initGameData.minimumLetterCounts,
+          data.lockedPositions,
+          data.minimumLetterCounts,
         );
-        gameStateController.setGameState(initGameData.gameState);
+        gameStateController.setGameState(data.gameState);
 
         // If game is complete, set up reference row reveal state
         if (
-          initGameData.targetWord &&
-          (initGameData.gameState === GameState.WON ||
-            initGameData.gameState === GameState.LOST)
+          data.targetWord &&
+          (data.gameState === GameState.WON ||
+            data.gameState === GameState.LOST)
         ) {
           setIsReferenceRowRevealing(true);
-          targetWordRef.current = initGameData.targetWord;
+          targetWordRef.current = data.targetWord;
         }
 
         isInputLocked.current = false;
         setHasHydrated(true);
       } catch (err) {
-        console.error("Network error during game initialization.", err);
-        isInputLocked.current = false;
+        console.error("Network error during game initialization:", err);
+        setServerError(
+          "Network error. Please check your connection and reload.",
+        );
       }
     };
 
@@ -386,7 +416,10 @@ export const useGame = (): UseGameReturn => {
       return;
 
     if (key === "Backspace") return handleBackspace();
-    if (key === "Enter") return handleSubmit();
+    if (key === "Enter") {
+      handleSubmit();
+      return;
+    }
     if (LETTER_REGEX.test(key)) return handleLetter(key);
   };
   /**
@@ -424,10 +457,15 @@ export const useGame = (): UseGameReturn => {
    *
    * Play key sound, lock input to prevent spam, and delegate validation and submission to {@link submitGuess}.
    */
-  const handleSubmit = (): void => {
+  const handleSubmit = async (): Promise<void> => {
     playKeySound();
     isInputLocked.current = true;
-    submitGuess();
+    const { isServerError, message } = await submitGuess();
+    if (isServerError === true && message !== null) {
+      setServerError(message);
+      isInputLocked.current = false;
+      return;
+    }
   };
   useKeyboardInput(handleInput);
 
@@ -444,44 +482,66 @@ export const useGame = (): UseGameReturn => {
     }
 
     isInputLocked.current = true;
+    try {
+      const response = await fetch("/api/practice/restart", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          ruleset: settingsContextController.ruleset.value,
+          wordLength: settingsContextController.wordLength.value,
+        }),
+      });
 
-    const restartResult = await fetch("/api/practice/restart", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        ruleset: settingsContextController.ruleset.value,
-        wordLength: settingsContextController.wordLength.value,
-      }),
-    });
+      if (response.status === 500) {
+        setServerError("Server error. Please reload or try again later.");
+        return;
+      }
 
-    if (!restartResult.ok) {
-      toastsController.addToast("Restart failed.");
+      if (response.status === 400) {
+        setServerError("Bad request. Please reload or try again later");
+        return;
+      }
+
+      if (response.status === 422) {
+        const { message } = await response.json();
+        toastsController.addToast(message);
+        isInputLocked.current = false;
+        return;
+      }
+
+      if (!response.ok) {
+        console.error("Unexpected error during restart:", response.status);
+        setServerError(
+          `Unexpected error (${response.status}). Please reload or try again later.`,
+        );
+      }
+
+      gameStateController.resetState();
+
+      cursorController.resetCursor();
+
+      keyStatusesController.resetKeyStatuses();
+
+      gameGrid.resetGrid();
+      referenceRow.resetRow();
+      gameGridAnimationTracker.reset();
+      referenceRowAnimationTracker.reset();
+
+      strictConstraintsController.resetStrictConstraints();
+
+      targetWordRef.current = null;
+      setIsReferenceRowRevealing(false);
+
+      toastsController.toastList.forEach((t) =>
+        toastsController.removeToast(t.id),
+      );
+      toastsController.addToast("Game restarted!");
+
       isInputLocked.current = false;
-      return;
+    } catch (err) {
+      console.error("Network error during restart:", err);
+      setServerError("Network error. Please check your connection and reload.");
     }
-
-    gameStateController.resetState();
-
-    cursorController.resetCursor();
-
-    keyStatusesController.resetKeyStatuses();
-
-    gameGrid.resetGrid();
-    referenceRow.resetRow();
-    gameGridAnimationTracker.reset();
-    referenceRowAnimationTracker.reset();
-
-    strictConstraintsController.resetStrictConstraints();
-
-    targetWordRef.current = null;
-    setIsReferenceRowRevealing(false);
-
-    toastsController.toastList.forEach((t) =>
-      toastsController.removeToast(t.id),
-    );
-    toastsController.addToast("Game restarted!");
-
-    isInputLocked.current = false;
   };
 
   return {
@@ -522,6 +582,7 @@ export const useGame = (): UseGameReturn => {
 
     render: {
       hasHydrated,
+      serverError,
     },
   };
 };
