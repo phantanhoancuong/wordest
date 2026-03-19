@@ -12,10 +12,7 @@ import {
   evaluateGuess,
   updateStrictConstraints,
 } from "@/lib/utils";
-import {
-  getOrCreatePracticeGame,
-  getPracticeGame,
-} from "@/lib/database/queries/practiceGames";
+import { findOrCreatePracticeGame } from "@/lib/database/queries/practiceGames";
 import { practiceGames } from "@/lib/database/schema";
 
 import { WORD_LISTS } from "@/types/wordList.types";
@@ -42,7 +39,7 @@ async function validateAndUpdate(
   guess: string,
   isStrict: boolean,
 ) {
-  const game = await getOrCreatePracticeGame(userId, ruleset, wordLength);
+  const game = await findOrCreatePracticeGame(userId, ruleset, wordLength);
 
   /** If strict validation fails, 'isValid' is false, 'message' contains the violation reason, and 'statuses' is null.*/
   if (isStrict) {

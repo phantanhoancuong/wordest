@@ -1,7 +1,7 @@
 import { headers } from "next/headers";
 
 import { auth } from "@/lib/auth/auth";
-import { getPracticeGame } from "@/lib/database/queries/practiceGames";
+import { findPracticeGame } from "@/lib/database/queries/practiceGames";
 import { evaluateGuess } from "@/lib/utils";
 import { GameState } from "@/lib/constants";
 
@@ -32,7 +32,7 @@ export async function POST(req: Request) {
       return Response.json({ error: "BAD_REQUEST" }, { status: 400 });
     }
 
-    const game = await getPracticeGame(session.user.id, ruleset, wordLength);
+    const game = await findPracticeGame(session.user.id, ruleset, wordLength);
 
     // If no game is found, return null.
     if (game === null) return Response.json({ data: null });

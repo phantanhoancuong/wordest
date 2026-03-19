@@ -3,7 +3,7 @@ import { headers } from "next/headers";
 import { auth } from "@/lib/auth/auth";
 import {
   deletePracticeGame,
-  getPracticeGame,
+  findPracticeGame,
 } from "@/lib/database/queries/practiceGames";
 import { GameState } from "@/lib/constants";
 
@@ -41,7 +41,7 @@ export async function POST(req: Request) {
       );
     }
 
-    const game = await getPracticeGame(session.user.id, ruleset, wordLength);
+    const game = await findPracticeGame(session.user.id, ruleset, wordLength);
 
     // If the game is null, it means it hasn't been finished.
     if (game === null || game.gameState === GameState.PLAYING)
