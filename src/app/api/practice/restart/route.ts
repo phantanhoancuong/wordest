@@ -1,11 +1,13 @@
 import { headers } from "next/headers";
 
 import { auth } from "@/lib/auth/auth";
+
+import { GameState } from "@/lib/constants";
+
 import {
   deletePracticeGame,
   findPracticeGame,
 } from "@/lib/database/queries/practiceGames";
-import { GameState } from "@/lib/constants";
 
 /**
  * POST /api/practice/restart

@@ -228,6 +228,7 @@ export const useGame = (): UseGameReturn => {
           setServerError(
             `Unexpected error (${response.status}). Please reload or try again later.`,
           );
+          return;
         }
 
         const { data } = await response.json();
@@ -312,7 +313,7 @@ export const useGame = (): UseGameReturn => {
       targetWordRef.current = null;
       isInputLocked.current = true;
       try {
-        const initGameResult = await fetch("/api/daily/start", {
+        const response = await fetch("/api/daily/hydrate", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
@@ -321,48 +322,62 @@ export const useGame = (): UseGameReturn => {
           }),
         });
 
-        if (!initGameResult.ok) {
-          isInputLocked.current = false;
+        if (response.status === 500) {
+          setServerError("Server error. Please reload or try again later.");
           return;
         }
-        const initGameData = await initGameResult.json();
+
+        if (response.status === 400) {
+          setServerError("Bad request. Please reload or try again later.");
+          return;
+        }
+
+        if (!response.ok) {
+          console.error("Unexpected error during restart:", response.status);
+          setServerError(
+            `Unexpected error (${response.status}). Please reload or try again later.`,
+          );
+          return;
+        }
+
+        const { data } = await response.json();
 
         gameGrid.hydrateGrid(
-          initGameData.guesses,
-          initGameData.allStatuses,
+          data.guesses,
+          data.allStatuses,
           settingsContextController.wordLength.value,
         );
         referenceRow.hydrateRow(
-          initGameData.guesses,
-          initGameData.allStatuses,
+          data.guesses,
+          data.allStatuses,
           settingsContextController.wordLength.value,
-          initGameData.targetWord,
-          initGameData.gameState,
+          data.targetWord,
+          data.gameState,
         );
-        cursorController.hydrateCursor(initGameData.guesses.length);
+        cursorController.hydrateCursor(data.guesses.length);
         keyStatusesController.hydrateKeyStatuses(
-          initGameData.guesses,
-          initGameData.allStatuses,
+          data.guesses,
+          data.allStatuses,
         );
         strictConstraintsController.syncStrictConstraints(
-          initGameData.lockedPositions,
-          initGameData.minimumLetterCounts,
+          data.lockedPositions,
+          data.minimumLetterCounts,
         );
-        gameStateController.setGameState(initGameData.gameState);
+        gameStateController.setGameState(data.gameState);
 
         // If game is complete, set up reference row reveal state
         if (
-          initGameData.targetWord &&
-          (initGameData.gameState === GameState.WON ||
-            initGameData.gameState === GameState.LOST)
+          data.targetWord &&
+          (data.gameState === GameState.WON ||
+            data.gameState === GameState.LOST)
         ) {
           setIsReferenceRowRevealing(true);
-          targetWordRef.current = initGameData.targetWord;
+          targetWordRef.current = data.targetWord;
         }
 
         // Show new game message if applicable
-        if (initGameData.message) {
-          toastsController.addToast(initGameData.message);
+        if (data.message) {
+          toastsController.addToast(data.message);
         }
 
         isInputLocked.current = false;

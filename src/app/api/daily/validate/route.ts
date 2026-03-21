@@ -1,21 +1,39 @@
 import { headers } from "next/headers";
+
+import { eq, and } from "drizzle-orm";
+import { database } from "@/lib/database/client";
+import { dailyGames } from "@/lib/database/schema";
+
 import { auth } from "@/lib/auth/auth";
+
 import { WORD_LISTS } from "@/types/wordList.types";
+
 import { ATTEMPTS, GameState, Ruleset, WordLength } from "@/lib/constants";
-import { getDailyGame } from "@/lib/database/queries/dailyGames";
+
+import { findOrCreateDailyGame } from "@/lib/database/queries/dailyGames";
 import {
   checkValidStrictGuess,
+  evaluateGuess,
   getDateString,
-  getDaysSinceEpoch,
+  updateStrictConstraints,
 } from "@/lib/utils";
 import { generateDailyWord } from "@/lib/words/generateWord";
 
-import { evaluateGuess } from "@/lib/utils";
-import { updateStrictConstraints } from "@/lib/utils";
-import { database } from "@/lib/database/client";
-import { dailyGames } from "@/lib/database/schema";
-import { eq, and } from "drizzle-orm";
-
+/**
+ * Validate a guess and update the daily game state in the database.
+ *
+ * With strict constraints enabled, the guess is first checked against locked positions and minimum letter counts before evaluation.
+ * If the strict check fails, the game state is not updated.
+ *
+ * When the game ends (win of loss), return the target word so the client can reveal it in the reference row.
+ *
+ * @param userId - The ID of the user submitting the guess.
+ * @param ruleset - The ruleset of the active game.
+ * @param wordLength - The word length of the active game.
+ * @param guess - The guessed word.
+ * @param isStrict - Whether strict constraints should be enforced.
+ * @returns An object containing 'isValid', 'message', and 'data'.
+ */
 async function validateAndUpdate(
   userId: string,
   ruleset: Ruleset,
@@ -23,12 +41,13 @@ async function validateAndUpdate(
   guess: string,
   isStrict: boolean,
 ) {
-  const { game, isNewGame, wasIncomplete } = await getDailyGame(
+  // If the user plays when the day rolls over, a new game may be created.
+  // If the user didn't finish the last game, a message shows up to tell them a new game was created.
+  const { game, isNewGame, wasIncomplete } = await findOrCreateDailyGame(
     userId,
     ruleset,
     wordLength,
   );
-
   if (isNewGame) {
     let message = null;
     if (wasIncomplete)
@@ -36,6 +55,7 @@ async function validateAndUpdate(
     return { isValid: false, message, data: null };
   }
 
+  // If strict validation fails, 'message' contains the violation reason.
   if (isStrict) {
     const { isValid, message } = checkValidStrictGuess(
       guess,
@@ -58,6 +78,7 @@ async function validateAndUpdate(
       ? GameState.LOST
       : GameState.PLAYING;
 
+  // Spreading an empty object is a no-op.
   const strictUpdates = isStrict
     ? updateStrictConstraints(
         guess,
@@ -94,7 +115,22 @@ async function validateAndUpdate(
     },
   };
 }
+/**
+ * POST /api/daily/validate
+ *
+ * Validate a daily game guess and update the game state (create the game if necessary).
+ *
+ * Steps:
+ * 1. Authenticate the session.
+ * 2. Validate the guess exists in the word list for the given length.
+ * 3. If strict mode, additionally validate against locked positions and minimum letter counts.
+ * 4. Persist the updated game data and return them.
+ * Player-facing errors (NOT_IN_WORD_LIST and STRICT_VIOLATION) are returned with a human-readable message
+ * for dipslay in the UI. Server errors are logged and returned without exposing internal details.
+ *
+ * @returns '{ statuses } on success, or '{ error } with an a status code on failure.
 
+ */
 export async function POST(req: Request) {
   try {
     const session = await auth.api.getSession({ headers: await headers() });

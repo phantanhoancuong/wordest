@@ -30,7 +30,7 @@ import { WORD_LISTS } from "@/types/wordList.types";
  * @param wordLength - The word length of the active game.
  * @param guess - The guessed word.
  * @param isStrict - Whether strict constraints should be enforced.
- * @returns An object containing 'isValid', 'message', and evaluated 'statuses'.
+ * @returns An object containing 'isValid', 'message', and 'data'.
  */
 async function validateAndUpdate(
   userId: string,
@@ -41,7 +41,7 @@ async function validateAndUpdate(
 ) {
   const game = await findOrCreatePracticeGame(userId, ruleset, wordLength);
 
-  /** If strict validation fails, 'isValid' is false, 'message' contains the violation reason, and 'statuses' is null.*/
+  // If strict validation fails, 'message' contains the violation reason.
   if (isStrict) {
     const { isValid, message } = checkValidStrictGuess(
       guess,
@@ -62,7 +62,7 @@ async function validateAndUpdate(
       ? GameState.LOST
       : GameState.PLAYING;
 
-  // Spreading an empty object is a no-op, so we avoid duplicating the database update logic.
+  // Spreading an empty object is a no-op.
   const strictUpdates = isStrict
     ? updateStrictConstraints(
         guess,
