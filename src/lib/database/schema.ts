@@ -1,4 +1,4 @@
-import { GameState, Ruleset, WordLength } from "@/lib/constants";
+import { GameState, Ruleset, SessionType, WordLength } from "@/lib/constants";
 import { relations, sql } from "drizzle-orm";
 
 import {
@@ -172,6 +172,51 @@ export const dailyGames = sqliteTable(
   }),
 );
 
+export const playerStats = sqliteTable(
+  "player_stats",
+  {
+    userId: text("user_id")
+      .notNull()
+      .references(() => user.id, { onDelete: "cascade" }),
+    sessionType: text("session_type", {
+      enum: Object.values(SessionType) as [string, ...string[]],
+    }).notNull(),
+    ruleset: text("ruleset", {
+      enum: Object.values(Ruleset) as [string, ...string[]],
+    }).notNull(),
+    wordLength: integer("word_length").$type<WordLength>().notNull(),
+
+    gamesPlayed: integer("games_played").notNull().default(0),
+    gamesWon: integer("games_won").notNull().default(0),
+    gamesLost: integer("games_lost").notNull().default(0),
+    currentStreak: integer("current_streak").notNull().default(0),
+    maxStreak: integer("max_streak").notNull().default(0),
+    guessDistribution: text("guess_distribution", { mode: "json" })
+      .$type<number[]>()
+      .default([0, 0, 0, 0, 0, 0]),
+    lastCompleted: integer("last_completed", { mode: "timestamp" }).default(
+      null,
+    ),
+    createdAt: integer("created_at", { mode: "timestamp" })
+      .notNull()
+      .default(sql`(unixepoch())`),
+    updatedAt: integer("updated_at", { mode: "timestamp" })
+      .notNull()
+      .default(sql`(unixepoch())`),
+  },
+
+  (table) => ({
+    pk: primaryKey({
+      columns: [
+        table.userId,
+        table.sessionType,
+        table.ruleset,
+        table.wordLength,
+      ],
+    }),
+    userIdx: index("player_stats_user_idx").on(table.userId),
+  }),
+);
 export const userRelations = relations(user, ({ many }) => ({
   sessions: many(session),
   accounts: many(account),

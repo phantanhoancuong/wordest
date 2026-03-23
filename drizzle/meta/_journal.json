@@ -15,6 +15,13 @@
       "when": 1773668159624,
       "tag": "0001_gifted_ink",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1774265707997,
+      "tag": "0002_legal_omega_flight",
+      "breakpoints": true
     }
   ]
 }

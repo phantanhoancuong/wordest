@@ -8,9 +8,16 @@ import { auth } from "@/lib/auth/auth";
 
 import { WORD_LISTS } from "@/types/wordList.types";
 
-import { ATTEMPTS, GameState, Ruleset, WordLength } from "@/lib/constants";
+import {
+  ATTEMPTS,
+  GameState,
+  Ruleset,
+  SessionType,
+  WordLength,
+} from "@/lib/constants";
 
 import { findOrCreateDailyGame } from "@/lib/database/queries/dailyGames";
+import { upsertPlayerStats } from "@/lib/database/queries/playerStats";
 import {
   checkValidStrictGuess,
   evaluateGuess,
@@ -88,20 +95,34 @@ async function validateAndUpdate(
       )
     : null;
 
-  await database
-    .update(dailyGames)
-    .set({
-      guesses: updatedGuesses,
-      gameState: updatedGameState,
-      ...(strictUpdates ?? {}),
-    })
-    .where(
-      and(
-        eq(dailyGames.userId, userId),
-        eq(dailyGames.ruleset, ruleset),
-        eq(dailyGames.wordLength, wordLength),
-      ),
-    );
+  // Wrap the state and stats updates so they're atomic and go together.
+  await database.transaction(async (tx) => {
+    // Update game states.
+    await tx
+      .update(dailyGames)
+      .set({
+        guesses: updatedGuesses,
+        gameState: updatedGameState,
+        ...(strictUpdates ?? {}),
+      })
+      .where(
+        and(
+          eq(dailyGames.userId, userId),
+          eq(dailyGames.ruleset, ruleset),
+          eq(dailyGames.wordLength, wordLength),
+        ),
+      );
+
+    if (isWon || isLost) {
+      // Update player stats.
+      await upsertPlayerStats(
+        tx,
+        { userId, sessionType: SessionType.DAILY, ruleset, wordLength },
+        isWon,
+        updatedGuesses.length,
+      );
+    }
+  });
 
   return {
     isValid: true,

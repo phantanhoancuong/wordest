@@ -2,9 +2,18 @@ import { headers } from "next/headers";
 
 import { auth } from "@/lib/auth/auth";
 
-import { GameState } from "@/lib/constants";
+import { database } from "@/lib/database/client";
 
-import { findDailyGame } from "@/lib/database/queries/dailyGames";
+import { GameState, SessionType } from "@/lib/constants";
+
+import {
+  createDailyGame,
+  findDailyGame,
+} from "@/lib/database/queries/dailyGames";
+import {
+  recordExpiredGame,
+  upsertPlayerStats,
+} from "@/lib/database/queries/playerStats";
 import { evaluateGuess, getDateString } from "@/lib/utils";
 import { generateDailyWord } from "@/lib/words/generateWord";
 
@@ -35,7 +44,7 @@ export async function POST(req: Request) {
       return Response.json({ error: "BAD_REQUEST" }, { status: 400 });
     }
 
-    const game = await findDailyGame(session.user.id, ruleset, wordLength);
+    let game = await findDailyGame(session.user.id, ruleset, wordLength);
 
     // If no game is found, return null.
     if (game === null)
@@ -43,6 +52,20 @@ export async function POST(req: Request) {
         data: null,
         message: `New game fetched for ${getDateString({ format: "display" })}`,
       });
+
+    // If the game is from a previous day, create a new game.
+    if (game.date !== getDateString({ format: "display" })) {
+      await database.transaction(async (tx) => {
+        if (game.gameState === GameState.PLAYING)
+          await recordExpiredGame(tx, {
+            userId: session.user.id,
+            sessionType: SessionType.DAILY,
+            ruleset,
+            wordLength,
+          });
+      });
+      game = await createDailyGame(session.user.id, ruleset, wordLength);
+    }
 
     const targetWord = generateDailyWord(ruleset, wordLength);
 

@@ -341,6 +341,19 @@ export const useGame = (): UseGameReturn => {
         }
 
         const { data } = await response.json();
+        // If no game is found, reset states to defaults.
+        if (data === null) {
+          gameGrid.resetGrid();
+          referenceRow.resetRow();
+          cursorController.resetCursor();
+          keyStatusesController.resetKeyStatuses();
+          strictConstraintsController.resetStrictConstraints();
+          gameStateController.resetState();
+
+          isInputLocked.current = false;
+          setHasHydrated(true);
+          return;
+        }
 
         gameGrid.hydrateGrid(
           data.guesses,

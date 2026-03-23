@@ -5,15 +5,22 @@ import { and, eq } from "drizzle-orm";
 import { auth } from "@/lib/auth/auth";
 import { database } from "@/lib/database/client";
 
-import { ATTEMPTS, GameState, Ruleset, WordLength } from "@/lib/constants";
+import {
+  ATTEMPTS,
+  GameState,
+  Ruleset,
+  SessionType,
+  WordLength,
+} from "@/lib/constants";
 
+import { findOrCreatePracticeGame } from "@/lib/database/queries/practiceGames";
+import { upsertPlayerStats } from "@/lib/database/queries/playerStats";
+import { practiceGames } from "@/lib/database/schema";
 import {
   checkValidStrictGuess,
   evaluateGuess,
   updateStrictConstraints,
 } from "@/lib/utils";
-import { findOrCreatePracticeGame } from "@/lib/database/queries/practiceGames";
-import { practiceGames } from "@/lib/database/schema";
 
 import { WORD_LISTS } from "@/types/wordList.types";
 
@@ -71,20 +78,35 @@ async function validateAndUpdate(
         game.lockedPositions,
       )
     : null;
-  await database
-    .update(practiceGames)
-    .set({
-      guesses: updatedGuesses,
-      gameState: updatedGameState,
-      ...(strictUpdates ?? {}),
-    })
-    .where(
-      and(
-        eq(practiceGames.userId, userId),
-        eq(practiceGames.ruleset, ruleset),
-        eq(practiceGames.wordLength, wordLength),
-      ),
-    );
+
+  // Wrap the state and stats updates so they're atomic and go together.
+  await database.transaction(async (tx) => {
+    // Update game states.
+    await tx
+      .update(practiceGames)
+      .set({
+        guesses: updatedGuesses,
+        gameState: updatedGameState,
+        ...(strictUpdates ?? {}),
+      })
+      .where(
+        and(
+          eq(practiceGames.userId, userId),
+          eq(practiceGames.ruleset, ruleset),
+          eq(practiceGames.wordLength, wordLength),
+        ),
+      );
+
+    if (isWon || isLost) {
+      // Update player stats.
+      await upsertPlayerStats(
+        tx,
+        { userId, sessionType: SessionType.PRACTICE, ruleset, wordLength },
+        isWon,
+        updatedGuesses.length,
+      );
+    }
+  });
 
   return {
     isValid: true,

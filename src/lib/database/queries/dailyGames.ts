@@ -22,7 +22,7 @@ import { getDateString } from "@/lib/utils";
  * @param wordLength - The length of the target word.
  * @returns The newly created game object.
  */
-async function createDailyGame(
+export async function createDailyGame(
   userId: string,
   ruleset: Ruleset,
   wordLength: WordLength,
