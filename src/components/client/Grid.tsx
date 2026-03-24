@@ -1,6 +1,6 @@
 "use client";
 
-import { RenderCell } from "@/types/cell";
+import { RenderCell } from "@/types/cell.types";
 import { UseGameReturn } from "@/types/useGame.types";
 
 import Cell from "@/components/client/Cell";
@@ -10,7 +10,7 @@ import styles from "@/styles/components/Grid.module.css";
 /** Props for the {@link Grid} component. */
 interface GridProps {
   /** 2D array of renderable cells representing the game board data. */
-  grid: RenderCell[][];
+  grid: RenderCell[][] | RenderCell[];
   dataRows?: number;
   dataCols?: number;
   layoutRows?: number;
@@ -27,6 +27,10 @@ interface GridStyleVars extends React.CSSProperties {
   "--layout-cols"?: number;
 }
 
+const isGrid2D = (
+  grid: RenderCell[] | RenderCell[][],
+): grid is RenderCell[][] => Array.isArray(grid[0]);
+
 /**
  * Renders the game board as a grid of {@link Cell} components.
  *
@@ -41,18 +45,20 @@ function Grid({
   layoutCols,
   onAnimationEnd,
 }: GridProps) {
+  const normalizedGrid: RenderCell[][] = isGrid2D(grid) ? grid : [grid];
+
   /** Inline CSS variables controlling the grid dimensions. */
   const style: GridStyleVars = {
-    "--data-rows": dataRows ?? grid.length,
-    "--data-cols": dataCols ?? grid[0].length,
-    "--layout-rows": layoutRows ?? grid.length,
-    "--layout-cols": layoutCols ?? grid[0].length,
+    "--data-rows": dataRows ?? normalizedGrid.length,
+    "--data-cols": dataCols ?? normalizedGrid[0].length,
+    "--layout-rows": layoutRows ?? normalizedGrid.length,
+    "--layout-cols": layoutCols ?? normalizedGrid[0].length,
   };
 
   return (
     <div className={styles["grid__container"]}>
       <div className={styles["grid"]} style={style}>
-        {grid.map((row: Array<RenderCell>, rowIndex: number) =>
+        {normalizedGrid.map((row: Array<RenderCell>, rowIndex: number) =>
           row.map((cell: RenderCell, colIndex: number) => (
             <Cell
               key={`${rowIndex}-${colIndex}-${cell.animationKey}`}

@@ -1,5 +1,13 @@
+import { GameState, Ruleset, SessionType, WordLength } from "@/lib/constants";
 import { relations, sql } from "drizzle-orm";
-import { sqliteTable, text, integer, index } from "drizzle-orm/sqlite-core";
+
+import {
+  sqliteTable,
+  text,
+  integer,
+  index,
+  primaryKey,
+} from "drizzle-orm/sqlite-core";
 
 export const user = sqliteTable("user", {
   id: text("id").primaryKey(),
@@ -16,6 +24,7 @@ export const user = sqliteTable("user", {
     .default(sql`(cast(unixepoch('subsecond') * 1000 as integer))`)
     .$onUpdate(() => /* @__PURE__ */ new Date())
     .notNull(),
+  isAnonymous: integer("is_anonymous", { mode: "boolean" }).default(false),
 });
 
 export const session = sqliteTable(
@@ -87,9 +96,132 @@ export const verification = sqliteTable(
   (table) => [index("verification_identifier_idx").on(table.identifier)],
 );
 
+export const practiceGames = sqliteTable(
+  "practice_games",
+  {
+    userId: text("user_id")
+      .notNull()
+      .references(() => user.id, { onDelete: "cascade" }),
+
+    ruleset: text("ruleset", {
+      enum: Object.values(Ruleset) as [string, ...string[]],
+    }).notNull(),
+    wordLength: integer("word_length").$type<WordLength>().notNull(),
+    targetWord: text("target_word").notNull(),
+    gameState: text("game_state", {
+      enum: Object.values(GameState) as [string, ...string[]],
+    })
+      .notNull()
+      .default(GameState.PLAYING),
+    lockedPositions: text("locked_positions", { mode: "json" })
+      .$type<Record<number, string>>()
+      .notNull()
+      .default({}),
+    minimumLetterCounts: text("minimum_letter_counts", { mode: "json" })
+      .$type<Record<string, number>>()
+      .notNull()
+      .default({}),
+    guesses: text("guesses", { mode: "json" })
+      .$type<string[]>()
+      .notNull()
+      .default([]),
+  },
+  (table) => ({
+    pk: primaryKey({
+      columns: [table.userId, table.ruleset, table.wordLength],
+    }),
+    userIdx: index("practice_games_user_idx").on(table.userId),
+  }),
+);
+
+export const dailyGames = sqliteTable(
+  "daily_games",
+  {
+    userId: text("user_id")
+      .notNull()
+      .references(() => user.id, { onDelete: "cascade" }),
+
+    ruleset: text("ruleset", {
+      enum: Object.values(Ruleset) as [string, ...string[]],
+    }).notNull(),
+    wordLength: integer("word_length").$type<WordLength>().notNull(),
+    date: text("date").notNull(),
+    gameState: text("game_state", {
+      enum: Object.values(GameState) as [string, ...string[]],
+    })
+      .notNull()
+      .default(GameState.PLAYING),
+    lockedPositions: text("locked_positions", { mode: "json" })
+      .$type<Record<number, string>>()
+      .notNull()
+      .default({}),
+    minimumLetterCounts: text("minimum_letter_counts", { mode: "json" })
+      .$type<Record<string, number>>()
+      .notNull()
+      .default({}),
+    guesses: text("guesses", { mode: "json" })
+      .$type<string[]>()
+      .notNull()
+      .default([]),
+  },
+  (table) => ({
+    pk: primaryKey({
+      columns: [table.userId, table.ruleset, table.wordLength],
+    }),
+    userIdx: index("daily_games_user_idx").on(table.userId),
+  }),
+);
+
+export const playerStats = sqliteTable(
+  "player_stats",
+  {
+    userId: text("user_id")
+      .notNull()
+      .references(() => user.id, { onDelete: "cascade" }),
+    sessionType: text("session_type", {
+      enum: Object.values(SessionType) as [string, ...string[]],
+    }).notNull(),
+    ruleset: text("ruleset", {
+      enum: Object.values(Ruleset) as [string, ...string[]],
+    }).notNull(),
+    wordLength: integer("word_length").$type<WordLength>().notNull(),
+
+    gamesPlayed: integer("games_played").notNull().default(0),
+    gamesWon: integer("games_won").notNull().default(0),
+    gamesLost: integer("games_lost").notNull().default(0),
+    currentStreak: integer("current_streak").notNull().default(0),
+    maxStreak: integer("max_streak").notNull().default(0),
+    guessDistribution: text("guess_distribution", { mode: "json" })
+      .$type<number[]>()
+      .default([0, 0, 0, 0, 0, 0]),
+    lastCompleted: integer("last_completed", { mode: "timestamp" }).default(
+      null,
+    ),
+    createdAt: integer("created_at", { mode: "timestamp" })
+      .notNull()
+      .default(sql`(unixepoch())`),
+    updatedAt: integer("updated_at", { mode: "timestamp" })
+      .notNull()
+      .default(sql`(unixepoch())`),
+  },
+
+  (table) => ({
+    pk: primaryKey({
+      columns: [
+        table.userId,
+        table.sessionType,
+        table.ruleset,
+        table.wordLength,
+      ],
+    }),
+    userIdx: index("player_stats_user_idx").on(table.userId),
+  }),
+);
 export const userRelations = relations(user, ({ many }) => ({
   sessions: many(session),
   accounts: many(account),
+  practiceGames: many(practiceGames),
+  dailyGames: many(dailyGames),
 }));
 
 export const sessionRelations = relations(session, ({ one }) => ({
@@ -102,6 +234,20 @@ export const sessionRelations = relations(session, ({ one }) => ({
 export const accountRelations = relations(account, ({ one }) => ({
   user: one(user, {
     fields: [account.userId],
+    references: [user.id],
+  }),
+}));
+
+export const practiceGamesRelations = relations(practiceGames, ({ one }) => ({
+  user: one(user, {
+    fields: [practiceGames.userId],
+    references: [user.id],
+  }),
+}));
+
+export const dailyGamesRelations = relations(dailyGames, ({ one }) => ({
+  user: one(user, {
+    fields: [dailyGames.userId],
     references: [user.id],
   }),
 }));

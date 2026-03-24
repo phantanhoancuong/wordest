@@ -1,12 +1,15 @@
 export { default as AccordionArrowIcon } from "./keyboard_arrow_right_24dp_000000_FILL0_wght400_GRAD0_opsz24.svg";
+export { default as ArticleIcon } from "./article_24dp_E3E3E3_FILL0_wght400_GRAD0_opsz24.svg";
 export { default as BackArrowIcon } from "./arrow_back_24dp_000000_FILL0_wght400_GRAD0_opsz24.svg";
 export { default as CalendarIcon } from "./calendar_today_24dp_000000_FILL0_wght400_GRAD0_opsz24.svg";
 export { default as ContrastIcon } from "./contrast_24dp_000000_FILL0_wght400_GRAD0_opsz24.svg";
 export { default as ControllerIcon } from "./sports_esports_24dp_E3E3E3_FILL0_wght400_GRAD0_opsz24.svg";
 export { default as EyeIcon } from "./visibility_24dp_000000_FILL0_wght400_GRAD0_opsz24.svg";
+export { default as HomeIcon } from "./home_24dp_E3E3E3_FILL0_wght400_GRAD0_opsz24.svg";
 export { default as InfinityIcon } from "./all_inclusive_24dp_000000_FILL0_wght400_GRAD0_opsz24.svg";
 export { default as PersonIconFill } from "./person_24dp_E3E3E3_FILL1_wght400_GRAD0_opsz24.svg";
 export { default as PersonIconOutline } from "./person_24dp_E3E3E3_FILL0_wght400_GRAD0_opsz24.svg";
+export { default as PrivacyTipIcon } from "./privacy_tip_24dp_E3E3E3_FILL0_wght400_GRAD0_opsz24.svg";
 export { default as QueryStatsIcon } from "./query_stats_24dp_E3E3E3_FILL0_wght400_GRAD0_opsz24.svg";
 export { default as PaletteIcon } from "./palette_24dp_000000_FILL0_wght400_GRAD0_opsz24.svg";
 export { default as ReplayIcon } from "./replay_24dp_E3E3E3_FILL0_wght400_GRAD0_opsz24.svg";

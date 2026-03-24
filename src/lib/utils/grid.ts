@@ -5,7 +5,7 @@ import {
   CellStatusType,
   DataCell,
   RenderCell,
-} from "@/types/cell";
+} from "@/types/cell.types";
 
 /**
  * Convert a 2D grid of DataCell to a 2d grid of RenderCell[][].
@@ -96,6 +96,20 @@ export const initEmptyRenderGrid = (
       animationDelay,
     })),
   );
+};
+
+export const initEmptyRenderRow = (
+  colNum: number,
+  defaultStatus: CellStatusType = CellStatus.DEFAULT,
+  defaultAnimation: CellAnimationType = CellAnimation.NONE,
+  animationDelay = 0,
+) => {
+  return Array.from({ length: colNum }, () => ({
+    char: "",
+    status: defaultStatus,
+    animation: defaultAnimation,
+    animationDelay,
+  }));
 };
 
 /**

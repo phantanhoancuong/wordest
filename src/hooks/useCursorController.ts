@@ -1,8 +1,5 @@
 "use client";
-
 import { useRef } from "react";
-
-import { useActiveSession, useLatest } from "@/hooks";
 
 import { UseCursorControllerReturn } from "@/types/useCursorController.types";
 
@@ -11,32 +8,36 @@ import { UseCursorControllerReturn } from "@/types/useCursorController.types";
  *
  * Tracks the current index of where the user is typing to guide grid rendering, animation, and game logic.
  */
-export const useCursorController = (): UseCursorControllerReturn => {
-  const {
-    row: rowState,
-    col: colState,
-    setRow: setRowState,
-    setCol: setColState,
-    incrementRow: incrementRowState,
-  } = useActiveSession();
+export const useCursorController = (
+  row: number,
+  col: number,
+): UseCursorControllerReturn => {
+  const rowNum = useRef<number>(row);
+  const colNum = useRef<number>(col);
+  const rowRef = useRef<number>(0);
+  const colRef = useRef<number>(0);
 
-  const rowRef = useLatest(rowState);
-  const colRef = useLatest(colState);
-
+  const hydrateCursor = (rowIndex: number = 0): void => {
+    rowRef.current = rowIndex;
+    colRef.current = 0;
+  };
   /**
    * Resets the cursor index to its initial position.
    */
   const resetCursor = (): void => {
-    setRowState(0);
-    setColState(0);
+    rowRef.current = 0;
+    colRef.current = 0;
   };
 
   /**
    * Advances the cursor to the next row and resets the column index to 0.
    */
-  const advanceRow = (): void => {
-    setColState(0);
-    incrementRowState();
+  const advanceRow = (rowLimit: number = rowNum.current): number | null => {
+    if (rowRef.current >= rowLimit) return null;
+    const currentRow = rowRef.current;
+    rowRef.current = rowRef.current + 1;
+    colRef.current = 0;
+    return currentRow;
   };
 
   /**
@@ -45,10 +46,10 @@ export const useCursorController = (): UseCursorControllerReturn => {
    * @param colLimit - The maximum number of columns in the row.
    * @returns The current column index before advancing, or null if at limit.
    */
-  const advanceCol = (colLimit: number): number | null => {
+  const advanceCol = (colLimit: number = colNum.current): number | null => {
     if (colRef.current >= colLimit) return null;
     const currentCol = colRef.current;
-    setColState(currentCol + 1);
+    colRef.current = colRef.current + 1;
     return currentCol;
   };
 
@@ -60,16 +61,17 @@ export const useCursorController = (): UseCursorControllerReturn => {
   const retreatCol = (): number | null => {
     if (colRef.current === 0) return null;
     const newCol = colRef.current - 1;
-    setColState(newCol);
+    colRef.current = newCol;
     return newCol;
   };
 
   return {
     row: rowRef,
     col: colRef,
+    hydrateCursor,
+    resetCursor,
     advanceRow,
     advanceCol,
     retreatCol,
-    resetCursor,
   };
 };

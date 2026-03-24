@@ -4,7 +4,7 @@ import { useState } from "react";
 
 import { MAX_TOASTS } from "@/lib/constants";
 
-import { Toast } from "@/types/toast";
+import { Toast } from "@/types/toast.types";
 import { UseToastsReturn } from "@/types/useToasts";
 
 /**

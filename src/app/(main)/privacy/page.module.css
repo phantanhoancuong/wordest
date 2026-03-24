@@ -1,0 +1,31 @@
+.privacy-page__content {
+  width: 100%;
+  opacity: 0;
+  animation: fadeIn 500ms ease forwards;
+  margin-bottom: 3dvh;
+}
+
+.privacy-page__scrollbar-wrapper {
+  height: 100%;
+  width: 100%;
+  padding: 0 10%;
+  overflow-y: scroll;
+  overflow-x: hidden;
+  scrollbar-gutter: stable;
+}
+
+.policy-section__text {
+  font-size: 1.3em;
+  margin: 0.3em 0em;
+  line-height: 1.6;
+}
+
+.privacy-page__email {
+  color: var(--app-text-highlight-color);
+}
+
+@keyframes fadeIn {
+  to {
+    opacity: 1;
+  }
+}

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 
 import { useSettingsContext } from "@/app/contexts/SettingsContext";
 import { useSettingsUIStore } from "@/store/useSettingsUIStore";
@@ -28,10 +29,12 @@ import { playVolumePreview } from "@/lib/audio";
 import { getVolumeIcon } from "@/lib/volumeIcons";
 
 import {
+  ArticleIcon,
   ContrastIcon,
   TrashCanIcon,
   EyeIcon,
   PaletteIcon,
+  PrivacyTipIcon,
   ResetIcon,
   RulerIcon,
   SpeedIcon,
@@ -68,10 +71,12 @@ export default function SettingsPage() {
   const isGameplayOpen = useSettingsUIStore((s) => s.isGameplayOpen);
   const isDangerZoneOpen = useSettingsUIStore((s) => s.isDangerZoneOpen);
   const isAccessOpen = useSettingsUIStore((s) => s.isAccessOpen);
+  const isAboutOpen = useSettingsUIStore((s) => s.isAboutOpen);
   const setIsGeneralOpen = useSettingsUIStore((s) => s.setIsGeneralOpen);
   const setIsGameplayOpen = useSettingsUIStore((s) => s.setIsGameplayOpen);
   const setIsDangerZoneOpen = useSettingsUIStore((s) => s.setIsDangerZoneOpen);
   const setIsAccessOpen = useSettingsUIStore((s) => s.setIsAccessOpen);
+  const setIsAboutOpen = useSettingsUIStore((s) => s.setIsAboutOpen);
 
   // Local UI state for the volume slider (0-100)
   // This is decoupled from persisted volume (0-1) to avoid unnecessary writes during dragging.
@@ -81,9 +86,9 @@ export default function SettingsPage() {
   // Prevents rendering until client hydration completes to avoid mismatches
   const [hasHydrated, setHasHydrated] = useState(false);
 
-  /**
-   * Sync the draft slider value with the persisted volume once hydrated.
-   */
+  const router = useRouter();
+
+  // Sync the draft slider value with the persisted volume once hydrated.
   useEffect(() => {
     setDraftVolume(volume.value * 100);
     setHasHydrated(true);
@@ -417,6 +422,39 @@ export default function SettingsPage() {
         </div>
       </SettingsSection>
 
+      <SettingsSection
+        title="about"
+        isOpen={isAboutOpen}
+        setIsOpen={setIsAboutOpen}
+      >
+        <div className={styles["setting__container"]}>
+          <SettingsItem
+            Icon={PrivacyTipIcon}
+            name="privacy policy"
+            description="Read how user data is collected, used, and stored."
+            control={
+              <ActionButton
+                label="view policy"
+                onClick={() => router.push("/privacy")}
+              />
+            }
+          />
+        </div>
+        <div className={styles["setting__container"]}>
+          <SettingsItem
+            Icon={ArticleIcon}
+            name="terms of service"
+            description="Read the rules and conditions for using this application."
+            control={
+              <ActionButton
+                label="view terms"
+                onClick={() => router.push("/terms")}
+              />
+            }
+          />
+        </div>
+      </SettingsSection>
+
       <ConfirmDialog
         isOpen={openDialog === "settings reset"}
         title="Reset settings"
@@ -435,7 +473,7 @@ export default function SettingsPage() {
         confirmLabel="delete"
         onConfirm={() => {
           setOpenDialog(null);
-          playerStatsState.resetAllStats();
+          playerStatsState.resetPlayerStats();
         }}
         onCancel={() => setOpenDialog(null)}
       />

@@ -25,7 +25,7 @@ import {
   WordLength,
 } from "@/lib/constants";
 
-import { CellStatusType, DataCell } from "@/types/cell";
+import { CellStatusType, DataCell } from "@/types/cell.types";
 
 import { initEmptyDataGrid } from "@/lib/utils";
 import { DailySnapshot } from "@/hooks/useDailySnapshotState";

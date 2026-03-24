@@ -1,6 +1,5 @@
 .toast {
-  height: 3rem;
-  width: 5rem;
+  padding: 0.75rem 1.25rem;
   text-align: center;
   background-color: gray;
   justify-content: center;
@@ -8,6 +7,7 @@
   display: flex;
   opacity: 1;
   transition: opacity 0.3s ease;
+  white-space: nowrap;
 }
 
 .toast--hidden {

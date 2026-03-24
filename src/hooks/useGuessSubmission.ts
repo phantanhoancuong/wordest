@@ -5,183 +5,252 @@ import {
   CellAnimation,
   CellStatus,
   GameState,
+  SessionType,
 } from "@/lib/constants";
 
-import { CellStatusType } from "@/types/cell";
+import { CellStatusType, RenderCell } from "@/types/cell.types";
 import { UseAnimationTrackerReturn } from "@/types/useAnimationTracker.types";
 import { UseCursorControllerReturn } from "@/types/useCursorController.types";
 import { UseStrictConstraintsReturn } from "@/types/useStrictConstraints.types";
 import { UseGameStateReturn } from "@/types/useGameState.types";
-import { UseGridStateReturn } from "@/types/useGridState.types";
-
-import { validateWord } from "@/lib/api";
-import { evaluateGuess } from "@/lib/utils";
+import { useGameGridReturn } from "@/types/useGameGrid.types";
+import { useReferenceRowReturn } from "@/types/useReferenceRow.types";
+import { Ruleset, WordLength } from "@/lib/constants";
+import { RefObject } from "react";
 
 /**
- * Hook responsible for handling guess submission logic.
+ * Hook that handles guess submission, validation, and post-submission updates.
  *
- * Encapsulates:
- * - Guess validation via API
- * - Grid updates and animations
- * - Keyboard status updates
- * - Game state transitions (win / lose)
- * - Error handling and toasts
+ * Orchestrate the submission flow:
+ * - Validate guess completeness and strict constraints compliance.
+ * - Send guess to server for dictionary validation and evaluation.
+ * - Update game grid with evaluated cell statuses and animation.
+ * - Update reference row with new correct letters.
+ * - Update keyboard key statuses based on guess feedback.
+ * - Transition game state on win/loss conditions.
+ * - Display appropriate toast notifications.
  *
- * This hook returns a `submitGuess` function intended to be called
- * when the user presses Enter.
+ * @param isStrict - Whether strict or hardcore ruleset is active.
+ * @param ruleset - Current ruleset (NORMAL, STRICCT, or HARDCORE).
+ * @param wordLength - Length of the target word.
+ * @param animationSpeedMultiplier - Speed multiplier for all animations.
+ * @param gameGrid - Game grid controller for managing the main board.
+ * @param referenceRow - Reference row controller for showing correct letters.
+ * @param gameGridAnimationTracker - Track game grid cell animations.
+ * @param referenceGridAnimationTracker - Track reference row cell animations.
+ * @param cursorController - Controller for cursor position.
+ * @param gameStateController - Controller for game state transitions.
+ * @param strictConstraintsController - Controller for strict constraints enforcenment.
+ * @param addToast - Function to display toast notifications.
+ * @param handleValidationError - Callback for server validation errors.
+ * @param updateKeyStatuses - Function to update keyboard key colors.
+ * @returns Submit function to be called when the player presses Enter.
  */
 export const useGuessSubmission = (
   isStrict: boolean,
+  activeSession: SessionType,
+  ruleset: Ruleset,
+  wordLength: WordLength,
   animationSpeedMultiplier: number,
-  targetLetterCount: React.RefObject<Record<string, number>>,
-  targetWord: string,
-  referenceGrid: UseGridStateReturn,
-  gameGrid: UseGridStateReturn,
-  gameState: UseGameStateReturn,
-  cursor: UseCursorControllerReturn,
+  gameGrid: useGameGridReturn,
+  referenceRow: useReferenceRowReturn,
   gameGridAnimationTracker: UseAnimationTrackerReturn,
   referenceGridAnimationTracker: UseAnimationTrackerReturn,
-  useStrictConstraints: UseStrictConstraintsReturn,
+  cursorController: UseCursorControllerReturn,
+  gameStateController: UseGameStateReturn,
+  strictConstraintsController: UseStrictConstraintsReturn,
   addToast: (message: string) => void,
-  handleValidationError: () => void,
-  setValidationError: React.Dispatch<React.SetStateAction<string>>,
   updateKeyStatuses: (guess: string, statuses: CellStatusType[]) => void,
-): (() => void) => {
+  targetWordRef: RefObject<string | null>,
+): (() => Promise<{ isServerError: boolean; message: string | null }>) => {
   /**
-   * Handles an invalid guess (not in dictionary).
+   * Handle an invalid guess by showing an error and triggering shake animation.
    *
-   * - Displays a validation error
-   * - Triggers shake animation on the current row
-   * - Registers animations with the animation tracker
+   * Display a toast message explaining why the guess was rejected:
+   * - Not in dictionary.
+   * - Strict constraint violation.
+   * - Incomplete.
+   * Apply shake animation to the current row to provide visual feedback.
    *
-   * @param row - Current row index
+   * @param row - Index of the row containing the invalid guess.
+   * @param message - Error message to display in the toast.
    */
   const handleInvalidGuess = (
     row: number,
     message: string = "Not in word list",
   ): void => {
-    setValidationError(message);
     addToast(message);
     gameGridAnimationTracker.add(gameGrid.colNum);
-    gameGrid.applyInvalidGuessAnimation(row, animationSpeedMultiplier);
+    gameGrid.applyInvalidGuessAnimation(row);
   };
 
   /**
-   * Handles a valid guess.
+   * Handle a valid guess by updating all game state after server evaluation.
    *
-   * - Evaluates the guess against the target word to produce cell statuses.
-   * - Updates Strict constraints by:
-   *   - Locking confirmed correct letters to their positions.
-   *   - Tracking the minimum required count of revealed letters.
-   * - Reveals newly confirmed correct letters in the reference grid.
-   * - Applies flip/bounce animations to the guess row.
-   * - Updates keyboard key statuses based on the evaluation.
-   * - Updates game state transitions (win/lose) when applicable.
+   * Execute the following updates:
+   * - Sync strict constraints if strict/hadecore ruleset is active.
+   * - Update reference row with newly discovered correct letters.
+   * - Apply bounce animations to the guess row with evaluated statuses.
+   * - Update keyboard key statuses based on letter feedback.
+   * - Transition game state and advance cursor (or end game on win/loss).
    *
+   * The target word is not revealed immediately on game end;
+   * instead it's stored in {@link targetWordRef} and revealed after game grid animations complete.
+   *
+   * @param statuses - Evaluated cell statuses from server (CORRECT, PRESENT, or ABSENT).
+   * @param gameState - New game state from server (PLAYING, WON, or LOST).
+   * @param lockedPositions - Map of confirmed correct letter positions (strict/harcore ruleset).
+   * @param minimumLetterCounts - Minimum required counts for revealed letters (strict/hardcore ruleset).
    * @param guess - The submitted guess string.
    * @param row - Index of the current guess row.
    */
-  const handleValidGuess = (guess: string, row: number): void => {
-    const statuses = evaluateGuess(
-      guess,
-      targetWord,
-      targetLetterCount.current,
-    );
+  const handleValidGuess = (
+    statuses: CellStatusType[],
+    gameState: GameState,
+    lockedPositions: Record<number, string>,
+    minimumLetterCounts: Record<string, number>,
+    targetWord: string | null,
+    guess: string,
+    row: number,
+  ): void => {
+    if (isStrict)
+      strictConstraintsController.syncStrictConstraints(
+        lockedPositions,
+        minimumLetterCounts,
+      );
 
-    if (isStrict) {
-      useStrictConstraints.updateStrictConstraints(guess, statuses);
-    }
+    // Only update reference row incrementally if game is still in progress.
+    if (gameState === GameState.PLAYING) {
+      const prevReferenceRow = referenceRow.rowRef.current;
+      const nextReferenceRow = [...referenceRow.rowRef.current];
+      let changedCount = 0;
 
-    const prevReferenceRow = referenceGrid.renderGridRef.current[0];
-    const referenceRow = [...prevReferenceRow];
-    let changedCount = 0;
+      for (let i = 0; i < nextReferenceRow.length; ++i) {
+        const prevCell = prevReferenceRow[i];
+        if (prevCell.status === CellStatus.CORRECT) continue;
 
-    for (let i = 0; i < referenceRow.length; i++) {
-      const prevCell = prevReferenceRow[i];
-
-      if (prevCell.status === CellStatus.CORRECT) continue;
-
-      if (statuses[i] === CellStatus.CORRECT) {
-        referenceRow[i] = {
-          ...prevCell,
-          status: CellStatus.CORRECT,
-          animation: CellAnimation.BOUNCE,
-          animationDelay:
-            i * animationTiming.bounce.delay * animationSpeedMultiplier,
-        };
-        changedCount++;
+        if (statuses[i] === CellStatus.CORRECT) {
+          nextReferenceRow[i] = {
+            ...prevCell,
+            char: guess[i],
+            status: CellStatus.CORRECT,
+            animation: CellAnimation.BOUNCE,
+            animationDelay:
+              i * animationTiming.bounce.delay * animationSpeedMultiplier,
+          };
+          changedCount++;
+        }
       }
-    }
 
-    if (changedCount > 0) {
-      referenceGridAnimationTracker.add(changedCount);
-      referenceGrid.applyReferenceGridAnimation(referenceRow);
+      if (changedCount > 0) {
+        referenceGridAnimationTracker.add(changedCount);
+        referenceRow.updateRow(nextReferenceRow);
+      }
+    } else {
+      // If the game ends, store target word for reveal after animations
+      targetWordRef.current = targetWord;
     }
 
     gameGridAnimationTracker.add(gameGrid.colNum);
     gameGrid.applyValidGuessAnimation(row, statuses, animationSpeedMultiplier);
+
     updateKeyStatuses(guess, statuses);
 
-    if (guess === targetWord) {
+    if (gameState === GameState.WON) {
       addToast("You won!");
-      gameState.setGameState(GameState.WON);
+      gameStateController.setGameState(GameState.WON);
       return;
     }
 
-    if (row + 1 >= gameGrid.rowNum) {
-      addToast(`You lost!`);
-      gameState.setGameState(GameState.LOST);
+    if (gameState === GameState.LOST) {
+      addToast("You lost!");
+      gameStateController.setGameState(GameState.LOST);
       return;
     }
 
-    cursor.advanceRow();
+    cursorController.advanceRow();
   };
 
   /**
-   * Submits the current guess and evaluate step-by-step:
-   * 1. Is the guess complete (fill all columns).
-   * 2. Does the guess fulfill all Strict constraints (if Strict or Hardcore ruleset are enabled).
-   * 3. Does the guessed word exist in the dictionary of allowed words.
+   * Submit the current guess for validation and evaluation.
    *
-   * If invalid at any step, calls 'handleInvalidGuess()' with an appropriate message.
+   * Validate in three stages:
+   * 1. Client-side: Check if the guess is complete (all cells filled).
+   * 2. Server-side: Validate dictionary and strict constraints.
+   * 3. Evaluation: If valid, evaluate the guess and update game state.
+   *
+   * On validation failure at any stage, display an appropriate error message
+   * and trigger shake animation. On success, delegate to {@link handleValidGuess}.
+   *
+   * @returns Promise that resolves after submission completes.
    */
-  const submitGuess = async (): Promise<void> => {
-    if (cursor.col.current !== gameGrid.colNum) {
-      handleInvalidGuess(cursor.row.current, "Incomplete guess.");
-      return;
+  const submitGuess = async (): Promise<{
+    isServerError: boolean;
+    message: string | null;
+  }> => {
+    if (cursorController.col.current !== gameGrid.colNum) {
+      handleInvalidGuess(cursorController.row.current, "Incomplete guess.");
+      return { isServerError: false, message: null };
     }
 
-    const guess = gameGrid.renderGridRef.current[cursor.row.current]
-      .map((cell) => cell.char)
+    const guess = gameGrid.gridRef.current[cursorController.row.current]
+      .map((cell: RenderCell) => cell.char)
       .join("");
 
-    if (isStrict) {
-      const { isValid, message } =
-        useStrictConstraints.checkValidStrictGuess(guess);
-      if (!isValid) {
-        handleInvalidGuess(cursor.row.current, message);
-        return;
-      }
-    }
+    const endPoint =
+      activeSession === SessionType.DAILY
+        ? "/api/daily/validate"
+        : "/api/practice/validate";
 
     try {
-      const { status, data } = await validateWord(guess, guess.length);
+      const response = await fetch(endPoint, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ guess, ruleset, wordLength, isStrict }),
+      });
+      if (response.status === 500)
+        return {
+          isServerError: true,
+          message: "Server error. Please reload or try again later.",
+        };
 
-      if (status >= 500 || !data) {
-        handleValidationError();
-        return;
+      if (response.status === 400)
+        return {
+          isServerError: true,
+          message: "Bad request. Please reload or try again later",
+        };
+
+      const { data, message } = await response.json();
+
+      if (response.status === 422) {
+        handleInvalidGuess(cursorController.row.current, message);
+        return { isServerError: false, message: null };
       }
 
-      if (!data.valid) {
-        handleInvalidGuess(cursor.row.current);
-        return;
+      if (!response.ok) {
+        console.error("Unexpected error during validation:", response.status);
+        return {
+          isServerError: true,
+          message: `Unexpected error (${response.status}). Please reload or try again later.`,
+        };
       }
 
-      setValidationError("");
-      handleValidGuess(guess, cursor.row.current);
-    } catch (error: unknown) {
-      console.error("submitGuess error:", error);
-      addToast("Unexpected error occurred.");
+      handleValidGuess(
+        data.statuses,
+        data.gameState,
+        data.lockedPositions,
+        data.minimumLetterCounts,
+        data.targetWord,
+        guess,
+        cursorController.row.current,
+      );
+      return { isServerError: false, message: null };
+    } catch (err) {
+      console.error("Network error during validation:", err);
+      return {
+        isServerError: true,
+        message: "Network error. Please check your connection and reload.",
+      };
     }
   };
 

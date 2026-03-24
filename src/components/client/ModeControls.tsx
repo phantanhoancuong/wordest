@@ -56,76 +56,89 @@ function ModeButton<T>({
   );
 }
 
-function ModeControls() {
+interface ModeControlsButtonProps {
+  isOpen: boolean;
+  setIsOpen: (value: boolean) => void;
+}
+
+export function ModeControlsButton({
+  isOpen,
+  setIsOpen,
+}: ModeControlsButtonProps) {
   const { ruleset, wordLength } = useSettingsContext();
-  const { activeSession, setActiveSession } = useActiveSession();
-  const [isOpen, setIsOpen] = useState(false);
+  const { activeSession } = useActiveSession();
 
   const modeSummaryString =
     activeSession + " · " + ruleset.value + " · " + wordLength.value;
 
   return (
-    <div className={styles["mode-controls"]}>
-      <button
-        className={styles["mode-controls__button"]}
-        onClick={() => setIsOpen((prev) => !prev)}
-        key={activeSession}
-      >
-        {modeSummaryString}
-        <AccordionArrowIcon className={isOpen ? styles["icon--open"] : ""} />
-      </button>
+    <button
+      className={styles["mode-controls__button"]}
+      onClick={() => setIsOpen(!isOpen)}
+    >
+      {modeSummaryString}
+      <AccordionArrowIcon className={isOpen ? styles["icon--open"] : ""} />
+    </button>
+  );
+}
 
+interface ModeControlsOverlayProps {
+  isOpen: boolean;
+  setIsOpen: (value: boolean) => void;
+}
+
+export function ModeControlsOverlay({
+  isOpen,
+  setIsOpen,
+}: ModeControlsOverlayProps) {
+  const { ruleset, wordLength } = useSettingsContext();
+  const { activeSession, setActiveSession } = useActiveSession();
+
+  return (
+    <div
+      className={`${styles["mode-controls__overlay"]} ${
+        isOpen ? styles["mode-controls--open"] : styles["mode-controls--closed"]
+      }`}
+      onClick={() => setIsOpen(false)}
+    >
       <div
-        className={`${styles["mode-controls__overlay"]} ${
-          isOpen
-            ? styles["mode-controls--open"]
-            : styles["mode-controls--closed"]
-        }`}
-        onClick={() => setIsOpen(false)}
+        className={styles["mode-controls__menu"]}
+        onClick={(e) => e.stopPropagation()}
       >
-        <div
-          className={styles["mode-controls__menu"]}
-          onClick={(e) => e.stopPropagation()}
-        >
-          <div className={styles["mode-controls__menu-section"]}>
-            {sessionOptions.map((opt) => (
-              <ModeButton
-                key={opt.value}
-                label={opt.label}
-                value={opt.value}
-                activeValue={activeSession}
-                onSelect={setActiveSession}
-              />
-            ))}
-          </div>
-
-          <div className={styles["mode-controls__menu-section"]}>
-            {rulesetOptions.map((opt) => (
-              <ModeButton
-                key={opt.value}
-                label={opt.label}
-                value={opt.value}
-                activeValue={ruleset.value}
-                onSelect={ruleset.setValue}
-              />
-            ))}
-          </div>
-
-          <div className={styles["mode-controls__menu-section"]}>
-            {wordLengthOptions.map((opt) => (
-              <ModeButton
-                key={opt.value}
-                label={opt.label}
-                value={opt.value}
-                activeValue={wordLength.value}
-                onSelect={wordLength.setValue}
-              />
-            ))}
-          </div>
+        <div className={styles["mode-controls__menu-section"]}>
+          {sessionOptions.map((opt) => (
+            <ModeButton
+              key={opt.value}
+              label={opt.label}
+              value={opt.value}
+              activeValue={activeSession}
+              onSelect={setActiveSession}
+            />
+          ))}
+        </div>
+        <div className={styles["mode-controls__menu-section"]}>
+          {rulesetOptions.map((opt) => (
+            <ModeButton
+              key={opt.value}
+              label={opt.label}
+              value={opt.value}
+              activeValue={ruleset.value}
+              onSelect={ruleset.setValue}
+            />
+          ))}
+        </div>
+        <div className={styles["mode-controls__menu-section"]}>
+          {wordLengthOptions.map((opt) => (
+            <ModeButton
+              key={opt.value}
+              label={opt.label}
+              value={opt.value}
+              activeValue={wordLength.value}
+              onSelect={wordLength.setValue}
+            />
+          ))}
         </div>
       </div>
     </div>
   );
 }
-
-export default ModeControls;

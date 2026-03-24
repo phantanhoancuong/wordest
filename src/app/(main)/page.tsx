@@ -1,65 +1,83 @@
 "use client";
 
+import { useState } from "react";
+
 import { useSettingsContext } from "@/app/contexts/SettingsContext";
 
 import { Ruleset, SessionType } from "@/lib/constants";
 
-import { useActiveSession, useGame } from "@/hooks";
+import { useActiveSession } from "@/hooks";
 
-import { Grid, Keyboard, ModeControls, ToastBar } from "@/components/client";
+import {
+  Grid,
+  Keyboard,
+  ModeControlsButton,
+  ModeControlsOverlay,
+  ToastBar,
+} from "@/components/client";
 
 import { ReplayIcon } from "@/assets/icons";
 
 import styles from "@/app/(main)/page.module.css";
 
+import { useGame } from "@/hooks/useGame";
+import { GameState } from "@/lib/constants";
+
 /**
  * Main game page component.
  *
- * Renders a complete game including:
- * - Mode states management (session, ruleset, and word length).
- * - Game board with controls and grids.
- * - On-screen keyboard.
- * - Toast notifications.
+ * Render the complete game interface including the game board, keyboard, mode controls, and toast notifications.
+ * Manage visibilitty of the optional UI elements (reference row, key statuses, restart button) based on current session type and user settings.
  *
- * Responsibilities:
- * - Subscribes to the active game session.
- * - Retrieves game state, grid data, keyboard state, and actions through {@link useGame}.
- * - Renders controls for mode switching and game restarting.
- * - Conditionally renders reference grid and key status UI based on settings.
+ * The game remounts when the session type, ruleset, or word length changes via the {@link layoutKey}.
  *
- * Game logic, validation, animations, and persistence are handled inside {@link useGame}.
+ * Wait for hydration before rendering to prevent SSR/client mismatches.
  *
- * @returns The main game UI for the current mode.
+ * Game logic, validation, animations, and persistence are delegated to {@link useGame}.
+ *
+ * @returns The main game page UI.
  */
 export default function Home() {
   const { activeSession } = useActiveSession();
 
-  const { gameGrid, referenceGrid, keyboard, game, toasts, input, render } =
+  const { gameGrid, referenceRow, keyboard, game, toasts, input, render } =
     useGame();
 
-  const { ruleset, showReferenceGrid, showKeyStatuses } = useSettingsContext();
+  const { ruleset, showReferenceGrid, showKeyStatuses, wordLength } =
+    useSettingsContext();
+
+  const [isMenuOpen, setIsMenuOpen] = useState<boolean>(false);
+
+  /** Force component remount when session, ruleset, or word length changes. */
+  const layoutKey = `${activeSession}-${ruleset.value}-${wordLength.value}`;
 
   const renderReferenceGrid =
-    ruleset.value !== Ruleset.HARDCORE && showReferenceGrid.value;
+    (ruleset.value !== Ruleset.HARDCORE && showReferenceGrid.value) ||
+    (game.gameState !== GameState.PLAYING && referenceRow.isRevealing);
   const renderKeyStatuses =
     ruleset.value !== Ruleset.HARDCORE && showKeyStatuses.value;
 
-  if (!render.hasHydrated) return null;
-  if (game.wordFetchError)
-    return <p className={styles["game__error"]}>{game.wordFetchError}</p>;
+  if (!render.hasHydrated)
+    return <div className={styles["home-page__content"]} />;
+
+  if (render.serverError !== null)
+    return (
+      <div className={styles["home-page__content"]}>
+        <div className={styles["home-page__error"]}>{render.serverError}</div>
+      </div>
+    );
+
   return (
     <div className={styles["home-page__content"]}>
       <div className={styles["game-board"]}>
         <div className={styles["game-board__controls"]}>
-          <ModeControls />
+          <ModeControlsButton isOpen={isMenuOpen} setIsOpen={setIsMenuOpen} />
           {activeSession === SessionType.PRACTICE ? (
             <button
               type="button"
               className={styles["game-board__restart"]}
-              key={activeSession}
               onClick={(e) => {
                 e.currentTarget.blur();
-                toasts.addToast("Game restarted!");
                 game.restartGame();
               }}
               aria-label="Restart game"
@@ -68,37 +86,48 @@ export default function Home() {
             </button>
           ) : null}
         </div>
-        <div key={activeSession} className={styles["game-board__grids"]}>
+        <div key={`grids-${layoutKey}`} className={styles["game-board__grids"]}>
           <div className={styles["game-board__game-grid"]}>
             <Grid
-              grid={gameGrid.renderGrid}
+              grid={gameGrid.grid}
               onAnimationEnd={gameGrid.handleAnimationEnd}
               layoutRows={gameGrid.rowNum}
               layoutCols={gameGrid.colNum}
             />
           </div>
-
-          <div className={styles["game-board__reference-grid"]}>
-            {renderReferenceGrid ? (
-              <Grid
-                grid={referenceGrid.renderGrid}
-                onAnimationEnd={referenceGrid.handleAnimationEnd}
-                layoutRows={gameGrid.rowNum}
-                layoutCols={gameGrid.colNum}
-              />
-            ) : null}
+          <div
+            className={styles["game-board__reference-grid"]}
+            style={{ visibility: renderReferenceGrid ? "visible" : "hidden" }}
+          >
+            <Grid
+              grid={referenceRow.row}
+              onAnimationEnd={referenceRow.handleAnimationEnd}
+              layoutRows={gameGrid.rowNum}
+              layoutCols={gameGrid.colNum}
+            />
           </div>
         </div>
       </div>
-      <footer className={styles["app__keyboard"]} key={activeSession}>
+
+      <div className={styles["app__keyboard"]} key={`keyboard-${layoutKey}`}>
         <Keyboard
           renderKeyStatuses={renderKeyStatuses}
           keyStatuses={keyboard.statuses}
           onKeyClick={input.handle}
         />
+      </div>
+
+      <footer className={styles["app__footer"]}>
+        <a href="/privacy">Privacy Policy</a>
+        <a href="/terms">Terms of Service</a>
       </footer>
+
       <div className={styles["app__toast-bar"]}>
         <ToastBar toasts={toasts.list} removeToast={toasts.removeToast} />
+      </div>
+
+      <div className={styles["mode-overlay"]}>
+        <ModeControlsOverlay isOpen={isMenuOpen} setIsOpen={setIsMenuOpen} />
       </div>
     </div>
   );

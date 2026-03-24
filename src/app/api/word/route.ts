@@ -1,7 +1,7 @@
 import { Ruleset, SessionType } from "@/lib/constants";
 import { WORD_LISTS, SupportedWordLength } from "@/types/wordList.types";
 
-import { getTodayDateIndex } from "@/lib/utils";
+import { getDaysSinceEpoch } from "@/lib/utils";
 
 /**
  * Creates a seeded PRNG using the Mulberry32 algorithm.
@@ -51,7 +51,7 @@ export async function GET(req: Request) {
     let target: string;
 
     if (sessionType === "daily") {
-      const dateIndex = getTodayDateIndex();
+      const dateIndex = getDaysSinceEpoch();
       const cycleIndex = Math.floor(dateIndex / lists.answers.length);
       const wordIndex = dateIndex % lists.answers.length;
 

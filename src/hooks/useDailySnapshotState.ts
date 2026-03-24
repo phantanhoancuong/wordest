@@ -9,11 +9,11 @@ import {
   WordLength,
 } from "@/lib/constants";
 
-import { CellStatusType, DataCell } from "@/types/cell";
+import { CellStatusType, DataCell } from "@/types/cell.types";
 
 import { useLocalStorage } from "@/hooks";
 
-import { initEmptyDataGrid, getTodayDateIndex } from "@/lib/utils";
+import { initEmptyDataGrid, getDaysSinceEpoch } from "@/lib/utils";
 
 /**
  * Represents a single playable game snapshot for a given (ruleset, wordLength) on a specific day.
@@ -61,7 +61,7 @@ const initDailySnapshot = (wordLength: WordLength): DailySnapshot => ({
  * Creates a root persisted state object for daily snapshots.
  */
 const initDailySnapshotState = (): DailySnapshotState => ({
-  dateIndex: getTodayDateIndex(),
+  dateIndex: getDaysSinceEpoch(),
   snapshots: {},
 });
 
@@ -99,7 +99,7 @@ export const useDailySnapshotState = () => {
     let created = false;
 
     setDailySnapshotState((prev) => {
-      const todayIndex = getTodayDateIndex();
+      const todayIndex = getDaysSinceEpoch();
 
       // date rollover or missing bucket = new snapshot
       if (
@@ -135,7 +135,7 @@ export const useDailySnapshotState = () => {
     ruleset: Ruleset,
     wordLength: WordLength,
   ): DailySnapshotState => {
-    const todayIndex = getTodayDateIndex();
+    const todayIndex = getDaysSinceEpoch();
     if (todayIndex !== prev.dateIndex) {
       return {
         dateIndex: todayIndex,
@@ -222,7 +222,7 @@ export const useDailySnapshotState = () => {
     ruleset: Ruleset,
     wordLength: WordLength,
   ): DailySnapshot | null => {
-    const todayIndex = getTodayDateIndex();
+    const todayIndex = getDaysSinceEpoch();
     if (todayIndex !== dailySnapshotState.dateIndex) return null;
 
     const rulesetBucket = dailySnapshotState.snapshots[ruleset];

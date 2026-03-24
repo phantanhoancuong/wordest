@@ -1,6 +1,6 @@
 import { CellStatus } from "@/lib/constants";
 
-import { CellStatusType } from "@/types/cell";
+import { CellStatusType } from "@/types/cell.types";
 
 /**
  * Counts the occurrences of each letter in a word.
@@ -9,7 +9,7 @@ import { CellStatusType } from "@/types/cell";
  * @returns An object mapping each letter to its frequency.
  */
 export const countLetter = (word: string): Record<string, number> => {
-  const count = {};
+  const count = {} as Record<string, number>;
   for (const char of word) {
     count[char] = (count[char] || 0) + 1;
   }
@@ -29,10 +29,9 @@ export const countLetter = (word: string): Record<string, number> => {
 export const evaluateGuess = (
   guess: string,
   targetWord: string,
-  targetLetterCount: Record<string, number>,
 ): Array<CellStatusType> => {
   const wordLength = guess.length;
-  const tempLetterCount = { ...targetLetterCount };
+  const tempLetterCount = { ...countLetter(targetWord) };
   const statuses = Array(wordLength).fill(CellStatus.ABSENT);
 
   for (let i = 0; i < wordLength; i++) {
