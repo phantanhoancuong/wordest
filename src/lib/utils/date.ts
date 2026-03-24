@@ -55,3 +55,33 @@ export const getDateString = (options?: {
     return `${day}/${month}/${year}`;
   }
 };
+
+/**
+ * Format a Datee as a human-readable relative time string.
+ *
+ * @param date - The date to format relative to now, or null.
+ * @returns A string like "just now", "5 minutes ago", "2 days ago", or "never" if null.
+ */
+export const getRelativeTimeString = (date: Date | null): string => {
+  if (date === null) return "never";
+
+  const seconds = Math.floor((Date.now() - date.getTime()) / 1000);
+
+  if (seconds < 60) return "just now";
+
+  const minutes = Math.floor(seconds / 60);
+  if (minutes < 60)
+    return minutes === 1 ? "a minute ago" : `${minutes} minutes ago`;
+
+  const hours = Math.floor(minutes / 60);
+  if (hours < 24) return hours === 1 ? "an hour ago" : `${hours} hours ago`;
+
+  const days = Math.floor(hours / 24);
+  if (days < 30) return days === 1 ? "a day ago" : `${days} days ago`;
+
+  const months = Math.floor(days / 30);
+  if (months < 12) return months === 1 ? "a month ago" : `${months} months ago`;
+
+  const years = Math.floor(months / 12);
+  return years === 1 ? "a year ago" : `${years} years ago`;
+};

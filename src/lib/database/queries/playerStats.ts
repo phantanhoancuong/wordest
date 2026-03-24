@@ -6,7 +6,7 @@ import { playerStats } from "@/lib/database/schema";
 
 import { Ruleset, SessionType, WordLength } from "@/lib/constants";
 
-import { PlayerStats, TX } from "@/types/database.types";
+import { PlayerStats, DB } from "@/types/database.types";
 
 type StatsFilter = {
   userId: string;
@@ -27,12 +27,12 @@ function statsWhereClause(filter: StatsFilter) {
 /**
  * Find a player's stats row for a given session type, ruleset, and word length.
  *
- * @param tx - Database client or active transaction.
+ * @param db - Database client or active transaction.
  * @param filter - The userId, sessionType, ruleset, and wordLength to look up.
  * @returns The matching {@link PlayerStats} row, or null if none exists.
  */
-export async function findPlayerStats(tx: TX, filter: StatsFilter) {
-  const [stats] = await tx
+export async function findPlayerStats(db: DB, filter: StatsFilter) {
+  const [stats] = await db
     .select()
     .from(playerStats)
     .where(statsWhereClause(filter))
@@ -52,18 +52,18 @@ export async function findPlayerStats(tx: TX, filter: StatsFilter) {
  * @param guessCount - Number of guesses the player used.
  */
 export async function upsertPlayerStats(
-  tx: TX,
+  db: DB,
   filter: StatsFilter,
   isWon: boolean,
   guessCount: number,
 ) {
   const now = new Date();
-  const existing = await findPlayerStats(tx, filter);
+  const existing = await findPlayerStats(db, filter);
   if (existing === null) {
     const guessDistribution = [0, 0, 0, 0, 0, 0];
     if (isWon) guessDistribution[guessCount - 1] = 1;
 
-    await tx.insert(playerStats).values({
+    await db.insert(playerStats).values({
       ...filter,
       gamesPlayed: 1,
       gamesWon: isWon ? 1 : 0,
@@ -77,7 +77,7 @@ export async function upsertPlayerStats(
     const guessDistribution = [...existing.guessDistribution];
     if (isWon) guessDistribution[guessCount - 1] += 1;
 
-    await tx
+    await db
       .update(playerStats)
       .set({
         gamesPlayed: existing.gamesPlayed + 1,
@@ -98,21 +98,21 @@ export async function upsertPlayerStats(
  *
  * Increment games played and lost, reset the current streak, and update lastCompleted.
  *
- * @param tx - Database client or active transaction.
+ * @param db - Database client or active transaction.
  * @param filter - The userId, sessionType, ruleset, and wordLength to update for.
  */
-export async function recordExpiredGame(tx: TX, filter: StatsFilter) {
+export async function recordExpiredGame(db: DB, filter: StatsFilter) {
   const now = new Date();
-  const existing = await findPlayerStats(tx, filter);
+  const existing = await findPlayerStats(db, filter);
 
   if (existing === null)
-    await tx.insert(playerStats).values({
+    await db.insert(playerStats).values({
       ...filter,
       gamesPlayed: 1,
       gamesLost: 1,
     });
   else
-    await tx
+    await db
       .update(playerStats)
       .set({
         gamesPlayed: existing.gamesPlayed + 1,
@@ -122,4 +122,14 @@ export async function recordExpiredGame(tx: TX, filter: StatsFilter) {
         updatedAt: now,
       })
       .where(statsWhereClause(filter));
+}
+
+/**
+ * Delete all stats rows for a given user.
+ *
+ * @param db - Databas client or active transaction.
+ * @param userId - The user whose stats to delete.
+ */
+export async function deleteAllPlayerStats(db: DB, userId: string) {
+  await db.delete(playerStats).where(eq(playerStats.userId, userId));
 }

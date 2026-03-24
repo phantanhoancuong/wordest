@@ -51,7 +51,6 @@ export const useGame = (): UseGameReturn => {
   const activeSessionController = useActiveSession();
   const gameStateController = useGameState();
   const keyStatusesController = useKeyStatuses();
-  const playerStatsController = usePlayerStatsState();
   const settingsContextController = useSettingsContext();
   const strictConstraintsController = useStrictConstraints();
   const toastsController = useToasts();
@@ -83,22 +82,6 @@ export const useGame = (): UseGameReturn => {
       if (state === GameState.WON || state === GameState.LOST) {
         setIsReferenceRowRevealing(true);
         revealReferenceRow(state, targetWordRef.current);
-      }
-
-      if (state === GameState.WON) {
-        playerStatsController.handleWon(
-          activeSessionController.activeSession,
-          settingsContextController.ruleset.value,
-          settingsContextController.wordLength.value,
-        );
-      }
-
-      if (state === GameState.LOST) {
-        playerStatsController.handleLost(
-          activeSessionController.activeSession,
-          settingsContextController.ruleset.value,
-          settingsContextController.wordLength.value,
-        );
       }
 
       isInputLocked.current = false;

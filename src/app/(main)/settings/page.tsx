@@ -473,7 +473,7 @@ export default function SettingsPage() {
         confirmLabel="delete"
         onConfirm={() => {
           setOpenDialog(null);
-          playerStatsState.resetAllStats();
+          playerStatsState.resetPlayerStats();
         }}
         onCancel={() => setOpenDialog(null)}
       />

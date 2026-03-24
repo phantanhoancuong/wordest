@@ -3,6 +3,8 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 
+import { useEffect } from "react";
+
 import { authClient } from "@/lib/auth/auth-client";
 
 import {
@@ -14,6 +16,8 @@ import {
 
 import { useSettingsContext } from "@/app/contexts";
 
+import { PlayerStats } from "@/types/database.types";
+
 import { useActiveSession, usePlayerStatsState } from "@/hooks";
 
 import {
@@ -23,7 +27,7 @@ import {
 } from "@/components/client";
 import { SettingsItem } from "@/components/server";
 
-import { getDateString } from "@/lib/utils";
+import { getRelativeTimeString } from "@/lib/utils";
 
 import { ControllerIcon, RulerIcon, StarIcon } from "@/assets/icons";
 import styles from "@/app/(main)/account/page.module.css";
@@ -62,6 +66,9 @@ export default function AccountPage() {
     settingsContext.wordLength.value,
   );
 
+  const [displayedStats, setDisplayedStats] =
+    useState<Partial<PlayerStats> | null>(null);
+
   const { data, isPending } = authClient.useSession();
   const isAnonymous = !data || data.user.isAnonymous;
 
@@ -79,16 +86,19 @@ export default function AccountPage() {
   };
 
   const playerStatsState = usePlayerStatsState();
-  const displayedStats = playerStatsState.getStats(
-    session,
-    ruleset,
-    wordLength,
-  );
+
+  useEffect(() => {
+    playerStatsState
+      .fetchPlayerStats(session, ruleset, wordLength)
+      .then((stats) => {
+        setDisplayedStats(stats);
+      });
+  }, [session, ruleset, wordLength]);
 
   const [isStatsOpen, setIsStatsOpen] = useState(true);
   const [isAccountActionsOpen, setIsAccountActionsOpen] = useState(true);
 
-  if (isPending) return null;
+  if (displayedStats === null || isPending) return null;
 
   return (
     <div className={styles["account-page__scrollbar-wrapper"]}>
@@ -161,30 +171,20 @@ export default function AccountPage() {
           </div>
           <div className={styles["stats__container"]}>
             <div className={styles["stats__content"]}>
-              Games completed: {displayedStats.gamesCompleted}
+              Games completed: {displayedStats.gamesPlayed}
             </div>
             <div className={styles["stats__content"]}>
               Games won: {displayedStats.gamesWon}
             </div>
             <div className={styles["stats__content"]}>
-              Current win streak: {displayedStats.streak}
+              Current win streak: {displayedStats.currentStreak}
             </div>
             <div className={styles["stats__content"]}>
               Longest win streak: {displayedStats.maxStreak}
             </div>
             <div className={styles["stats__content"]}>
               Last completed date:{" "}
-              {getDateString({
-                daysSinceEpoch: displayedStats.lastCompletedDateIndex,
-                format: "display",
-              })}
-            </div>
-            <div className={styles["stats__content"]}>
-              Last won date:{" "}
-              {getDateString({
-                daysSinceEpoch: displayedStats.lastWonDateIndex,
-                format: "display",
-              })}
+              {getRelativeTimeString(displayedStats.lastCompleted)}
             </div>
           </div>
         </SettingsSection>
