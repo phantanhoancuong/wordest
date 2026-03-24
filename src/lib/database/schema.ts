@@ -194,9 +194,9 @@ export const playerStats = sqliteTable(
     guessDistribution: text("guess_distribution", { mode: "json" })
       .$type<number[]>()
       .default([0, 0, 0, 0, 0, 0]),
-    lastCompleted: integer("last_completed", { mode: "timestamp" }).default(
-      null,
-    ),
+    lastCompleted: integer("last_completed", { mode: "timestamp" })
+      .notNull()
+      .default(sql`(unixepoch())`),
     createdAt: integer("created_at", { mode: "timestamp" })
       .notNull()
       .default(sql`(unixepoch())`),

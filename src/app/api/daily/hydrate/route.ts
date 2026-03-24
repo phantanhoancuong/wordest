@@ -10,10 +10,7 @@ import {
   createDailyGame,
   findDailyGame,
 } from "@/lib/database/queries/dailyGames";
-import {
-  recordExpiredGame,
-  upsertPlayerStats,
-} from "@/lib/database/queries/playerStats";
+import { recordExpiredGame } from "@/lib/database/queries/playerStats";
 import { evaluateGuess, getDateString } from "@/lib/utils";
 import { generateDailyWord } from "@/lib/words/generateWord";
 
@@ -54,7 +51,7 @@ export async function POST(req: Request) {
       });
 
     // If the game is from a previous day, create a new game.
-    if (game.date !== getDateString({ format: "display" })) {
+    if (game.date !== getDateString({ format: "database" })) {
       await database.transaction(async (tx) => {
         if (game.gameState === GameState.PLAYING)
           await recordExpiredGame(tx, {

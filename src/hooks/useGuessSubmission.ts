@@ -62,7 +62,7 @@ export const useGuessSubmission = (
   addToast: (message: string) => void,
   updateKeyStatuses: (guess: string, statuses: CellStatusType[]) => void,
   targetWordRef: RefObject<string | null>,
-): (() => Promise<{ isServerError: boolean; message: string | null }>) => {
+) => {
   /**
    * Handle an invalid guess by showing an error and triggering shake animation.
    *
@@ -184,10 +184,7 @@ export const useGuessSubmission = (
    *
    * @returns Promise that resolves after submission completes.
    */
-  const submitGuess = async (): Promise<{
-    isServerError: boolean;
-    message: string | null;
-  }> => {
+  const submitGuess = async () => {
     if (cursorController.col.current !== gameGrid.colNum) {
       handleInvalidGuess(cursorController.row.current, "Incomplete guess.");
       return { isServerError: false, message: null };
@@ -220,9 +217,11 @@ export const useGuessSubmission = (
           message: "Bad request. Please reload or try again later",
         };
 
-      const { data, message } = await response.json();
+      const { data, message, resetGrid } = await response.json();
 
       if (response.status === 422) {
+        if (resetGrid)
+          return { isServerError: false, message, shouldResetGrid: true };
         handleInvalidGuess(cursorController.row.current, message);
         return { isServerError: false, message: null };
       }

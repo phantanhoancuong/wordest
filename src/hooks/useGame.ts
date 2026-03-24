@@ -471,9 +471,20 @@ export const useGame = (): UseGameReturn => {
   const handleSubmit = async (): Promise<void> => {
     playKeySound();
     isInputLocked.current = true;
-    const { isServerError, message } = await submitGuess();
-    if (isServerError === true && message !== null) {
+    const { isServerError, message, shouldResetGrid } = await submitGuess();
+    if (isServerError && message) {
       setServerError(message);
+      isInputLocked.current = false;
+      return;
+    }
+
+    if (shouldResetGrid) {
+      gameGrid.resetGrid();
+      referenceRow.resetRow();
+      cursorController.resetCursor();
+      keyStatusesController.resetKeyStatuses();
+      strictConstraintsController.resetStrictConstraints();
+      if (message) toastsController.addToast(message);
       isInputLocked.current = false;
       return;
     }

@@ -55,12 +55,13 @@ async function validateAndUpdate(
     ruleset,
     wordLength,
   );
-  if (isNewGame) {
-    let message = null;
-    if (wasIncomplete)
-      message = `New game fetched for ${getDateString({ format: "display" })}`;
-    return { isValid: false, message, data: null };
-  }
+  if (isNewGame && wasIncomplete)
+    return {
+      isValid: false,
+      isExpired: true,
+      message: `New game fetched for ${getDateString({ format: "display" })}`,
+      data: null,
+    };
 
   // If strict validation fails, 'message' contains the violation reason.
   if (isStrict) {
@@ -184,6 +185,13 @@ export async function POST(req: Request) {
       guess,
       isStrict,
     );
+
+    if (result.isExpired) {
+      return Response.json(
+        { message: result.message, resetGrid: true },
+        { status: 422 },
+      );
+    }
 
     if (!result.isValid)
       return Response.json({ message: result.message }, { status: 422 });

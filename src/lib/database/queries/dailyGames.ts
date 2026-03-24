@@ -104,7 +104,7 @@ export async function findOrCreateDailyGame(
   const game = await findDailyGame(userId, ruleset, wordLength);
 
   // No game exists or game is from a previous day, create a new game.
-  if (!game || game.date !== getDateString({ format: "display" }))
+  if (!game || game.date !== getDateString({ format: "database" }))
     return {
       game: await createDailyGame(userId, ruleset, wordLength),
       isNewGame: true,
