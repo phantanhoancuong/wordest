@@ -50,18 +50,20 @@ async function validateAndUpdate(
 ) {
   // If the user plays when the day rolls over, a new game may be created.
   // If the user didn't finish the last game, a message shows up to tell them a new game was created.
-  const { game, isNewGame, wasIncomplete } = await findOrCreateDailyGame(
+  const { game, isExpired } = await findOrCreateDailyGame(
     userId,
     ruleset,
     wordLength,
   );
-  if (isNewGame && wasIncomplete)
+  if (isExpired) {
+    console.log("isExpired", isExpired);
     return {
       isValid: false,
-      isExpired: true,
+      isExpired,
       message: `New game fetched for ${getDateString({ format: "display" })}`,
       data: null,
     };
+  }
 
   // If strict validation fails, 'message' contains the violation reason.
   if (isStrict) {
@@ -105,6 +107,7 @@ async function validateAndUpdate(
         guesses: updatedGuesses,
         gameState: updatedGameState,
         ...(strictUpdates ?? {}),
+        date: getDateString({ format: "database" }),
       })
       .where(
         and(
