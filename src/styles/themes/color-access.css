@@ -22,4 +22,7 @@
   --scrollbar-thumb-color: #a3e635;
 
   --app-text-highlight-color: #a3e635;
+
+  --bar-background-default-color: #a3e635;
+  --bar-background-lost-color: #f97316;
 }

@@ -1,0 +1,36 @@
+.distribution__container {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 1em;
+}
+
+.distribution__row {
+  display: flex;
+
+  height: 100%;
+  width: 100%;
+  gap: 0.5em;
+}
+
+.legend {
+  text-align: right;
+  width: 3em;
+}
+
+.value {
+  padding-right: 0.2em;
+}
+
+.distribution__bar {
+  --max: 10;
+
+  width: calc(var(--value) / var(--max) * 80%);
+  background-color: var(--bar-background-default-color);
+  text-align: right;
+  border-radius: 0.2em;
+}
+
+.lost {
+  background-color: var(--bar-background-lost-color);
+}

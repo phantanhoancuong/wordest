@@ -41,4 +41,7 @@
   --scrollbar-thumb-color: #59a21f;
 
   --app-text-highlight-color: #59a21f;
+
+  --bar-background-default-color: #59a21f;
+  --bar-background-lost-color: #c0392b;
 }

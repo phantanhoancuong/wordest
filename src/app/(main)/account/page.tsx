@@ -23,6 +23,7 @@ import { useActiveSession, usePlayerStatsState } from "@/hooks";
 import {
   ActionButton,
   ButtonGroup,
+  Distribution,
   SettingsSection,
 } from "@/components/client";
 import { SettingsItem } from "@/components/server";
@@ -170,22 +171,50 @@ export default function AccountPage() {
             />
           </div>
           <div className={styles["stats__container"]}>
-            <div className={styles["stats__content"]}>
-              Games completed: {displayedStats.gamesPlayed}
-            </div>
-            <div className={styles["stats__content"]}>
-              Games won: {displayedStats.gamesWon}
-            </div>
-            <div className={styles["stats__content"]}>
-              Current win streak: {displayedStats.currentStreak}
-            </div>
-            <div className={styles["stats__content"]}>
-              Longest win streak: {displayedStats.maxStreak}
-            </div>
-            <div className={styles["stats__content"]}>
-              Last completed date:{" "}
-              {getRelativeTimeString(displayedStats.lastCompleted)}
-            </div>
+            <p className={styles["stats__value"]}>
+              Games: {displayedStats.gamesPlayed}
+            </p>
+
+            <p className={styles["stats__value"]}>
+              Wins / Losses: {displayedStats.gamesWon} /{" "}
+              {displayedStats.gamesLost}
+            </p>
+
+            <p className={styles["stats__value"]}>
+              Win Rate:{" "}
+              {displayedStats.gamesPlayed === 0
+                ? "0%"
+                : (
+                    (displayedStats.gamesWon / displayedStats.gamesPlayed) *
+                    100
+                  ).toFixed(1) + "%"}
+            </p>
+
+            <p className={styles["stats__value"]}>
+              Current / Max streak: {displayedStats.currentStreak} /{" "}
+              {displayedStats.maxStreak}
+            </p>
+
+            <p className={styles["stats__value"]}>
+              Last Played: {getRelativeTimeString(displayedStats.lastCompleted)}
+            </p>
+          </div>
+          <div className={styles["stats__distribution"]}>
+            <p className={styles["stats__header"]}> Guess distribution:</p>
+            <Distribution
+              distribution={{
+                data: [
+                  ...displayedStats.guessDistribution,
+                  displayedStats.gamesLost,
+                ],
+                legends: [
+                  ...displayedStats.guessDistribution.map((_, i) =>
+                    String(i + 1),
+                  ),
+                  "Lost",
+                ],
+              }}
+            />
           </div>
         </SettingsSection>
 

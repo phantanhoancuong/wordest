@@ -27,7 +27,6 @@ import {
   useGuessSubmission,
   useKeyboardInput,
   useKeyStatuses,
-  usePlayerStatsState,
   useReferenceRow,
   useSoundPlayer,
   useStrictConstraints,

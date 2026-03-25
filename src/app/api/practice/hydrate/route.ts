@@ -45,7 +45,7 @@ export async function POST(req: Request) {
       data: {
         allStatuses,
         guesses: game.guesses,
-        gameState: GameState,
+        gameState: game.gameState,
         lockedPositions: game.lockedPositions,
         minimumLetterCounts: game.minimumLetterCounts,
         targetWord:

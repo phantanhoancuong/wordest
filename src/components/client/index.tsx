@@ -4,6 +4,7 @@ export { default as Banner } from "./Banner";
 export { default as ButtonGroup } from "./ButtonGroup";
 export { default as Cell } from "./Cell";
 export { default as ConfirmDialog } from "./ConfirmDialog";
+export { default as Distribution } from "./Distribution";
 export { default as StorageNamespaceVersionGuard } from "./StorageNamespaceVersionGuard";
 export { default as Grid } from "./Grid";
 export { default as Keyboard } from "./Keyboard";
