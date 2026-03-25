@@ -62,10 +62,13 @@ export const getDateString = (options?: {
  * @param date - The date to format relative to now, or null.
  * @returns A string like "just now", "5 minutes ago", "2 days ago", or "never" if null.
  */
-export const getRelativeTimeString = (date: Date | null): string => {
+export const getRelativeTimeString = (date: Date | string | null): string => {
   if (date === null) return "never";
 
-  const seconds = Math.floor((Date.now() - date.getTime()) / 1000);
+  const d = date instanceof Date ? date : new Date(date);
+  if (isNaN(d.getTime())) return "unknown";
+
+  const seconds = Math.floor((Date.now() - d.getTime()) / 1000);
 
   if (seconds < 60) return "just now";
 
